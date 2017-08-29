@@ -1,0 +1,85 @@
+# Copyright 2014 Open Connectome Project (http;//openconnecto.me)
+# Written by Da Zheng (zhengda1936@gmail.com)
+#
+# This file is part of SAFSlib.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+CC = gcc
+CXX = g++
+#MEMCHECK=1
+#PROF=1
+#MEMTRACE=1
+#RELEASE=1
+USE_NUMA=1
+USE_LIBAIO=1
+HWLOC=1
+CFLAGS = -g -O3 -DSTATISTICS -DPROFILER
+ifdef MEMCHECK
+TRACE_FLAGS = -fsanitize=address
+TRACE_FLAGS += -fno-omit-frame-pointer # for better stack traces in error messages
+TRACE_FLAGS += -fno-optimize-sibling-calls # disable tail call elimination
+endif
+ifeq ($(HWLOC), 1)
+CFLAGS += -DUSE_HWLOC
+CXXFLAGS += -DUSE_HWLOC
+LDFLAGS += -lhwloc
+endif
+ifeq ($(USE_LIBAIO), 1)
+	LDFLAGS += -laio
+	CFLAGS += -DUSE_LIBAIO
+	CXXFLAGS += -DUSE_LIBAIO
+endif
+ifeq ($(USE_NUMA), 1)
+	LDFLAGS += -lnuma
+	CFLAGS += -DUSE_NUMA
+	CXXFLAGS += -DUSE_NUMA
+endif
+ifeq ($(USE_OPENBLAS), 1)
+	LDFLAGS += -lopenblas
+	CFLAGS += -DUSE_OPENBLAS
+	CXXFLAGS += -DUSE_OPENBLAS
+else
+	LDFLAGS += -lcblas
+endif
+
+CLANG_FLAGS = -Wno-attributes
+LDFLAGS += -lpthread $(TRACE_FLAGS) -rdynamic -lrt -fopenmp
+CXXFLAGS += -mavx -g -O3 -I. -Wall -fPIC -std=c++0x $(TRACE_FLAGS) $(CLANG_FLAGS) -DSTATISTICS -DBOOST_LOG_DYN_LINK -fopenmp
+ifdef PROF
+	LDFLAGS +=-lprofiler
+	CXXFLAGS += -DPROFILER
+endif
+ifdef BOOST_LOG
+	LDFLAGS += -lboost_log
+	CXXFLAGS += USE_BOOST_LOG
+endif
+ifdef MEMTRACE
+	CXXFLAGS += -DENABLE_MEM_TRACE
+endif
+ifdef RELEASE
+	CXXFLAGS += -DNDEBUG
+endif
+CPPFLAGS := -MD
+
+ifdef MEMCHECK
+CXXFLAGS += -DMEMCHECK
+CC = clang
+CXX = clang++
+endif
+
+SOURCE := $(wildcard *.c) $(wildcard *.cpp)
+OBJS := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(SOURCE)))
+DEPS := $(patsubst %.o,%.d,$(OBJS))
+MISSING_DEPS := $(filter-out $(wildcard $(DEPS)),$(DEPS))
+MISSING_DEPS_SOURCES := $(wildcard $(patsubst %.d,%.c,$(MISSING_DEPS)) $(patsubst %.d,%.cc,$(MISSING_DEPS)))
