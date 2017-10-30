@@ -27,57 +27,128 @@ import numpy as np
 
 class BandMatrix(object):
 
-    def __init__(self, mat, kl, ku):
-        self.m, self.n = mat.shape # nrow, ncol
+    def __init__(self, mat, kl, ku, store="C"):
+        """
+        mat: a numpy ndarray
+        kl: number of subdiagonals (nnz diags beneath main)
+        ku: number of superdiagonals (nnz diags above main)
+        store: Row ("R") or Column ("C") storage
+        """
+        self.m, self.n = mat.shape # nrow, ncol originially
         self.l = self.u = 0 # FIXME: Compute efficiently
 
-        self.nrow = ku + kl + 1 # nrow in Banded matrix not orig
+        self.store = store.upper()
+        if store == "C":
+            self.nrow = ku + kl + 1 # nrow in Banded matrix not orig
+            self.data = np.zeros((kl+ku+1, self.n))
+        elif store == "R":
+            self.nrow = len(mat.diagonal())
+            self.data = np.zeros((len(mat.diagonal()), kl+ku+1))
+        else:
+            raise RuntimeError(
+                    "Unknown storage type {}".format(self.store))
 
-        self.data = np.zeros((kl+ku+1, self.n))
         self._build_banded_(mat)
 
     def _build_banded_(self, mat):
+        if self.store == "C":
+            self._build_col_store_(mat)
+        elif self.store == "R":
+            self._build_row_store_(mat)
+        else:
+            assert False, "Unknown store type {}".format(self.store)
 
-        # bottom up
+    def _build_row_store_(self, mat):
+        dcol = 0
+        for diag_index in range(-self.nrow+1, self.nrow):
+            d = mat.diagonal(diag_index)
+
+            if diag_index == 0:
+                if d.any():
+                    self.data[:,dcol] = d
+                dcol += 1
+            elif d.any():
+                pad_len = self.n - len(d) # FIXME
+                if diag_index > 0:
+                    self.l += 1
+                    d = np.pad(d, (0, pad_len), "constant",\
+                            constant_values=0)
+                elif diag_index < 0:
+                    self.u += 1
+                    d = np.pad(d, (pad_len, 0), "constant",\
+                            constant_values=0)
+
+                self.data[:,dcol] = d
+                dcol += 1
+
+    def _build_col_store_(self, mat):
+        # BLAS
+        # top right hand corner down build up
         drow = 0
         for diag_index in range(-self.n+1, self.n)[::-1]:
             d = mat.diagonal(diag_index)
 
             if diag_index == 0:
+                if d.any():
+                    self.data[drow] = d
                 drow += 1
             elif d.any():
                 pad_len = self.n - len(d)
                 if diag_index > 0:
                     self.u += 1
+                    # pad left (front)
                     d = np.pad(d, (pad_len,0), "constant",\
                             constant_values=0)
                 elif diag_index < 0:
                     self.l += 1
+                    # pad right (end)
                     d = np.pad(d, (0, pad_len), "constant",\
                             constant_values=0)
 
                 self.data[drow] = d
                 drow += 1
 
-    def __mul__(self, b):
+    def __mul__(self, x):
         """
-        b is a vector
+        x: is a vector
         """
 
-        pass
+        if self.store == "R":
+            res = np.zeros(self.n)
+            for i in xrange(self.n):
+                jstart = max(1, i - self.l)
+                start = jstart - i + self.l + 1
+                jstop = min(self.n, i + self.u)
+                stop = jstop - i + self.l + 1
+                res[i] = np.dot((self.data[i, start:stop]).T,\
+                        x[jstart:jstop])
+            return res.reshape(self.n,1)
+        else:
+            raise NotImplementedError("C storage matrix vector multiply")
 
     def __getitem__(self, index):
         row, col = index
-        # FIXME: Potentiall expensive
-        if row >= max(1, col - self.u) and row <= min(self.m, col+self.l):
-            return self.data[self.u+row-col, col]
+        # FIXME: Potentially expensive
+        if self.store == "C":
+            if row >= max(1, col - self.u) and \
+                    row <= min(self.m, col+self.l):
+                return self.data[self.u+row-col, col]
+            else:
+                return 0
+        # TODO
+        elif self.store == "R":
+            b_col = self.l + col - row # column mapping
+            if b_col < 0 or b_col > (self.l + self.u):
+                return 0
+            else:
+                return self.data[row, b_col]
         else:
-            return 0
+            assert 0
 
     def __setitem__(self, index):
        self.data[self.u+row-col, col]
 
     def __repr__(self):
-        return "Banded: Superdiagonals (ku) = {}, Subdiagonals (kl) = {}\n".format(self.u, self.l) +\
+        return "Banded: Superdiagonals (ku) = {}, Subdiagonals (kl) = {}, Store = '{}'\n".format(self.u, self.l, self.store) +\
                 self.data.__repr__()
 
