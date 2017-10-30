@@ -113,6 +113,7 @@ class BandMatrix(object):
         x: is a vector
         """
 
+        # According to: http://www.cs.rpi.edu/~flaherje/pdf/lin2.pdf
         if self.store == "R":
             res = np.zeros(self.n)
             for i in xrange(self.n):
