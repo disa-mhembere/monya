@@ -40,9 +40,11 @@ class BandMatrix(object):
         self.store = store.upper()
         if store == "C":
             self.nrow = ku + kl + 1 # nrow in Banded matrix not orig
+            self.ncol = self.n
             self.data = np.zeros((kl+ku+1, self.n))
         elif store == "R":
             self.nrow = len(mat.diagonal())
+            self.ncol = ku + kl + 1
             self.data = np.zeros((len(mat.diagonal()), kl+ku+1))
         else:
             raise RuntimeError(
@@ -114,13 +116,19 @@ class BandMatrix(object):
         """
 
         # According to: http://www.cs.rpi.edu/~flaherje/pdf/lin2.pdf
+        # Changes for 0-based indexing
         if self.store == "R":
             res = np.zeros(self.n)
             for i in xrange(self.n):
-                jstart = max(1, i - self.l)
-                start = jstart - i + self.l + 1
-                jstop = min(self.n, i + self.u)
-                stop = jstop - i + self.l + 1
+                jstart = max(0, i - self.l) # 0: Extend range
+                start = jstart - i + self.l
+                jstop = min(self.n, i + self.u + 1) # +1: Extend range
+                stop = jstop - i + self.l
+
+                assert jstart < jstop and start < stop, "Start - Stop"
+                assert jstart >= 0 and start >= 0, "xstart < 0"
+                assert jstop <= self.nrow and start <= self.nrow, "xstart < 0"
+
                 res[i] = np.dot((self.data[i, start:stop]).T,\
                         x[jstart:jstop])
             return res.reshape(self.n,1)
@@ -136,7 +144,6 @@ class BandMatrix(object):
                 return self.data[self.u+row-col, col]
             else:
                 return 0
-        # TODO
         elif self.store == "R":
             b_col = self.l + col - row # column mapping
             if b_col < 0 or b_col > (self.l + self.u):
