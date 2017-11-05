@@ -18,16 +18,19 @@
 # BandMatrix.py
 # Created by Disa Mhembere on 2017-10-29.
 # Email: disa@jhu.edu
-# NOTE: This Banded matrix is inefficient, but identical to the format
+# NOTE: This Banded matrix implementation is inefficient,
+#       but identical to the format
 #   used by BLAS: http://www.netlib.org/lapack/lug/node124.html
 # NOTE: There is a partitioning that is imposed by the multiplication
 #   scheme.
 
 import numpy as np
 
+np.set_printoptions(4, linewidth=100)
+
 class BandMatrix(object):
 
-    def __init__(self, mat, kl, ku, store="C"):
+    def __init__(self, mat, kl, ku, store="R"):
         """
         mat: a numpy ndarray
         kl: number of subdiagonals (nnz diags beneath main)

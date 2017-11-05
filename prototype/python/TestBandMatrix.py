@@ -54,10 +54,10 @@ def test_mv():
     BC = B*x
 
     # Verbose
-    # print "AC:\n", AC
-    # print "BC:\n", BC
+    print "AC:\n", AC
+    print "BC:\n", BC
 
-    assert np.array_equal(AC, BC)
+    assert np.all(np.isclose(AC.flatten(), BC.flatten()))
 
 def main():
     test_equivalence()
