@@ -126,9 +126,12 @@ class BandMatrix(object):
                 jstop = min(self.n, i + self.u + 1) # +1: Extend range
                 stop = jstop - i + self.l
 
+                """
+                # Testing
                 assert jstart < jstop and start < stop, "Start - Stop"
                 assert jstart >= 0 and start >= 0, "xstart < 0"
                 assert jstop <= self.nrow and start <= self.nrow, "xstart < 0"
+                """
 
                 res[i] = np.dot((self.data[i, start:stop]).T,\
                         x[jstart:jstop])

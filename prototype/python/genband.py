@@ -54,8 +54,8 @@ class GenBand():
             for col in xrange(row + self.u + 1, self.mat.shape[1]):
                 assert not self.mat[row,col]
 
-    def raw(self):
-        return np.array(self.mat)
+    def raw(self, dense=False):
+        return np.array(self.mat) if dense else self.mat
 
     def __repr__(self,):
         return self.mat.__repr__()
