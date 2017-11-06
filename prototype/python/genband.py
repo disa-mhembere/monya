@@ -35,6 +35,7 @@ class GenBand():
         self.mat = sparse.rand(self.n, self.n, .5).todense()
 
         # print "\n\nOriginal: \n", self
+        # Work on upper half of matrix
         for row in xrange(self.n - self.u - 1):
             self.mat[row, (row+1 + self.u):] = 0
 
@@ -54,7 +55,7 @@ class GenBand():
                 assert not self.mat[row,col]
 
     def raw(self):
-        return np.array(self.data)
+        return np.array(self.mat)
 
     def __repr__(self,):
         return self.mat.__repr__()

@@ -26,7 +26,7 @@
 
 import numpy as np
 
-np.set_printoptions(4, linewidth=100)
+np.set_printoptions(3, linewidth=100)
 
 class BandMatrix(object):
 
@@ -75,13 +75,11 @@ class BandMatrix(object):
             elif d.any():
                 pad_len = self.n - len(d) # FIXME
                 if diag_index > 0:
-                    self.l += 1
-                    d = np.pad(d, (0, pad_len), "constant",\
-                            constant_values=0)
-                elif diag_index < 0:
                     self.u += 1
-                    d = np.pad(d, (pad_len, 0), "constant",\
-                            constant_values=0)
+                    d = np.pad(d, (0, pad_len), "constant", constant_values=0)
+                elif diag_index < 0:
+                    self.l += 1
+                    d = np.pad(d, (pad_len, 0), "constant", constant_values=0)
 
                 self.data[:,dcol] = d
                 dcol += 1
