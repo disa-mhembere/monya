@@ -13,24 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include Makefile.common
+include ../../Makefile.common
 
-all: build_lib testdir
+CXXFLAGS +=-I.. -I../../SAFS/libsafs
+LDFLAGS := -L.. -L../../SAFS/libsafs -lsafs -lstructures $(LDFLAGS)
 
-build_lib:
-	$(MAKE) -C SAFS
+all: Test
 
-testdir: build_lib
-	$(MAKE) -C test
-
-src: build_lib
-	$(MAKE) -C src
+Test: Test.o
+	$(CXX) -o Test Test.o $(LDFLAGS)
 
 clean:
 	rm -f *.d
 	rm -f *.o
 	rm -f *~
-	find -name core -delete
-	make --ignore-errors -C SAFS clean
-	make --ignore-errors -C test clean
+	rm -f Test
+	rm -f *.a
+
 -include $(DEPS)

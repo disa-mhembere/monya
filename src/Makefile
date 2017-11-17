@@ -13,24 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include Makefile.common
+include ../Makefile.common
 
-all: build_lib testdir
+all: libstructures test
 
-build_lib:
-	$(MAKE) -C SAFS
+libstructures: $(OBJS)
+	rm -f libstructures.a
+	ar -cvq libstructures.a $(OBJS)
 
-testdir: build_lib
-	$(MAKE) -C test
-
-src: build_lib
-	$(MAKE) -C src
+test: libstructures
+	make -C test
 
 clean:
 	rm -f *.d
 	rm -f *.o
 	rm -f *~
-	find -name core -delete
-	make --ignore-errors -C SAFS clean
+	rm -f *.a
 	make --ignore-errors -C test clean
+
 -include $(DEPS)
