@@ -36,9 +36,9 @@ class NodeView {
             // TODO
         }
 
-    //protected:
-        //NodeView::ptr left;
-        //NodeView::ptr right;
+    protected:
+        NodeView<T>::ptr left;
+        NodeView<T>::ptr right;
 };
 
 } } // End monya::container

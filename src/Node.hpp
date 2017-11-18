@@ -30,14 +30,14 @@ template <typename T>
 class Node: public NodeView <T> {
 
     public:
-        //std::shared_ptr<Node<T> > cast2(NodeView<T>::ptr nv) {
-            //return std::static_pointer_cast<Node<T> >(nv);
-        //}
+        std::shared_ptr<Node<T> > cast2(typename NodeView<T>::ptr nv) {
+            return std::static_pointer_cast<Node<T> >(nv);
+        }
 
-        //static ptr create(NodeView<T>::ptr left=nullptr,
-                //NodeView<T>::ptr right=nullptr) {
-            //return ptr(new NodeView<T>(left, right));
-        //}
+        static typename NodeView<T>::ptr create(typename NodeView<T>::ptr left=nullptr,
+                typename NodeView<T>::ptr right=nullptr) {
+            return ptr(new NodeView<T>(left, right));
+        }
 };
 } } // End monya::container
 

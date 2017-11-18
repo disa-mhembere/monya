@@ -38,9 +38,9 @@ class BinaryTreePartition : public TreePartition <NodeType> {
             return TreePartition<NodeType>::ptr(new BinaryTreePartition<NodeType>());
         }
 
-        //static ptr cast2(TreePartition<NodeType>::ptr tp) {
-            //return std::static_pointer_cast<BinaryTreePartition<NodeType> >(tp);
-        //}
+        static ptr cast2(typename TreePartition<NodeType>::ptr tp) {
+            return std::static_pointer_cast<BinaryTreePartition<NodeType> >(tp);
+        }
 };
 
 } } // End monya::container
