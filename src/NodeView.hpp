@@ -21,6 +21,7 @@
 #define NODEVIEW_HPP__
 
 #include <memory>
+#include <utility>
 
 namespace monya { namespace container {
 
@@ -31,14 +32,22 @@ class NodeView {
     public:
         typedef std::shared_ptr<NodeView<T> > ptr;
 
-    private:
-        NodeView(NodeView<T>::ptr left, NodeView<T>::ptr right) {
+    protected:
+        // Trees either are binary or n-ary -- repr both
+        typedef std::pair<NodeView<T>::ptr, NodeView<T>::ptr> Nodepair;
+        typedef NodeView<T>::ptr* Nodelist;
+
+        // Represent children of a node
+        union Children {
+            Nodepair np; // Node pair
+            Nodelist nl; // Node list
+        };
+
+        NodeView(Children childs=(nullptr, nullptr)) {
             // TODO
         }
 
-    protected:
-        NodeView<T>::ptr left;
-        NodeView<T>::ptr right;
+        Children childs; // It's english -- just add an s
 };
 
 } } // End monya::container
