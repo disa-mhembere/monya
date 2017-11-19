@@ -23,28 +23,40 @@
 #include <memory>
 #include <utility>
 
-namespace monya { namespace container {
+namespace monya {
+    typedef unsigned child_t; // The number of children an NAry node can hold
+
+    namespace container {
 
 // Represent a node in the tree
 template <typename T>
 class NodeView {
 
-    public:
-        typedef std::shared_ptr<NodeView<T> > ptr;
-
     protected:
-        // Trees either are binary or n-ary -- repr both
-        typedef std::pair<NodeView<T>::ptr, NodeView<T>::ptr> Nodepair;
-        typedef NodeView<T>::ptr* Nodelist;
+        // For nary trees we represent children as a list
+        // TODO: optimize for large fanout
+        typedef NodeView<T>** NodeList;
+
+        // For Binary Trees we only need nodes to have two children
+        class NodePair {
+            public:
+                NodeView<T>* left;
+                NodeView<T>* right;
+                NodePair(NodeView<T>* left, NodeView<T>* right) {
+                    this->left = left;
+                    this->right = right;
+                }
+        };
 
         // Represent children of a node
         union Children {
-            Nodepair np; // Node pair
-            Nodelist nl; // Node list
+            NodePair np; // Node pair
+            NodeList nl; // Node list
         };
 
-        NodeView(Children childs=(nullptr, nullptr)) {
-            // TODO
+        NodeView(NodeView<T>* left, NodeView<T>* right) {
+            childs->left = left;
+            childs->right = right;
         }
 
         Children childs; // It's english -- just add an s

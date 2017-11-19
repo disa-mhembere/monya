@@ -17,26 +17,46 @@
  * limitations under the License.
  */
 
-#ifndef NODE_HPP__
-#define NODE_HPP__
+#ifndef NARY_NODE_HPP__
+#define NARY_NODE_HPP__
 
-// Represent a node
+// Represent an nary node
 
 #include "NodeView.hpp"
 
 namespace monya { namespace container {
 
 template <typename T>
-class Node: public NodeView <T> {
+class NAryNode: public NodeView<T> {
+
+    private:
+        T data;
+        child_t nchild;
 
     public:
-        std::shared_ptr<Node<T> > cast2(typename NodeView<T>::ptr nv) {
-            return std::static_pointer_cast<Node<T> >(nv);
+
+        NAryNode (NodeView<T>** childs, child_t nchild) {
+            this->childs = childs;
+            this->nchild = nchild;
         }
 
-        static typename NodeView<T>::ptr create(typename NodeView<T>::ptr left=nullptr,
-                typename NodeView<T>::ptr right=nullptr) {
-            return ptr(new NodeView<T>(left, right));
+        T get_data() {
+            return data;
+        }
+
+        void set_data(T data) {
+            this->data = data;
+        }
+
+        void add_child(NodeView<T>* child) {
+        }
+
+        static NAryNode<T>* cast2(NodeView<T>* nv) {
+            return static_cast<NAryNode<T> >(nv);
+        }
+
+        void print() {
+            std::cout << data << std::endl;
         }
 };
 } } // End monya::container
