@@ -18,7 +18,7 @@
  */
 
 #ifndef MATRIX_PARTITION_HPP__
-#define MATRIX_PARTITION_HPP___
+#define MATRIX_PARTITION_HPP__
 
 #include <memory>
 

@@ -24,6 +24,11 @@
 #include "NArayNode.hpp"
 #include "TreePartition.hpp"
 
+#include "MatrixPartition.hpp"
+#include "BandMatrixPartition.hpp"
+#include "COOPartition.hpp"
+#include "SyncReader.hpp"
+
 int main(int argc, char* argv[]) {
 
     return EXIT_SUCCESS;
