@@ -23,6 +23,7 @@
 // Represent a binary node
 
 #include "NodeView.hpp"
+#include <iostream>
 
 namespace monya { namespace container {
 

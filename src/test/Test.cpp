@@ -20,7 +20,8 @@
 #include "BinaryTreePartition.hpp"
 #include "NodeView.hpp"
 #include "FormatConverter.hpp"
-#include "Node.hpp"
+#include "BinaryNode.hpp"
+#include "NArayNode.hpp"
 #include "TreePartition.hpp"
 
 int main(int argc, char* argv[]) {

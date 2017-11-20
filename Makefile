@@ -15,7 +15,7 @@
 
 include Makefile.common
 
-all: build_lib testdir
+all: build_lib testdir src
 
 build_lib:
 	$(MAKE) -C SAFS
@@ -33,4 +33,5 @@ clean:
 	find -name core -delete
 	make --ignore-errors -C SAFS clean
 	make --ignore-errors -C test clean
+	make --ignore-errors -C src clean
 -include $(DEPS)
