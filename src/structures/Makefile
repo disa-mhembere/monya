@@ -13,21 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include ../Makefile.common
+include ../../Makefile.common
 
-CXXFLAGS += -I../SAFS/libsafs
-LDFLAGS := -L../SAFS/libsafs -lsafs $(LDFLAGS)
-LIBFILE = ../SAFS/libsafs/libsafs.a
+all: libstructures unit-test
 
-all: test
+libstructures: $(OBJS)
+	rm -f libstructures.a
+	ar -cvq libstructures.a $(OBJS)
 
-test: test.o $(LIBFILE)
-	$(CXX) -o test test.o $(LDFLAGS)
+unit-test: libstructures
+	make -C unit-test
 
 clean:
 	rm -f *.d
 	rm -f *.o
 	rm -f *~
-	rm -f test
+	rm -f *.a
+	make --ignore-errors -C unit-test clean
 
 -include $(DEPS)

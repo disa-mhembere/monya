@@ -18,16 +18,6 @@
  */
 
 #include "BinaryTreePartition.hpp"
-#include "NodeView.hpp"
-#include "FormatConverter.hpp"
-#include "BinaryNode.hpp"
-#include "NArayNode.hpp"
-#include "TreePartition.hpp"
-
-#include "MatrixPartition.hpp"
-#include "BandMatrixPartition.hpp"
-#include "COOPartition.hpp"
-#include "SyncReader.hpp"
 
 int main(int argc, char* argv[]) {
 

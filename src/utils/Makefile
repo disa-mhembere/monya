@@ -1,5 +1,5 @@
 # Copyright 2017 Neurodata (https://neurodata.io)
-# Written by Disa Mhembere (disa.mhembere@gmail.com)
+# Written by Disa Mhembere (disa@cs.jhu.edu)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,19 +15,20 @@
 
 include ../../Makefile.common
 
-CXXFLAGS +=-I.. -I../../SAFS/libsafs
-LDFLAGS := -L.. -L../../SAFS/libsafs -lsafs -lstructures $(LDFLAGS)
+all: libutils unit-test
 
-all: Test
+libutils: $(OBJS)
+	rm -f libutils.a
+	ar -cvq libutils.a $(OBJS)
 
-Test: Test.o
-	$(CXX) -o Test Test.o $(LDFLAGS)
+unit-test: libutils
+	make -C unit-test
 
 clean:
 	rm -f *.d
 	rm -f *.o
 	rm -f *~
-	rm -f Test
 	rm -f *.a
+	make --ignore-errors -C unit-test clean
 
 -include $(DEPS)

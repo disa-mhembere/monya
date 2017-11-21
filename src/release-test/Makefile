@@ -13,21 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include ../Makefile.common
+include ../../Makefile.common
 
-CXXFLAGS += -I../SAFS/libsafs
-LDFLAGS := -L../SAFS/libsafs -lsafs $(LDFLAGS)
-LIBFILE = ../SAFS/libsafs/libsafs.a
+CXXFLAGS +=-I.. -I../structures -I../../SAFS/libsafs
+LDFLAGS := -L.. -L../../SAFS/libsafs -L../structures \
+	-lsafs -lstructures $(LDFLAGS)
 
-all: test
+all: Test
 
-test: test.o $(LIBFILE)
-	$(CXX) -o test test.o $(LDFLAGS)
+Test: Test.o
+	$(CXX) -o Test Test.o $(LDFLAGS)
 
 clean:
 	rm -f *.d
 	rm -f *.o
 	rm -f *~
-	rm -f test
+	rm -f Test
+	rm -f *.a
 
 -include $(DEPS)

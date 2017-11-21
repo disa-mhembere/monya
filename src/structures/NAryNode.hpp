@@ -23,6 +23,7 @@
 // Represent an nary node
 
 #include <exception>
+#include <iostream>
 #include "NodeView.hpp"
 
 namespace monya { namespace container {

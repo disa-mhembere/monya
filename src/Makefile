@@ -1,5 +1,5 @@
 # Copyright 2017 Neurodata (https://neurodata.io)
-# Written by Disa Mhembere (disa.mhembere@gmail.com)
+# Written by Disa Mhembere (disa@cs.jhu.edu)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,20 +15,24 @@
 
 include ../Makefile.common
 
-all: libstructures test
+all: libstructures release-test utils
 
-libstructures: $(OBJS)
-	rm -f libstructures.a
-	ar -cvq libstructures.a $(OBJS)
+libstructures:
+	make -C structures
 
-test: libstructures
-	make -C test
+release-test: libstructures utils
+	make -C release-test
+
+utils: libstructures
+	make -C utils
 
 clean:
 	rm -f *.d
 	rm -f *.o
 	rm -f *~
 	rm -f *.a
-	make --ignore-errors -C test clean
+	make --ignore-errors -C release-test clean
+	make --ignore-errors -C structures clean
+	make --ignore-errors -C utils clean
 
 -include $(DEPS)
