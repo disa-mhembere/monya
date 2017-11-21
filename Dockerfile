@@ -1,5 +1,5 @@
 FROM ubuntu:16.04
-MAINTAINER  Disa Mhembere <disa@jhu.edu>
+MAINTAINER  Disa Mhembere <disa@cs.jhu.edu>
 
 RUN apt-get update && apt-get install -y openssh-server
 
@@ -20,7 +20,7 @@ RUN echo "function parse_git_branch_and_add_brackets {
   git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\ \[\1\]/'
   }
 PS1=\"docker:\W \u\[\033[0;32m\]\$(parse_git_branch_and_add_brackets) \[\033[0m\]\$ \"" \
->> /etc/bash.bashrc
+>> ~/.bashrc
 RUN git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 wget https://gist.githubusercontent.com/disa-mhembere/1baf10b1c3b1e047750538f9a1d3eb3c/raw/04046a3090651fa92dd691d6ba411113bb689127/.vimrc -O ~/.vimrc
 RUN git clone https://github.com/disa-mhembere/matree.git

@@ -17,7 +17,7 @@
 
 # BandMatrix.py
 # Created by Disa Mhembere on 2017-10-29.
-# Email: disa@jhu.edu
+# Email: disa@cs.jhu.edu
 # NOTE: This Banded matrix implementation is inefficient,
 #       but identical to the format
 #   used by BLAS: http://www.netlib.org/lapack/lug/node124.html
