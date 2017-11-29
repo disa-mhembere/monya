@@ -101,6 +101,9 @@ class NAryNode: public NodeView<T> {
         void print() {
             std::cout << data << std::endl;
         }
+
+        virtual void prep() override { /*TODO*/ };
+        virtual void run() override { /*TODO*/ };
 };
 } } // End monya::container
 

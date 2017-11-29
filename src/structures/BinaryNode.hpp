@@ -64,6 +64,25 @@ class BinaryNode: public NodeView<T> {
         void print() {
             std::cout << data << std::endl;
         }
+
+        void read_svm() {
+        }
+
+        void run() override {
+            // TODO
+        }
+
+        void prep() override {
+            // TODO
+        }
+
+        void persist() {
+            // TODO
+        }
+
+        void cache() {
+            // TODO
+        }
 };
 } } // End monya::container
 
