@@ -17,11 +17,10 @@ include ../Makefile.common
 
 CXXFLAGS += -I../SAFS/libsafs
 LDFLAGS := -L../SAFS/libsafs -lsafs $(LDFLAGS)
-LIBFILE = ../SAFS/libsafs/libsafs.a
 
 all: test
 
-test: test.o $(LIBFILE)
+test: test.o
 	$(CXX) -o test test.o $(LDFLAGS)
 
 clean:

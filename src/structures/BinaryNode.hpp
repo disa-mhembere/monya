@@ -24,6 +24,7 @@
 
 #include "NodeView.hpp"
 #include <iostream>
+#include "io_interface.h"
 
 namespace monya { namespace container {
 
