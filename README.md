@@ -2,9 +2,7 @@
 
 Optimizes Semi-External Memory Tree Operations for machine learning.
 
-
 **It does the heavy lifting for you!**
->>>>>>> dev
 
 # Summary
 
