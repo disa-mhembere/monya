@@ -29,12 +29,23 @@
 namespace monya { namespace container {
 
 template <typename T>
-class BinaryNode: public NodeView<T> {
+class BinaryNode: public NodeView<T>, public safs::callback {
 
     private:
-        T data;
+        T data; // Node data
+        char* buf; // TODO templatize -- the data read from disk
+        int numbytes; // The number of bytes in the read of data from disk
 
     public:
+
+        virtual int invoke(safs::io_request *reqs[], int num) override {
+            for (int i = 0; i < num; i++) {
+                this->buf = reqs[i]->get_buf();
+                this->numbytes = reqs[i]->get_size();
+                free(this->buf); // TODO: Verify OK
+            }
+            return EXIT_SUCCESS;
+        }
 
         BinaryNode (T data, NodeView<T>* left=NULL, NodeView<T>* right=NULL) {
             this->data = data;
@@ -69,20 +80,28 @@ class BinaryNode: public NodeView<T> {
         void read_svm() {
         }
 
+        // What computation does the user want to run when data hits memory
         void run() override {
             // TODO
         }
 
+        // Does the user want to perm I/O if so then pick the data to read
         void prep() override {
             // TODO
         }
 
+        // Async writeback
         void persist() {
             // TODO
         }
 
+        // Keep the node in memory
         void cache() {
             // TODO
+        }
+
+        // Does this node want to bear children?
+        void spawn() {
         }
 };
 } } // End monya::container
