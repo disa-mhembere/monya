@@ -1,6 +1,8 @@
-# matree
+# Monya &nbsp; &nbsp; &nbsp;![monya](img/monya-thumbnail.png)
 
-Optimizes Semi-External Memory Tree Operations using a Sparse Matrix representation
+Optimizes Semi-External Memory Tree Operations for machine learning.
+
+**It does the heavy lifting for you!**
 
 # Summary
 
