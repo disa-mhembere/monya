@@ -17,12 +17,19 @@
  * limitations under the License.
  */
 
-#ifndef FORMAT_CONVERTER_HPP
-#define FORMAT_CONVERTER_HPP
-// An in-memory and semi-external memory amortized converter from
-//  trees to matrices
+#ifndef MONYA_TYPES_HPP__
+#define MONYA_TYPES_HPP__
 
+// Represent a binary node
 
-// TODO
+#include "NodeView.hpp"
+#include <iostream>
+
+#define INVALID_ID -1
+
+namespace monya {
+    typedef unsigned node_id_t;
+    typedef unsigned child_t; // The number of children an NAry node can hold
+} // End monya
 
 #endif

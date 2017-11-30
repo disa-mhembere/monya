@@ -17,30 +17,13 @@
  * limitations under the License.
  */
 
-#ifndef MATRIX_PARTITION_HPP__
-#define MATRIX_PARTITION_HPP__
+#ifndef COMPUTE_ENGINE_HPP__
+#define COMPUTE_ENGINE_HPP__
 
-#include <memory>
+namespace monya {
+    class ComputeEngine {
 
-namespace monya { namespace container {
-
-template <typename DataType>
-class MatrixPartition {
-
-    private:
-        short numa_id;
-        // TODO
-
-        MatrixPartition() {
-            // TODO
-        }
-
-    public:
-        typedef std::shared_ptr<MatrixPartition<DataType> > ptr;
-
-        // TODO
-};
-
-} } // End monya::container
+    };
+} // End monya
 
 #endif

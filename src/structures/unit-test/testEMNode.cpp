@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-#include "BandMatrixPartition.hpp"
+#include "EMNode.hpp"
 
 int main(int argc, char* argv[]) {
 

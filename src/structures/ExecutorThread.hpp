@@ -17,29 +17,13 @@
  * limitations under the License.
  */
 
-#ifndef BAND_MATRIX_PARTITION_HPP__
-#define BAND_MATRIX_PARTITION_HPP___
+#ifndef EXECUTOR_THREAD_HPP__
+#define EXECUTOR_THREAD_HPP__
 
-#include "MatrixPartition.hpp"
+namespace monya { namespace structures {
+    class ExecutorThread {
 
-namespace monya { namespace container {
-
-template <typename DataType>
-class BandMatrixPartition : public MatrixPartition<DataType> {
-
-    private:
-        // TODO
-
-        BandMatrixPartition() {
-            // TODO
-        }
-
-    public:
-        typedef std::shared_ptr<BandMatrixPartition<DataType> > ptr;
-
-        // TODO
-};
-
-} } // End monya::container
+    };
+}} // End monya::structures
 
 #endif

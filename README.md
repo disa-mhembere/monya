@@ -1,6 +1,10 @@
-# monya
+# Monya &nbsp; &nbsp; &nbsp;![monya](img/monya-thumbnail.png)
 
-Optimizes Semi-External Memory Tree Operations for machine learning:
+Optimizes Semi-External Memory Tree Operations for machine learning.
+
+
+**It does the heavy lifting for you!**
+>>>>>>> dev
 
 # Summary
 

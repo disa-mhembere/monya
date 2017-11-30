@@ -17,30 +17,14 @@
  * limitations under the License.
  */
 
-#ifndef COO_PARTITION_HPP__
-#define COO_PARTITION_HPP__
+#ifndef TASK_QUEUE_HPP__
+#define TASK_QUEUE_HPP__
 
-#include "MatrixPartition.hpp"
+namespace monya { namespace structures {
 
-namespace monya { namespace container {
+template <typename T>
+class TaskQueue {
 
-template <typename DataType>
-class COOPartition : public MatrixPartition<DataType> {
-
-    private:
-        short numa_id;
-        // TODO
-
-        COOPartition() {
-            // TODO
-        }
-
-    public:
-        typedef std::shared_ptr<COOPartition<DataType> > ptr;
-
-        // TODO
 };
 
-} } // End monya::container
-
-#endif
+}} // End monya::structures

@@ -59,6 +59,9 @@ class NodeView {
             childs->right = right;
         }
 
+        // When the data required is in memory run this computation
+        virtual void prep() = 0;
+        virtual void run() = 0;
         Children childs; // It's english -- just add an s
 };
 

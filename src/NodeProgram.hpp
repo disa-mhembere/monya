@@ -17,9 +17,13 @@
  * limitations under the License.
  */
 
-#include "MatrixPartition.hpp"
+#ifndef NODE_PROGRAM_HPP__
+#define NODE_PROGRAM_HPP__
 
-int main(int argc, char* argv[]) {
+namespace monya {
+    class NodeProgram {
 
-    return EXIT_SUCCESS;
-}
+    };
+} // End monya
+
+#endif
