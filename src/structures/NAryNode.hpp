@@ -25,6 +25,7 @@
 #include <exception>
 #include <iostream>
 #include "NodeView.hpp"
+#include "../common/types.hpp"
 
 namespace monya { namespace container {
 

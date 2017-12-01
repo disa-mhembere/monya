@@ -30,14 +30,14 @@ namespace monya { namespace container {
 
 template <typename T>
 class BinaryNode: public NodeView<T>, public safs::callback {
-
     private:
-        T data; // Node data
         char* buf; // TODO templatize -- the data read from disk
         int numbytes; // The number of bytes in the read of data from disk
+        short depth;
+        NodeView<T>* l; // Left child
+        NodeView<T>* r; // Right child
 
     public:
-
         virtual int invoke(safs::io_request *reqs[], int num) override {
             for (int i = 0; i < num; i++) {
                 this->buf = reqs[i]->get_buf();
@@ -47,34 +47,31 @@ class BinaryNode: public NodeView<T>, public safs::callback {
             return EXIT_SUCCESS;
         }
 
-        BinaryNode (T data, NodeView<T>* left=NULL, NodeView<T>* right=NULL) {
-            this->data = data;
-            this->left;
-            this->right;
-        }
-
-        void set_data(T data) {
+        BinaryNode (const T data) {
             this->data = data;
         }
 
-        void set_left(NodeView<T>* left) {
-            this->left = left;
+        void insert() {
         }
 
-        void set_right(NodeView<T>* right) {
-            this->right = right;
+        void left(NodeView<T>* left) {
+            this->l = left;
         }
 
-        T get_data() {
-            return data;
+        void right(NodeView<T>* right) {
+            this->r = right;
+        }
+
+        NodeView<T>* left() const {
+            return this->l;
+        }
+
+        NodeView<T>* right() const {
+            return this->r;
         }
 
         static BinaryNode<T>* cast2(NodeView<T>* nv) {
             return static_cast<BinaryNode<T> >(nv);
-        }
-
-        void print() {
-            std::cout << data << std::endl;
         }
 
         void read_svm() {
@@ -102,6 +99,9 @@ class BinaryNode: public NodeView<T>, public safs::callback {
 
         // Does this node want to bear children?
         void spawn() {
+        }
+
+        ~BinaryNode() override {
         }
 };
 } } // End monya::container
