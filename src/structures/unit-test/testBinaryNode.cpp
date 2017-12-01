@@ -19,7 +19,24 @@
 
 #include "BinaryNode.hpp"
 
+namespace mc = monya::container;
+
 int main(int argc, char* argv[]) {
+
+    mc::NodeView<double>* root = new mc::BinaryNode<double>(10);
+    root->print();
+
+    mc::NodeView<double>* left = new mc::BinaryNode<double>(4);
+    static_cast<mc::BinaryNode<double>*>(left)->print();
+    static_cast<mc::BinaryNode<double>*>(root)->left(left);
+
+    mc::NodeView<double>* right = new mc::BinaryNode<double>(14);
+    right->print();
+    static_cast<mc::BinaryNode<double>*>(root)->right(right);
+
+    delete(left);
+    delete(right);
+    delete(root);
 
     return EXIT_SUCCESS;
 }
