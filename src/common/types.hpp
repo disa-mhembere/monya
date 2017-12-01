@@ -22,7 +22,6 @@
 
 // Represent a binary node
 
-#include "NodeView.hpp"
 #include <iostream>
 
 #define INVALID_ID -1
