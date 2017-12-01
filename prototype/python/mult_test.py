@@ -30,14 +30,9 @@ def test(n, l, u):
     # x = np.random.random((n,1))
     x = sparse.rand(n, 1, .5).todense()
 
-    dense_mat = generator.raw(dense=True)
+    dense_mat = generator.raw()
     start = time()
     dx = np.dot(dense_mat, x)
-    print "{},".format(time()-start),
-
-    sparse_mat = generator.raw(dense=False)
-    start = time()
-    sx = np.dot(sparse_mat, x)
     print "{},".format(time()-start),
 
     start = time()
@@ -46,18 +41,16 @@ def test(n, l, u):
 
     # print "dense_mat:\n", dense_mat
     # print "band_mat:\n", band_mat
-    # print "sparse_mat:\n", sparse_mat
     # print "bx\n", bx
     # print "dx\n", dx
-    # print "sx\n", sx
 
-    assert np.all(np.isclose(bx.flatten(), dx.flatten()))
-    assert np.all(np.isclose(bx.flatten(), sx.flatten()))
+    # assert np.all(np.isclose(bx.flatten(), dx.flatten()))
 
 if __name__ == "__main__":
-    n = 200
-    step = 50
-    print "Bandwith, Dense Mult, Sparse Mult, Band Mult"
+    n = 10000
+    step = 100
+    stop = 5000
+    print "Bandwith, Dense Mult, Band Mult"
     for bandwidth in xrange(step, n, step):
         print "{},".format(bandwidth),
         test(n, bandwidth/2, bandwidth/2)
