@@ -28,6 +28,29 @@
 namespace monya { namespace container {
 
 template <typename T>
+class Applicator {
+    public:
+        virtual void call(T*) = 0;
+        irtual ~Applicator() { };
+};
+
+template <typename T>
+class Printer: public Applicator <T> {
+    public:
+        void call(T* node) override {
+            node->print();
+        }
+};
+
+template <typename T>
+class Destroyer: public Applicator <T> {
+    public:
+        void call(T* node) override {
+            delete(node);
+        }
+};
+
+template <typename T>
 class Tree {
 
     private:
@@ -35,7 +58,7 @@ class Tree {
         NodeView<T>* root;
 
         Tree(NodeView<T>* root) {
-            this->root = NULL;
+            this->root = root;
         }
 
     public:
@@ -55,35 +78,44 @@ class Tree {
 
         // Tester
         void echo() {
-            //apply<print_node>
-        }
-
-
-        static void print_node(NodeView<T>* node) {
-            node->print();
+            Applicator<BinaryNode<T> >* applicator = new Printer<BinaryNode<T> >();
+            apply(BinaryNode<T>::cast2(this->root), applicator);
+            delete(applicator);
         }
 
         // TODO: Optimize
-        template<typename CallbackFunction>
-        void apply(BinaryNode<T>* node, CallbackFunction&& f,
+        // TODO: Remove recursion
+        // Thiscan be used to perform any method for the tree
+        void apply(BinaryNode<T>* node, Applicator<BinaryNode<T> >* applicator,
                 order_t traversal=PREORDER) {
             switch (traversal) {
-                case PREORDER:
-                    if (node->left())
-                        apply(node->left(), f, traversal);
+                case POSTORDER:
+                    if (node->left()) // Checks NULL, but TODO: should also check if on disk
+                        apply(BinaryNode<T>::cast2(node->left()), applicator, traversal);
                     if (node->right())
-                        apply(node->right(), f, traversal);
-                    else
-                        f(node);
+                        apply(BinaryNode<T>::cast2(node->right()), applicator, traversal);
+
+                    applicator->call(node);
                     break;
                 case INORDER:
-                    throw monya::not_implemented_exception("INORDER");
+                    if (node->left())
+                        apply(BinaryNode<T>::cast2(node->left()), applicator, traversal);
+
+                    applicator->call(node);
+
+                    if (node->right())
+                        apply(BinaryNode<T>::cast2(node->right()), applicator, traversal);
                     break;
-                case INORDER:
-                    throw monya::not_implemented_exception("INORDER");
+                case PREORDER:
+                    applicator->call(node);
+
+                    if (node->left())
+                        apply(BinaryNode<T>::cast2(node->left()), applicator, traversal);
+                    if (node->right())
+                        apply(BinaryNode<T>::cast2(node->right()), applicator, traversal);
                     break;
-                case INORDER:
-                    throw monya::not_implemented_exception("INORDER");
+                case LEVELORDER:
+                    throw monya::not_implemented_exception();
                     break;
                 default:
                     throw monya::parameter_exception(std::to_string(traversal));
@@ -91,7 +123,9 @@ class Tree {
         }
 
         ~Tree() {
-            std::cout << "deleting nodes\n";
+            Applicator<BinaryNode<T> >* applicator = new Destroyer<BinaryNode<T> >();
+            apply(BinaryNode<T>::cast2(this->root), applicator);
+            delete(applicator);
         }
 };
 

@@ -51,9 +51,12 @@ class BinaryNode: public NodeView<T>, public safs::callback {
 
         BinaryNode (const T data) {
             this->data = data;
+            this->l = NULL;
+            this->r = NULL;
         }
 
         void insert() {
+            // TODO
         }
 
         void left(NodeView<T>* left) {
@@ -77,6 +80,7 @@ class BinaryNode: public NodeView<T>, public safs::callback {
         }
 
         void read_svm() {
+            // TODO
         }
 
         // What computation does the user want to run when data hits memory
