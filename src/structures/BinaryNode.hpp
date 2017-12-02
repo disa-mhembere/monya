@@ -47,6 +47,8 @@ class BinaryNode: public NodeView<T>, public safs::callback {
             return EXIT_SUCCESS;
         }
 
+        BinaryNode () { }
+
         BinaryNode (const T data) {
             this->data = data;
         }
@@ -71,7 +73,7 @@ class BinaryNode: public NodeView<T>, public safs::callback {
         }
 
         static BinaryNode<T>* cast2(NodeView<T>* nv) {
-            return static_cast<BinaryNode<T> >(nv);
+            return static_cast<BinaryNode<T>* >(nv);
         }
 
         void read_svm() {
