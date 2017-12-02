@@ -17,9 +17,24 @@
  * limitations under the License.
  */
 
-#include "BinaryTreePartition.hpp"
+#include "Tree.hpp"
+#include "BinaryNode.hpp"
+
+namespace mc = monya::container;
 
 int main(int argc, char* argv[]) {
+
+    mc::NodeView<double>* root = new mc::BinaryNode<double>(10);
+
+    mc::NodeView<double>* left = new mc::BinaryNode<double>(4);
+    mc::BinaryNode<double>::cast2(root)->left(left);
+
+    mc::NodeView<double>* right = new mc::BinaryNode<double>(14);
+    mc::BinaryNode<double>::cast2(root)->right(right);
+
+    mc::Tree<double>::ptr tree = mc::Tree<double>::create(root);
+
+    tree->echo();
 
     return EXIT_SUCCESS;
 }

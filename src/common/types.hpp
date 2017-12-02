@@ -29,6 +29,14 @@
 namespace monya {
     typedef unsigned node_id_t;
     typedef unsigned child_t; // The number of children an NAry node can hold
+
+    // Traversal order of the tree
+    enum order_t {
+        PREORDER,
+        INORDER,
+        POSTORDER,
+        LEVELORDER
+    };
 } // End monya
 
 #endif
