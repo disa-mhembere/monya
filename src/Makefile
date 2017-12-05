@@ -18,21 +18,21 @@ include ../Makefile.common
 all: libstructures release-test utils
 
 libstructures:
-	make -C structures
+	$(MAKE) -C structures
 
 release-test: libstructures utils
-	make -C release-test
+	$(MAKE) -C release-test
 
 utils: libstructures
-	make -C utils
+	$(MAKE) -C utils
 
 clean:
 	rm -f *.d
 	rm -f *.o
 	rm -f *~
 	rm -f *.a
-	make --ignore-errors -C release-test clean
-	make --ignore-errors -C structures clean
-	make --ignore-errors -C utils clean
+	$(MAKE) --ignore-errors -C release-test clean
+	$(MAKE) --ignore-errors -C structures clean
+	$(MAKE) --ignore-errors -C utils clean
 
 -include $(DEPS)

@@ -22,13 +22,13 @@ libutils: $(OBJS)
 	ar -cvq libutils.a $(OBJS)
 
 unit-test: libutils
-	make -C unit-test
+	$(MAKE) -C unit-test
 
 clean:
 	rm -f *.d
 	rm -f *.o
 	rm -f *~
 	rm -f *.a
-	make --ignore-errors -C unit-test clean
+	$(MAKE) --ignore-errors -C unit-test clean
 
 -include $(DEPS)
