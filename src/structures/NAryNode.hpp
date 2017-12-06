@@ -105,6 +105,9 @@ class NAryNode: public NodeView<T> {
 
         virtual void prep() override { /*TODO*/ };
         virtual void run() override { /*TODO*/ };
+
+        virtual void spawn(NodeView<T>* node) override { /*TODO*/ };
+;
 };
 } } // End monya::container
 

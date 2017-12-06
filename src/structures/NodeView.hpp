@@ -39,7 +39,9 @@ class NodeView {
         virtual void run() = 0;
 
     public:
-        const T get_data() const {
+        virtual void spawn(NodeView<T>* node) = 0;
+
+        virtual T get_data() {
             return data;
         }
 

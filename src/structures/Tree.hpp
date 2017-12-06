@@ -31,7 +31,7 @@ template <typename T>
 class Applicator {
     public:
         virtual void call(T*) = 0;
-        irtual ~Applicator() { };
+        virtual ~Applicator() { };
 };
 
 template <typename T>
@@ -57,6 +57,10 @@ class Tree {
         short numa_id;
         NodeView<T>* root;
 
+        Tree() {
+            this->root = NULL;
+        }
+
         Tree(NodeView<T>* root) {
             this->root = root;
         }
@@ -65,7 +69,10 @@ class Tree {
         typedef std::shared_ptr<Tree<T> > ptr;
 
         static ptr create(NodeView<T>* root=NULL) {
-            return ptr(new Tree<T>(root));
+            if (NULL == root)
+                return ptr(new Tree<T>());
+            else
+                return ptr(new Tree<T>(root));
         }
 
         void materialize_node(const node_id_t id) {
@@ -78,9 +85,28 @@ class Tree {
 
         // Tester
         void echo() {
-            Applicator<BinaryNode<T> >* applicator = new Printer<BinaryNode<T> >();
-            apply(BinaryNode<T>::cast2(this->root), applicator);
-            delete(applicator);
+            if (root) {
+                Applicator<BinaryNode<T> >* applicator = new Printer<BinaryNode<T> >();
+                apply(BinaryNode<T>::cast2(this->root), applicator);
+                delete(applicator);
+            }
+        }
+
+        NodeView<T>* get_root() {
+            return this->root;
+        }
+
+        void set_root(NodeView<T>* root) {
+            this->root = root;
+        }
+
+        // The root you pass in can be any root
+        // NOTE: Users must implement the insert method within their subclasses of NodeView
+        void insert(NodeView<T>* node) {
+            if (!root)
+                root = node;
+            else
+                root->spawn(node);
         }
 
         // TODO: Optimize
@@ -123,9 +149,11 @@ class Tree {
         }
 
         ~Tree() {
-            Applicator<BinaryNode<T> >* applicator = new Destroyer<BinaryNode<T> >();
-            apply(BinaryNode<T>::cast2(this->root), applicator);
-            delete(applicator);
+            if (root) {
+                Applicator<BinaryNode<T> >* applicator = new Destroyer<BinaryNode<T> >();
+                apply(BinaryNode<T>::cast2(this->root), applicator, POSTORDER);
+                delete(applicator);
+            }
         }
 };
 

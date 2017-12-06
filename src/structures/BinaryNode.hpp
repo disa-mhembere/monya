@@ -47,7 +47,10 @@ class BinaryNode: public NodeView<T>, public safs::callback {
             return EXIT_SUCCESS;
         }
 
-        BinaryNode () { }
+        BinaryNode () {
+            this->l = NULL;
+            this->r = NULL;
+        }
 
         BinaryNode (const T data) {
             this->data = data;
@@ -55,8 +58,19 @@ class BinaryNode: public NodeView<T>, public safs::callback {
             this->r = NULL;
         }
 
-        void insert() {
-            // TODO
+        // Given a new node add children to this node
+        virtual void spawn(NodeView<T>* node) override {
+            if (node->get_data() < this->data) {
+                if (!l)  // No left child
+                    left(node);  // Make node my left child
+                else
+                    l->spawn(node);
+            } else if (node->get_data() > this->data) {
+                if (!r)  // No right child
+                    right(node);
+                else
+                    r->spawn(node);
+            }
         }
 
         void left(NodeView<T>* left) {
@@ -101,10 +115,6 @@ class BinaryNode: public NodeView<T>, public safs::callback {
         // Keep the node in memory
         void cache() {
             // TODO
-        }
-
-        // Does this node want to bear children?
-        void spawn() {
         }
 
         ~BinaryNode() override {
