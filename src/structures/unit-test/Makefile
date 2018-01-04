@@ -18,7 +18,8 @@ include ../../../Makefile.common
 CXXFLAGS +=-I.. -I../../../SAFS/libsafs
 LDFLAGS := -L.. -L../../../SAFS/libsafs -lsafs -lstructures $(LDFLAGS)
 
-TESTFILES = testBinaryNode testTree testNAryNode testEMNode
+TESTFILES = testBinaryNode testTree testNAryNode testEMNode \
+			perftest cppperftest
 all: $(TESTFILES)
 
 testBinaryNode: testBinaryNode.o
@@ -32,6 +33,12 @@ testNAryNode: testNAryNode.o
 
 testEMNode: testEMNode.o
 	$(CXX) -o testEMNode testEMNode.o $(LDFLAGS)
+
+perftest: perftest.o
+	$(CXX) -o perftest perftest.o $(LDFLAGS)
+
+cppperftest: cppperftest.o
+	$(CXX) -o cppperftest cppperftest.o $(LDFLAGS)
 
 clean:
 	rm -f *.d

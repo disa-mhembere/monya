@@ -35,6 +35,5 @@ int main(int argc, char* argv[]) {
     mc::Tree<double>::ptr tree = mc::Tree<double>::create(root);
 
     tree->echo();
-
     return EXIT_SUCCESS;
 }

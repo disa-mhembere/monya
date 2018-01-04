@@ -31,7 +31,7 @@ clean:
 	rm -f *.o
 	rm -f *~
 	find -name core -delete
-	make --ignore-errors -C SAFS clean
-	make --ignore-errors -C test clean
-	make --ignore-errors -C src clean
+	$(MAKE) --ignore-errors -C SAFS clean
+	$(MAKE) --ignore-errors -C test clean
+	$(MAKE) --ignore-errors -C src clean
 -include $(DEPS)

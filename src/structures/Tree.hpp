@@ -87,7 +87,7 @@ class Tree {
         void echo() {
             if (root) {
                 Applicator<BinaryNode<T> >* applicator = new Printer<BinaryNode<T> >();
-                apply(BinaryNode<T>::cast2(this->root), applicator);
+                apply(BinaryNode<T>::cast2(this->root), applicator, PREORDER);
                 delete(applicator);
             }
         }
@@ -100,20 +100,56 @@ class Tree {
             this->root = root;
         }
 
-        // The root you pass in can be any root
-        // NOTE: Users must implement the insert method within their subclasses of NodeView
-        void insert(NodeView<T>* node) {
-            if (!root)
+        void insert(BinaryNode<T>* node, BinaryNode<T>* root) {
+            if (!root) {
                 root = node;
-            else
-                root->spawn(node);
+            } else {
+
+                BinaryNode<T>* prev = NULL;
+                BinaryNode<T>* curr = root;
+
+                while (curr) {
+                    prev = curr;
+                    if (*curr < *node) {
+                        curr = BinaryNode<T>::cast2(curr->right());
+                    } else {
+                        curr = BinaryNode<T>::cast2(curr->left());
+                    }
+                }
+
+                if (*prev < *node) {
+                    prev->right(node);
+                } else {
+                    prev->left(node);
+                }
+            }
+        }
+
+        NodeView<T>* find(T val) {
+            if (NULL == root)
+                return NULL; // Found nothing
+
+            BinaryNode<T>* curr = BinaryNode<T>::cast2(root);
+            BinaryNode<T>* lookup = new BinaryNode<T>(val);
+
+            while (curr) {
+                if (*lookup == *curr) // Users must define the == operator
+                    return curr;
+                if (*lookup > *curr)
+                    curr = BinaryNode<T>::cast2(curr->right());
+                else
+                    curr = BinaryNode<T>::cast2(curr->left());
+            }
+
+            delete(lookup);
+            return NULL; // Searched and found nothing!
         }
 
         // TODO: Optimize
         // TODO: Remove recursion
-        // Thiscan be used to perform any method for the tree
+        // This can be used to perform any method for the tree
         void apply(BinaryNode<T>* node, Applicator<BinaryNode<T> >* applicator,
-                order_t traversal=PREORDER) {
+                order_t traversal) {
             switch (traversal) {
                 case POSTORDER:
                     if (node->left()) // Checks NULL, but TODO: should also check if on disk

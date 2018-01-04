@@ -41,7 +41,7 @@ class NodeView {
     public:
         virtual void spawn(NodeView<T>* node) = 0;
 
-        virtual T get_data() {
+        virtual const T get_data() const {
             return data;
         }
 
@@ -53,8 +53,34 @@ class NodeView {
             std::cout << this->data << std::endl; 
         }
 
+        bool operator==(const NodeView<T>& other) {
+            return this->get_data() == other.get_data();
+        }
+
+        bool operator!=(const NodeView<T>& other) {
+            return !(*this == other);
+        }
+
+        bool operator<(const NodeView<T>& other) {
+            return this->get_data() < other.get_data();
+        }
+
+        bool operator>(const NodeView<T>& other) {
+            return this->get_data() > other.get_data();
+        }
+
+        bool operator<=(const NodeView<T>& other) {
+            return !(*this > other);
+        }
+
+        bool operator>=(const NodeView<T>& other) {
+            return !(*this < other);
+        }
+
         virtual ~NodeView() {
         };
+
+        // TODO: Define the operators for less than, greater than, ==
 };
 
 } } // End monya::container
