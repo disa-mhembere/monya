@@ -27,172 +27,316 @@
 
 namespace monya { namespace container {
 
-template <typename T>
-class Applicator {
-    public:
-        virtual void call(T*) = 0;
-        virtual ~Applicator() { };
-};
-
-template <typename T>
-class Printer: public Applicator <T> {
-    public:
-        void call(T* node) override {
-            node->print();
-        }
-};
-
-template <typename T>
-class Destroyer: public Applicator <T> {
-    public:
-        void call(T* node) override {
-            delete(node);
-        }
-};
-
-template <typename T>
+template <typename Key>
 class Tree {
-
     private:
-        short numa_id;
-        NodeView<T>* root;
+        enum Color {
+            RED,
+            BLACK
+        };
 
-        Tree() {
-            this->root = NULL;
+        struct Node {
+            Color color;
+            Key key;
+            Node *parent;
+            Node *left;
+            Node *right;
+        };
+
+        Node *root;
+
+        void rotate_left(Node *x) {
+            Node *y;
+
+            y = x->right;
+            x->right = y->left;
+
+            if (y->left) {
+                y->left->parent = x;
+            }
+
+            y->parent = x->parent;
+            y->left = x;
+
+            if (!x->parent) {
+                root = y;
+            } else if (x == x->parent->left) {
+                x->parent->left = y;
+            } else {
+                x->parent->right = y;
+            }
+            x->parent = y;
         }
 
-        Tree(NodeView<T>* root) {
-            this->root = root;
+        void rotate_right(Node *y) {
+            Node *x;
+
+            x = y->left;
+            y->left = x->right;
+            if (x->right) {
+                x->right->parent = y;
+            }
+
+            x->parent = y->parent;
+            x->right = y;
+
+            if (!y->parent) {
+                root = x;
+            } else if (y == y->parent->left) {
+                y->parent->left = x;
+            } else {
+                y->parent->right = x;
+            }
+
+            y->parent = x;
         }
 
-    public:
-        typedef std::shared_ptr<Tree<T> > ptr;
+        void Transplant(Node *dest, Node *src) {
+            if (dest->parent == NULL) {
+                root = src;
+            } else if (dest == dest->parent->left) {
+                dest->parent->left = src;
+            } else {
+                dest->parent->right = src;
+            }
 
-        static ptr create(NodeView<T>* root=NULL) {
-            if (NULL == root)
-                return ptr(new Tree<T>());
-            else
-                return ptr(new Tree<T>(root));
-        }
-
-        void materialize_node(const node_id_t id) {
-            // TODO
-        }
-
-        void virtualize() {
-            // TODO
-        }
-
-        // Tester
-        void echo() {
-            if (root) {
-                Applicator<BinaryNode<T> >* applicator = new Printer<BinaryNode<T> >();
-                apply(BinaryNode<T>::cast2(this->root), applicator, PREORDER);
-                delete(applicator);
+            if (src) {
+                src->parent = dest->parent;
             }
         }
 
-        NodeView<T>* get_root() {
-            return this->root;
+        Node *Minimum(Node *tree) {
+            while (tree->left) {
+                tree = tree->left;
+            }
+
+            return tree;
         }
 
-        void set_root(NodeView<T>* root) {
-            this->root = root;
+        void echo(Node *node, int tabs) {
+            if (!node) {
+                return;
+            }
+
+            echo(node->left, tabs + 1);
+
+            for (int i = 0; i < tabs; ++i) {
+                std::cout << "\t\t";
+            }
+            std::cout << *node->key << (node->color ? "B" : "R") << std::endl;
+
+            echo(node->right, tabs + 1);
         }
 
-        void insert(BinaryNode<T>* node, BinaryNode<T>* root) {
-            if (!root) {
-                root = node;
+        void delete_node(Node *node) {
+            if (!node) {
+                return;
+            }
+
+            if (node->left) {
+                delete_node(node->left);
+            }
+
+            if (node->right) {
+                delete_node(node->right);
+            }
+
+            delete node;
+        }
+
+        Tree() : root(NULL) {
+        }
+
+    public:
+
+        typedef std::shared_ptr<Tree<Key> > ptr;
+
+        static ptr create() {
+            return ptr(new Tree<Key>());
+        }
+
+        void insert(Key key) {
+            Node *node, *parent, *z;
+
+            parent = NULL;
+            node = root;
+            while (node) {
+                parent = node;
+                if ((*key) < *(node->key)) {
+                    node = node->left;
+                } else {
+                    node = node->right;
+                }
+            }
+
+            if (!parent) {
+                z = root = new Node;
+                z->key = key;
+                z->color = BLACK;
+                z->parent = z->left = z->right = NULL;
             } else {
+                z = new Node;
+                z->key = key;
+                z->color = RED;
+                z->parent = parent;
+                z->left = z->right = NULL;
 
-                BinaryNode<T>* prev = NULL;
-                BinaryNode<T>* curr = root;
+                if (*(z->key) < *(parent->key)) {
+                    parent->left = z;
+                } else {
+                    parent->right = z;
+                }
+            }
 
-                while (curr) {
-                    prev = curr;
-                    if (*curr < *node) {
-                        curr = BinaryNode<T>::cast2(curr->right());
+            Node *uncle;
+            bool side;
+            while (z->parent && z->parent->color == RED) {
+                if ((side = (z->parent == z->parent->parent->left))) {
+                    uncle = z->parent->parent->right;
+                } else {
+                    uncle = z->parent->parent->left;
+                }
+
+                if (uncle && uncle->color == RED) {
+                    z->parent->color = BLACK;
+                    uncle->color = BLACK;
+                    z->parent->parent->color = RED;
+                    z = z->parent->parent;
+                } else {
+                    if (z == (side ? z->parent->right : z->parent->left)) {
+                        z = z->parent;
+                        side ? rotate_left(z) : rotate_right(z);
+                    }
+
+                    z->parent->color = BLACK;
+                    z->parent->parent->color = RED;
+                    side ? rotate_right(z->parent->parent) :
+                        rotate_left(z->parent->parent);
+                }
+            }
+
+            root->color = BLACK;
+        }
+
+        Key& find(const Key& keyshell) {
+            Node *node = root;
+            while (node) {
+                if (*(node->key) > (*keyshell)) {
+                    node = node->left;
+                } else if (*(node->key) < (*keyshell)) {
+                    node = node->right;
+                } else {
+                    return node->key;
+                }
+            }
+
+            throw std::runtime_error("Key not found");
+        }
+
+        void _delete(const Key& key) {
+            Node *node = root;
+            while (node) {
+                if (*(node->key) > (*key)) {
+                    node = node->left;
+                } else if (*(node->key) < (*key)) {
+                    node = node->right;
+                } else {
+                    break;
+                }
+            }
+
+            if (!node || *(node->key) != (*key)) {
+                return;
+            }
+
+            Color original;
+            Node *sub, *old;
+            if (!node->left) {
+                Transplant(node, sub = node->right);
+            } else if (!node->right) {
+                Transplant(node, sub = node->left);
+            } else {
+                old = Minimum(node->right);
+                original = old->color;
+                sub = old->right;
+
+                if (old->parent == node) {
+                    sub->parent = node;
+                } else {
+                    Transplant(old, old->right);
+                    old->right = node->right;
+                    old->right->parent = old;
+                }
+
+                Transplant(node, old);
+                old->left = node->left;
+                old->left->parent = old;
+                old->color = node->color;
+            }
+
+            delete node;
+            if (original == BLACK) {
+                bool side;
+                Node *sibling;
+                while (old != root && old->color == BLACK) {
+                    if ((side = (old == old->parent->left))) {
+                        sibling = old->parent->right;
                     } else {
-                        curr = BinaryNode<T>::cast2(curr->left());
+                        sibling = old->parent->left;
+                    }
+
+                    if (sibling->color == RED) {
+                        sibling->color = BLACK;
+                        old->parent->color = RED;
+                        side ? rotate_left(old->parent) : rotate_right(old->parent);
+                        sibling = side ? old->parent->right : old->parent->left;
+                    }
+
+                    if (sibling->left->color == BLACK &&
+                            sibling->right->color == RED) {
+                        sibling->color = RED;
+                        old = old->parent;
+                    } else {
+                        if (BLACK == side ? sibling->right->color :
+                                sibling->left->color) {
+                            sibling->color = RED;
+                            if (side) {
+                                sibling->left->color = BLACK;
+                                rotate_right(sibling);
+                                sibling = old->parent->right;
+                            } else {
+                                sibling->right->color = BLACK;
+                                rotate_left(sibling);
+                                sibling = old->parent->left;
+                            }
+                        }
+
+                        sibling->color = old->parent->color;
+                        old->parent->color = BLACK;
+                        if (side) {
+                            sibling->left->color = BLACK;
+                            rotate_left(old->parent);
+                        } else {
+                            sibling->right->color = BLACK;
+                            rotate_right(old->parent);
+                        }
+
+                        old = root;
                     }
                 }
-
-                if (*prev < *node) {
-                    prev->right(node);
-                } else {
-                    prev->left(node);
-                }
             }
         }
 
-        NodeView<T>* find(T val) {
-            if (NULL == root)
-                return NULL; // Found nothing
-
-            BinaryNode<T>* curr = BinaryNode<T>::cast2(root);
-            BinaryNode<T>* lookup = new BinaryNode<T>(val);
-
-            while (curr) {
-                if (*lookup == *curr) // Users must define the == operator
-                    return curr;
-                if (*lookup > *curr)
-                    curr = BinaryNode<T>::cast2(curr->right());
-                else
-                    curr = BinaryNode<T>::cast2(curr->left());
-            }
-
-            delete(lookup);
-            return NULL; // Searched and found nothing!
-        }
-
-        // TODO: Optimize
-        // TODO: Remove recursion
-        // This can be used to perform any method for the tree
-        void apply(BinaryNode<T>* node, Applicator<BinaryNode<T> >* applicator,
-                order_t traversal) {
-            switch (traversal) {
-                case POSTORDER:
-                    if (node->left()) // Checks NULL, but TODO: should also check if on disk
-                        apply(BinaryNode<T>::cast2(node->left()), applicator, traversal);
-                    if (node->right())
-                        apply(BinaryNode<T>::cast2(node->right()), applicator, traversal);
-
-                    applicator->call(node);
-                    break;
-                case INORDER:
-                    if (node->left())
-                        apply(BinaryNode<T>::cast2(node->left()), applicator, traversal);
-
-                    applicator->call(node);
-
-                    if (node->right())
-                        apply(BinaryNode<T>::cast2(node->right()), applicator, traversal);
-                    break;
-                case PREORDER:
-                    applicator->call(node);
-
-                    if (node->left())
-                        apply(BinaryNode<T>::cast2(node->left()), applicator, traversal);
-                    if (node->right())
-                        apply(BinaryNode<T>::cast2(node->right()), applicator, traversal);
-                    break;
-                case LEVELORDER:
-                    throw monya::not_implemented_exception();
-                    break;
-                default:
-                    throw monya::parameter_exception(std::to_string(traversal));
-            }
+        void echo() {
+            echo(root, 0);
         }
 
         ~Tree() {
-            if (root) {
-                Applicator<BinaryNode<T> >* applicator = new Destroyer<BinaryNode<T> >();
-                apply(BinaryNode<T>::cast2(this->root), applicator, POSTORDER);
-                delete(applicator);
-            }
+            delete_node(root);
         }
-};
 
+
+};
 } } // End monya::container
 
 #endif

@@ -83,5 +83,11 @@ class NodeView {
         // TODO: Define the operators for less than, greater than, ==
 };
 
+template <typename T> std::ostream& operator<<
+    (std::ostream& stream, const NodeView<T>& node) {
+    stream << node.get_data();
+    return  stream;
+}
+
 } } // End monya::container
 #endif

@@ -120,6 +120,7 @@ class BinaryNode: public NodeView<T>, public safs::callback {
         ~BinaryNode() override {
         }
 };
+
 } } // End monya::container
 
 #endif
