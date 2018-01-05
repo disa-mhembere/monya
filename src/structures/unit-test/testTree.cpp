@@ -32,7 +32,9 @@ int main(int argc, char* argv[]) {
     mc::NodeView<double>* right = new mc::BinaryNode<double>(14);
     mc::BinaryNode<double>::cast2(root)->right(right);
 
-    mc::Tree<double>::ptr tree = mc::Tree<double>::create(root);
+    mc::Tree<mc::BinaryNode<double>*>::ptr tree =
+        mc::Tree<mc::BinaryNode<double>* >::create();
+    tree->insert(mc::BinaryNode<double>::cast2(root));
 
     tree->echo();
     return EXIT_SUCCESS;

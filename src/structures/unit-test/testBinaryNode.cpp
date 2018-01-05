@@ -24,6 +24,7 @@ namespace mc = monya::container;
 int main(int argc, char* argv[]) {
 
     mc::NodeView<double>* root = new mc::BinaryNode<double>(10);
+    std::cout << "Print test: " << root << std::endl;
     root->print();
 
     mc::NodeView<double>* left = new mc::BinaryNode<double>(4);

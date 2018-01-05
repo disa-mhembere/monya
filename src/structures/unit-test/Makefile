@@ -19,7 +19,7 @@ CXXFLAGS +=-I.. -I../../../SAFS/libsafs
 LDFLAGS := -L.. -L../../../SAFS/libsafs -lsafs -lstructures $(LDFLAGS)
 
 TESTFILES = testBinaryNode testTree testNAryNode testEMNode \
-			perftest cppperftest
+			perftest cppperftest rbtest
 all: $(TESTFILES)
 
 testBinaryNode: testBinaryNode.o
@@ -39,6 +39,9 @@ perftest: perftest.o
 
 cppperftest: cppperftest.o
 	$(CXX) -o cppperftest cppperftest.o $(LDFLAGS)
+
+rbtest: rbtest.o
+	$(CXX) -o rbtest rbtest.o $(LDFLAGS)
 
 clean:
 	rm -f *.d

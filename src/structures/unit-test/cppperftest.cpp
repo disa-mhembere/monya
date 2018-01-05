@@ -28,13 +28,14 @@
 
 namespace mc = monya::container;
 
-void insert_test(std::map<mc::NodeView<double>*, long>& tree, std::vector<long>& data) {
+void insert_test(std::map<mc::NodeView<double>*, long>& tree,
+        std::vector<long>& data) {
     clock_t t = clock();
 
     for (std::vector<long>::iterator it = data.begin();
             it != data.end(); ++it) {
-        tree.insert(std::pair<mc::NodeView<double>*, long>(new mc::BinaryNode<double>(*it), *it));
-        //tree.insert(std::pair<long, mc::NodeView<double>*>(*it, new mc::BinaryNode<double>(*it)));
+        tree.insert(std::pair<mc::NodeView<double>*, long>(
+                    new mc::BinaryNode<double>(*it), *it));
     }
 
     t = clock() - t;
@@ -42,27 +43,29 @@ void insert_test(std::map<mc::NodeView<double>*, long>& tree, std::vector<long>&
             ((float)t)/CLOCKS_PER_SEC, data.size());
 }
 
-void query_test(std::map<long, mc::NodeView<double>*>& tree, std::vector<long> data) {
+void query_test(std::map<mc::NodeView<double>*, long>& tree,
+        std::vector<long> data) {
     std::cout << "Doing random shuffle ..... ";
     std::srand(1234);
     std::random_shuffle (data.begin(), data.end());
     std::cout << "Done!\n\n";
     clock_t t = clock();
 
-    std::map<long, mc::NodeView<double>*>::iterator map_it;
-
     for (std::vector<long>::iterator it = data.begin();
             it != data.end(); ++it) {
-        tree.find(*it);
+        mc::BinaryNode<double>* node = new mc::BinaryNode<double>(*it);
+        tree.find(node);
+        delete(node);
     }
 
     t = clock() - t;
-    printf ("\nIt took %f sec to lookup keys in std::map\n",((float)t)/CLOCKS_PER_SEC);
+    printf("\nIt took %f sec to lookup keys in std::map\n",
+            ((float)t)/CLOCKS_PER_SEC);
 
     // Delete them now
-    for (std::map<long, mc::NodeView<double>*>::iterator it = tree.begin();
+    for (std::map<mc::NodeView<double>*, long>::iterator it = tree.begin();
             it != tree.end(); ++it) {
-        delete(it->second);
+        delete(it->first);
     }
 }
 
@@ -71,8 +74,9 @@ int main(int argc, char* argv[]) {
     std::vector<long> data(10);
     monya::bin_rm_reader<long> br("ordered_tree_10.bin");
 #else
-    std::vector<long> data(100000);
-    monya::bin_rm_reader<long> br("ordered_tree_100k.bin");
+    std::cout << "Reading 1M\n";
+    std::vector<long> data(1000000);
+    monya::bin_rm_reader<long> br("ordered_tree_1M.bin");
 #endif
     clock_t t = clock();
     br.read(data);
@@ -86,8 +90,7 @@ int main(int argc, char* argv[]) {
     insert_test(tree, data);
 
     //// Test query speed
-    //query_test(tree, data);
+    query_test(tree, data);
 
     return EXIT_SUCCESS;
 }
-

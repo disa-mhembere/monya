@@ -29,29 +29,24 @@
 
 namespace mc = monya::container;
 
-
-void insert_test(mc::Tree<double>::ptr tree, std::vector<long>& data) {
+void insert_test(mc::Tree<mc::BinaryNode<double>* >::ptr tree,
+        std::vector<long>& data) {
     clock_t t = clock();
 
     if (data.size() < 1)
         return;
 
-    tree->set_root(new mc::BinaryNode<double>(data[0]));
-
-    mc::BinaryNode<double>* root = mc::BinaryNode<double>::cast2(tree->get_root());
-    for (std::vector<long>::iterator it = data.begin() + 1;
-            it != data.end(); ++it) {
-
-        mc::BinaryNode<double>* node = new mc::BinaryNode<double>(*it);
-        tree->insert(node, root);
-        //std::cout << *it << " ";
+    for (std::vector<long>::iterator it = data.begin(); it != data.end(); ++it) {
+        tree->insert(new mc::BinaryNode<double>(*it));
     }
+
     t = clock() - t;
     printf ("\nIt took %f sec to insert the data into a Monya Tree.\n",
             ((float)t)/CLOCKS_PER_SEC);
 }
 
-void query_test(mc::Tree<double>::ptr tree, std::vector<long> data) {
+void query_test(mc::Tree<mc::BinaryNode<double>*>::ptr tree,
+        std::vector<long> data) {
     std::cout << "Doing random shuffle ..... ";
     std::srand(1234);
     std::random_shuffle (data.begin(), data.end());
@@ -60,7 +55,9 @@ void query_test(mc::Tree<double>::ptr tree, std::vector<long> data) {
 
     for (std::vector<long>::iterator it = data.begin();
             it != data.end(); ++it) {
-        tree->find(*it); 
+        mc::BinaryNode<double>* node = new mc::BinaryNode<double>(*it);
+        tree->find(node);
+        delete node;
     }
 
     t = clock() - t;
@@ -74,12 +71,13 @@ int main(int argc, char* argv[]) {
 #endif
 
 #if 0
+    std::cout << "Reading 10 dataset\n";
     std::vector<long> data(10);
     monya::bin_rm_reader<long> br("ordered_tree_10.bin");
 #else
-    std::cout << "Reading 100k dataset\n";
-    std::vector<long> data(100000);
-    monya::bin_rm_reader<long> br("ordered_tree_100k.bin");
+    std::cout << "Reading 1M dataset\n";
+    std::vector<long> data(1000000);
+    monya::bin_rm_reader<long> br("ordered_tree_1M.bin");
 #endif
 
     clock_t t = clock();
@@ -87,12 +85,11 @@ int main(int argc, char* argv[]) {
     t = clock() - t;
     printf ("It took %f sec to read the data.\n",((float)t)/CLOCKS_PER_SEC);
 
-    mc::Tree<double>::ptr tree = mc::Tree<double>::create();
+    mc::Tree<mc::BinaryNode<double>* >::ptr tree =
+        mc::Tree<mc::BinaryNode<double>* >::create();
     insert_test(tree, data);
 
     // Make sure we inserted correctly
-    //printf("Echoing tree\n");
-    //tree->echo();
 
     // Now query that we get back the same thing
     query_test(tree, data);
@@ -103,4 +100,3 @@ int main(int argc, char* argv[]) {
 #endif
    return EXIT_SUCCESS;
 }
-
