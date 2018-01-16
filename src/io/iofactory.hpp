@@ -17,9 +17,28 @@
  * limitations under the License.
  */
 
-#include "SyncReader.hpp"
+#ifndef MONYA_IO_FACTORY_HPP
+#define MONYA_IO_FACTORY_HPP
 
-int main(int argc, char* argv[]) {
+#include "IO.hpp"
 
-    return EXIT_SUCCESS;
+namespace monya {
+class iofactory {
+    private:
+        std::string fn; // Either name in safs or OS file system
+        bool is_direct;
+
+    public:
+        template <typename T>
+        typename io::IO<T>::ptr create_synchronous() {
+            is_direct = true;
+            return io::SyncIO<T>::create();
+        }
+
+        //typename io::IO<T>::ptr create_asynchronous(bool isdirect) {
+            // TODO
+        //}
+};
 }
+
+#endif
