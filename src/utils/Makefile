@@ -15,20 +15,20 @@
 
 include ../../Makefile.common
 
-all: libutils unit-test
+all: libutils
 
 libutils: $(OBJS)
 	rm -f libutils.a
 	ar -cvq libutils.a $(OBJS)
 
-unit-test: libutils
-	$(MAKE) -C unit-test
+#unit-test: libutils
+	#$(MAKE) -C unit-test
 
 clean:
 	rm -f *.d
 	rm -f *.o
 	rm -f *~
 	rm -f *.a
-	$(MAKE) --ignore-errors -C unit-test clean
+	#$(MAKE) --ignore-errors -C unit-test clean
 
 -include $(DEPS)
