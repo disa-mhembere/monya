@@ -17,7 +17,7 @@ include ../../Makefile.common
 
 CXXFLAGS +=-I.. -I../structures -I../../SAFS/libsafs
 LDFLAGS := -L.. -L../../SAFS/libsafs -L../structures \
-	-lsafs -lstructures $(LDFLAGS)
+	-lsafs -lstructures -lmonya $(LDFLAGS)
 
 all: Test
 
