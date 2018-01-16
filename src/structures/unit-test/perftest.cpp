@@ -17,9 +17,9 @@
  * limitations under the License.
  */
 
-#include "Tree.hpp"
+#include "RBTree.hpp"
 #include "BinaryNode.hpp"
-#include "../common/io.hpp"
+#include "../io/IO.hpp"
 #include <time.h>
 #include <stdio.h>
 
@@ -28,8 +28,9 @@
 #endif
 
 namespace mc = monya::container;
+namespace mi = monya::io;
 
-void insert_test(mc::Tree<mc::BinaryNode<double>* >::ptr tree,
+void insert_test(mc::RBTree<mc::BinaryNode<double>* >::ptr tree,
         std::vector<long>& data) {
     clock_t t = clock();
 
@@ -41,11 +42,11 @@ void insert_test(mc::Tree<mc::BinaryNode<double>* >::ptr tree,
     }
 
     t = clock() - t;
-    printf ("\nIt took %f sec to insert the data into a Monya Tree.\n",
+    printf ("\nIt took %f sec to insert the data into a Monya RBTree.\n",
             ((float)t)/CLOCKS_PER_SEC);
 }
 
-void query_test(mc::Tree<mc::BinaryNode<double>*>::ptr tree,
+void query_test(mc::RBTree<mc::BinaryNode<double>*>::ptr tree,
         std::vector<long> data) {
     std::cout << "Doing random shuffle ..... ";
     std::srand(1234);
@@ -70,23 +71,27 @@ int main(int argc, char* argv[]) {
     ProfilerStart("perftest.perf");
 #endif
 
+    std::string fn = "";
+    size_t DATALEN = 0;
+
 #if 0
-    std::cout << "Reading 10 dataset\n";
-    std::vector<long> data(10);
-    monya::bin_rm_reader<long> br("ordered_tree_10.bin");
+    fn = "ordered_tree_10.bin";
+    DATALEN = 10;
 #else
-    std::cout << "Reading 1M dataset\n";
-    std::vector<long> data(1000000);
-    monya::bin_rm_reader<long> br("ordered_tree_1M.bin");
+    fn =  "ordered_tree_10M.bin";
+    DATALEN = 10000000;
 #endif
+    std::cout << "Reading " << DATALEN << " dataset in '" << fn << "' ...\n";
+    std::vector<long> data(DATALEN);
+    mi::SyncIO<long> br(fn);
 
     clock_t t = clock();
-    br.read(data);
+    br.read(&data[0]);
     t = clock() - t;
     printf ("It took %f sec to read the data.\n",((float)t)/CLOCKS_PER_SEC);
 
-    mc::Tree<mc::BinaryNode<double>* >::ptr tree =
-        mc::Tree<mc::BinaryNode<double>* >::create();
+    mc::RBTree<mc::BinaryNode<double>* >::ptr tree =
+        mc::RBTree<mc::BinaryNode<double>* >::create();
     insert_test(tree, data);
 
     // Make sure we inserted correctly
@@ -96,7 +101,7 @@ int main(int argc, char* argv[]) {
 
 
 #ifdef PROFILER
-   ProfilerStop(); 
+   ProfilerStop();
 #endif
    return EXIT_SUCCESS;
 }

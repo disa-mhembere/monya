@@ -23,10 +23,11 @@
 #include <time.h>
 #include <stdio.h>
 
-#include "Tree.hpp"
-#include "../common/io.hpp"
+#include "../BinaryNode.hpp"
+#include "../io/IO.hpp"
 
 namespace mc = monya::container;
+namespace mi = monya::io;
 
 void insert_test(std::map<mc::NodeView<double>*, long>& tree,
         std::vector<long>& data) {
@@ -70,20 +71,26 @@ void query_test(std::map<mc::NodeView<double>*, long>& tree,
 }
 
 int main(int argc, char* argv[]) {
+    std::string fn = "";
+    size_t DATALEN = 0;
+
 #if 0
-    std::vector<long> data(10);
-    monya::bin_rm_reader<long> br("ordered_tree_10.bin");
+    fn = "ordered_tree_10.bin";
+    DATALEN = 10;
 #else
-    std::cout << "Reading 1M\n";
-    std::vector<long> data(1000000);
-    monya::bin_rm_reader<long> br("ordered_tree_1M.bin");
+    fn =  "ordered_tree_10M.bin";
+    DATALEN = 10000000;
 #endif
+    std::cout << "Reading " << DATALEN << " dataset in '" << fn << "' ...\n";
+    std::vector<long> data(DATALEN);
+    mi::SyncIO<long> br(fn);
+
     clock_t t = clock();
-    br.read(data);
+    br.read(&data[0]);
     t = clock() - t;
     printf ("It took %f sec to read the data.\n",((float)t)/CLOCKS_PER_SEC);
     t = clock();
-    
+
     std::map<mc::NodeView<double>*, long> tree;
 
     // Test insert speed

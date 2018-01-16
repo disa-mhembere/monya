@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-#include "Tree.hpp"
+#include "RBTree.hpp"
 #include "BinaryNode.hpp"
 
 namespace mc = monya::container;
@@ -32,8 +32,8 @@ int main(int argc, char* argv[]) {
     mc::NodeView<double>* right = new mc::BinaryNode<double>(14);
     mc::BinaryNode<double>::cast2(root)->right(right);
 
-    mc::Tree<mc::BinaryNode<double>*>::ptr tree =
-        mc::Tree<mc::BinaryNode<double>* >::create();
+    mc::RBTree<mc::BinaryNode<double>*>::ptr tree =
+        mc::RBTree<mc::BinaryNode<double>* >::create();
     tree->insert(mc::BinaryNode<double>::cast2(root));
 
     tree->echo();
