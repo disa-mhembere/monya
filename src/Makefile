@@ -15,13 +15,17 @@
 
 include ../Makefile.common
 
-all: libstructures release-test utils
+all: libstructures release-test utils libmonya
 
 libstructures:
 	$(MAKE) -C structures
 
 release-test: libstructures utils
 	$(MAKE) -C release-test
+
+libmonya: libstructures utils $(OBJS)
+	rm -f libmonya
+	ar -cvq libmonya.a $(OBJS)
 
 utils: libstructures
 	$(MAKE) -C utils

@@ -30,6 +30,7 @@ namespace monya {
     typedef unsigned node_id_t;
     typedef unsigned child_t; // The number of children an NAry node can hold
     typedef size_t offset_t; // The offset position of a file
+    typedef unsigned tree_t; // The number of trees in the forrest
 
     // Traversal order of the tree
     enum order_t {

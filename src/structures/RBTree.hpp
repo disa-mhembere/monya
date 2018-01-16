@@ -17,18 +17,17 @@
  * limitations under the License.
  */
 
-#ifndef TREE_HPP__
-#define TREE_HPP__
+#ifndef RB_TREE_HPP__
+#define RB_TREE_HPP__
 
 #include <memory>
 #include "../common/types.hpp"
 #include "../common/exception.hpp"
-#include "BinaryNode.hpp"
 
 namespace monya { namespace container {
 
-template <typename Key>
-class Tree {
+template <typename NodeType>
+class RBTree {
     private:
         enum Color {
             RED,
@@ -37,7 +36,7 @@ class Tree {
 
         struct Node {
             Color color;
-            Key key;
+            NodeType key;
             Node *parent;
             Node *left;
             Node *right;
@@ -91,7 +90,7 @@ class Tree {
             y->parent = x;
         }
 
-        void Transplant(Node *dest, Node *src) {
+        void transplant(Node *dest, Node *src) {
             if (dest->parent == NULL) {
                 root = src;
             } else if (dest == dest->parent->left) {
@@ -105,7 +104,7 @@ class Tree {
             }
         }
 
-        Node *Minimum(Node *tree) {
+        Node *minimum(Node *tree) {
             while (tree->left) {
                 tree = tree->left;
             }
@@ -144,18 +143,18 @@ class Tree {
             delete node;
         }
 
-        Tree() : root(NULL) {
+        RBTree() : root(NULL) {
         }
 
     public:
 
-        typedef std::shared_ptr<Tree<Key> > ptr;
+        typedef std::shared_ptr<RBTree<NodeType> > ptr;
 
         static ptr create() {
-            return ptr(new Tree<Key>());
+            return ptr(new RBTree<NodeType>());
         }
 
-        void insert(Key key) {
+        void insert(NodeType key) {
             Node *node, *parent, *z;
 
             parent = NULL;
@@ -218,7 +217,7 @@ class Tree {
             root->color = BLACK;
         }
 
-        Key& find(const Key& keyshell) {
+        NodeType& find(const NodeType& keyshell) {
             Node *node = root;
             while (node) {
                 if (*(node->key) > (*keyshell)) {
@@ -230,10 +229,10 @@ class Tree {
                 }
             }
 
-            throw std::runtime_error("Key not found");
+            throw std::runtime_error("NodeType not found");
         }
 
-        void _delete(const Key& key) {
+        void _delete(const NodeType& key) {
             Node *node = root;
             while (node) {
                 if (*(node->key) > (*key)) {
@@ -252,23 +251,23 @@ class Tree {
             Color original;
             Node *sub, *old;
             if (!node->left) {
-                Transplant(node, sub = node->right);
+                transplant(node, sub = node->right);
             } else if (!node->right) {
-                Transplant(node, sub = node->left);
+                transplant(node, sub = node->left);
             } else {
-                old = Minimum(node->right);
+                old = minimum(node->right);
                 original = old->color;
                 sub = old->right;
 
                 if (old->parent == node) {
                     sub->parent = node;
                 } else {
-                    Transplant(old, old->right);
+                    transplant(old, old->right);
                     old->right = node->right;
                     old->right->parent = old;
                 }
 
-                Transplant(node, old);
+                transplant(node, old);
                 old->left = node->left;
                 old->left->parent = old;
                 old->color = node->color;
@@ -331,7 +330,7 @@ class Tree {
             echo(root, 0);
         }
 
-        ~Tree() {
+        ~RBTree() {
             delete_node(root);
         }
 
