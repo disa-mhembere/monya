@@ -21,6 +21,7 @@
 #define MONYA_IO_FACTORY_HPP
 
 #include "IO.hpp"
+#include "../common/types.hpp"
 
 namespace monya {
 class iofactory {
@@ -29,15 +30,22 @@ class iofactory {
         bool is_direct;
 
     public:
-        template <typename T>
-        typename io::IO<T>::ptr create_synchronous() {
-            is_direct = true;
-            return io::SyncIO<T>::create();
-        }
+        io::IO::raw_ptr create(IOTYPE iotype) {
 
-        //typename io::IO<T>::ptr create_asynchronous(bool isdirect) {
-            // TODO
-        //}
+            switch (iotype) {
+                case MEM:
+                    return new io::MemoryIO();
+                    break;
+                case SEM:
+                    throw not_implemented_exception();
+                    break;
+                case SYNC:
+                    return new io::SyncIO();
+                    break;
+                default:
+                    throw not_implemented_exception();
+            }
+        }
 };
 }
 
