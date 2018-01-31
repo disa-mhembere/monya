@@ -17,11 +17,12 @@
  * limitations under the License.
  */
 
-#ifndef TREE_PROGRAM_HPP__
-#define TREE_PROGRAM_HPP__
+#ifndef MONYA_TREE_PROGRAM_HPP__
+#define MONYA_TREE_PROGRAM_HPP__
 
 #include "common/types.hpp"
 #include "structures/RBTree.hpp"
+#include "io/IO.hpp"
 
 // NOTE: We initally assume all the Trees are the same
 namespace monya {
@@ -34,9 +35,18 @@ namespace monya {
             short nnode_id; // NUMA node
             tree_t tree_id; // The ID of this tree
             std::string exmem_fn;
+            io::IO::raw_ptr ioer;
 
         public:
             TreeProgram() {
+            }
+
+            static TreeProgram<NodeType>* create_raw() {
+                return new TreeProgram<NodeType>();
+            }
+
+            void set_ioer(io::IO::raw_ptr ioer) {
+                this->ioer = ioer;
             }
 
             void set_tree_id(const tree_t tid) {

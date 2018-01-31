@@ -17,12 +17,74 @@
  * limitations under the License.
  */
 
-#ifndef COMPUTE_ENGINE_HPP__
-#define COMPUTE_ENGINE_HPP__
+#ifndef MONYA_COMPUTE_ENGINE_HPP__
+#define MONYA_COMPUTE_ENGINE_HPP__
+
+#include <memory>
+#include <vector>
+#include "TreeProgram.hpp"
 
 namespace monya {
+    class Params;
+
+    template <typename NodeType>
     class ComputeEngine {
 
+        private:
+            std::vector<TreeProgram<NodeType>*> forest; // For when there are more
+            tree_t ntree;
+            Params params;
+
+            ComputeEngine(tree_t ntree=1) {
+                this->ntree = ntree;
+                for (tree_t tid = 0; tid < ntree; tid++) {
+                    forest.push_back(TreeProgram<NodeType>::create_raw());
+                }
+            }
+
+            ComputeEngine(std::vector<TreeProgram<NodeType>*>& forest) {
+                this->forest = forest;
+            }
+
+        public:
+            typedef std::shared_ptr<ComputeEngine<NodeType> > ptr;
+
+            static ptr create(std::vector<TreeProgram<NodeType>*>& forest) {
+                return ptr(new ComputeEngine(forest));
+            }
+
+            static ptr create() {
+                return ptr(new ComputeEngine<NodeType>());
+            }
+
+            void set_params(const Params& params) {
+                this->params = params;
+            }
+
+            const Params& get_params() {
+                return this->params;
+            }
+
+            void add_tree(TreeProgram<NodeType>* tree) {
+                this->forest.push_back(tree);
+            }
+
+            void train() {
+                for (size_t tree_id = 0; tree_id < ntree; tree_id++) {
+                    //forest[tree_id]->build();
+                    throw not_implemented_exception();
+                }
+            }
+
+            void predict() {
+
+            }
+
+            ~ComputeEngine() {
+                for (size_t tree_id = 0; tree_id < ntree; tree_id++) {
+                    throw not_implemented_exception();
+                }
+            }
     };
 } // End monya
 
