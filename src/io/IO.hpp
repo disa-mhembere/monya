@@ -53,7 +53,12 @@ class IO {
             orientation = MAT_ORIENT::INVALID;
         }
 
-        IO(const dimpair dim, MAT_ORIENT orient, size_t dtype_size): IO() {
+        IO(const std::string fn, const size_t dtype_size): IO() {
+            this->fn = fn;
+            this->dtype_size = dtype_size;
+        }
+
+        IO(const dimpair dim, MAT_ORIENT orient, const size_t dtype_size): IO() {
             this->dim = dim;
             this->orientation = orient;
             this->dtype_size = dtype_size;
@@ -206,6 +211,10 @@ class SyncIO: public IO {
 
     public:
         SyncIO(): IO() {
+        }
+
+        SyncIO(const std::string fn, const size_t dtype_size):
+            IO(fn, dtype_size) {
         }
 
         SyncIO(const std::string fn, dimpair dim,
