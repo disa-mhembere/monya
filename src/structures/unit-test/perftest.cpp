@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
 #endif
     std::cout << "Reading " << DATALEN << " dataset in '" << fn << "' ...\n";
     std::vector<long> data(DATALEN);
-    mi::SyncIO<long> br(fn);
+    mi::SyncIO br(fn, sizeof(long));
 
     clock_t t = clock();
     br.read(&data[0]);
