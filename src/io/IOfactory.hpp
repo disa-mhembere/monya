@@ -24,13 +24,13 @@
 #include "../common/types.hpp"
 
 namespace monya {
-class iofactory {
+class IOfactory {
     private:
         std::string fn; // Either name in safs or OS file system
         bool is_direct;
 
     public:
-        io::IO::raw_ptr create(IOTYPE iotype) {
+        static io::IO::raw_ptr create(IOTYPE iotype) {
 
             switch (iotype) {
                 case MEM:

@@ -49,13 +49,22 @@ class IO {
 
         IO() {
             data = NULL;
-            fn = "TESTVALUE";
+            fn = "";
+            orientation = MAT_ORIENT::INVALID;
         }
 
         IO(const dimpair dim, MAT_ORIENT orient, size_t dtype_size): IO() {
             this->dim = dim;
             this->orientation = orient;
             this->dtype_size = dtype_size;
+        }
+
+        void set_orientation(const MAT_ORIENT orient) {
+            this->orientation = orient;
+        }
+
+        const MAT_ORIENT get_orientation() const {
+            return this->orientation;
         }
 
         void set_dtype_size(size_t dtype_size) {
@@ -113,7 +122,6 @@ class IO {
         }
 
         virtual void* get_col(const offset_t offset) {
-            std::cout << "Dafuq!\n";
             throw not_implemented_exception();
         }
 
@@ -153,14 +161,6 @@ class MemoryIO: public IO {
 
         void* get_data() {
             return this->data;
-        }
-
-        void set_orientation(MAT_ORIENT orient) {
-            this->orientation = orient;
-        }
-
-        MAT_ORIENT get_orientation() {
-            return this->orientation;
         }
 
         void write() override {
@@ -223,13 +223,10 @@ class SyncIO: public IO {
 
         void read(void* buf) override {
             if (!fs.is_open()) {
-                std::cout << "Opening file " << this->fn << "\n";
                 open();
             }
 
             size_t size = monya::util::get_file_size(this->fn);
-            std::cout << "Reading " << size << " bytes of file " <<
-                this->fn << "...\n";
             fs.read(reinterpret_cast<char*>(buf), size);
         }
 
@@ -282,8 +279,6 @@ class SyncIO: public IO {
                 fs.close();
             if (data != NULL)
                 delete [] data;
-
-            std::cout << "Cleaning up SyncIO\n";
         }
 };
 
