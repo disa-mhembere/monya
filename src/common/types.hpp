@@ -23,6 +23,8 @@
 // Represent a binary node
 
 #include <iostream>
+#include <map>
+#include <utility>
 
 #define INVALID_ID -1
 
@@ -32,12 +34,54 @@ namespace monya {
     typedef size_t offset_t; // The offset position of a file
     typedef unsigned tree_t; // The number of trees in the forrest
 
+    // Used to express the dimensions of a matrix
+    typedef std::pair<offset_t, offset_t> dimpair;
+
     // Traversal order of the tree
     enum order_t {
         PREORDER,
         INORDER,
         POSTORDER,
         LEVELORDER
+    };
+
+    /**
+      Whether we are running in memory, semi-external memory or in memory
+      with synchronous I/O
+      */
+    std::map<std::string, short> IOTYPE_t =
+        {{"mem", 0}, {"sem", 1}, {"sync", 2}};
+
+    enum IOTYPE {
+        MEM = 0,
+        SEM = 1, // Always async
+        SYNC = 2, // Synchronous is for testing only
+    };
+
+    /**
+       Matrix orientation can be
+         ROW: rowwise
+         COL: colwise
+         BAND: banded
+    */
+    enum MAT_ORIENT {
+        ROW,
+        COL,
+        BAND,
+        INVALID
+    };
+
+    class Params {
+        public:
+            std::string fn;
+            IOTYPE iotype;
+            tree_t ntree;
+
+        Params(std::string fn="", IOTYPE iotype=IOTYPE::MEM, tree_t ntree=1) {
+            this->fn = fn;
+            this->iotype = iotype;
+            this->ntree = ntree;
+        }
     };
 } // End monya
 
