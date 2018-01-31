@@ -143,12 +143,11 @@ class RBTree {
             delete node;
         }
 
+    public:
+        typedef std::shared_ptr<RBTree<NodeType> > ptr;
+
         RBTree() : root(NULL) {
         }
-
-    public:
-
-        typedef std::shared_ptr<RBTree<NodeType> > ptr;
 
         static ptr create() {
             return ptr(new RBTree<NodeType>());
