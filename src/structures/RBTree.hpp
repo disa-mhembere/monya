@@ -37,15 +37,16 @@ class RBTree {
         struct Node {
             Color color;
             NodeType key;
-            Node *parent;
-            Node *left;
-            Node *right;
+            Node* parent;
+            Node* left;
+            Node* right;
+            short depth; // TODO: Set the depth
         };
 
-        Node *root;
+        Node* root;
 
-        void rotate_left(Node *x) {
-            Node *y;
+        void rotate_left(Node* x) {
+            Node* y;
 
             y = x->right;
             x->right = y->left;
@@ -67,8 +68,8 @@ class RBTree {
             x->parent = y;
         }
 
-        void rotate_right(Node *y) {
-            Node *x;
+        void rotate_right(Node* y) {
+            Node* x;
 
             x = y->left;
             y->left = x->right;
@@ -90,7 +91,7 @@ class RBTree {
             y->parent = x;
         }
 
-        void transplant(Node *dest, Node *src) {
+        void transplant(Node* dest, Node* src) {
             if (dest->parent == NULL) {
                 root = src;
             } else if (dest == dest->parent->left) {
@@ -104,7 +105,7 @@ class RBTree {
             }
         }
 
-        Node *minimum(Node *tree) {
+        Node* minimum(Node* tree) {
             while (tree->left) {
                 tree = tree->left;
             }
@@ -112,7 +113,7 @@ class RBTree {
             return tree;
         }
 
-        void echo(Node *node, int tabs) {
+        void echo(Node* node, int tabs) {
             if (!node) {
                 return;
             }
@@ -127,7 +128,7 @@ class RBTree {
             echo(node->right, tabs + 1);
         }
 
-        void delete_node(Node *node) {
+        void delete_node(Node* node) {
             if (!node) {
                 return;
             }
@@ -146,7 +147,7 @@ class RBTree {
     public:
         typedef std::shared_ptr<RBTree<NodeType> > ptr;
 
-        RBTree() : root(NULL) {
+        RBTree(): root(NULL) {
         }
 
         static ptr create() {
@@ -154,65 +155,81 @@ class RBTree {
         }
 
         void insert(NodeType key) {
-            Node *node, *parent, *z;
+            Node* tmp; // A tmp node used to find the parent
+            Node* parent; // Will hold the parent of node being inserted
+            Node* new_node; // The new node being inserted
 
             parent = NULL;
-            node = root;
-            while (node) {
-                parent = node;
-                if ((*key) < *(node->key)) {
-                    node = node->left;
+            tmp = root;
+            // Traverse the tree to find the parent of the node to be inserted
+            while (tmp) {
+                parent = tmp;
+                if ((*key) < *(tmp->key)) {
+                    tmp = tmp->left;
                 } else {
-                    node = node->right;
+                    tmp = tmp->right;
                 }
             }
 
+            // If the parent is NULL then the tree is empty
+            //  Root is always BLACK
             if (!parent) {
-                z = root = new Node;
-                z->key = key;
-                z->color = BLACK;
-                z->parent = z->left = z->right = NULL;
+                new_node = root = new Node;
+                new_node->key = key;
+                new_node->color = BLACK;
+                new_node->parent = new_node->left = new_node->right = NULL;
             } else {
-                z = new Node;
-                z->key = key;
-                z->color = RED;
-                z->parent = parent;
-                z->left = z->right = NULL;
+                new_node = new Node;
+                new_node->key = key;
+                new_node->color = RED;
+                new_node->parent = parent;
+                new_node->left = new_node->right = NULL;
 
-                if (*(z->key) < *(parent->key)) {
-                    parent->left = z;
+                if (*(new_node->key) < *(parent->key)) {
+                    parent->left = new_node;
                 } else {
-                    parent->right = z;
+                    parent->right = new_node;
                 }
             }
 
             Node *uncle;
             bool side;
-            while (z->parent && z->parent->color == RED) {
-                if ((side = (z->parent == z->parent->parent->left))) {
-                    uncle = z->parent->parent->right;
+            while (new_node->parent && new_node->parent->color == RED) {
+                std::cout << "I'm in this bitch for: "; key->print();
+                if ((side = (new_node->parent ==
+                                new_node->parent->parent->left))) {
+                    uncle = new_node->parent->parent->right;
                 } else {
-                    uncle = z->parent->parent->left;
+                    uncle = new_node->parent->parent->left;
                 }
 
                 if (uncle && uncle->color == RED) {
-                    z->parent->color = BLACK;
+                    std::cout << "In here for: "; key->print();
+                    new_node->parent->color = BLACK;
                     uncle->color = BLACK;
-                    z->parent->parent->color = RED;
-                    z = z->parent->parent;
+                    new_node->parent->parent->color = RED;
+                    new_node = new_node->parent->parent;
+                    if (new_node == root) std::cout << "new_node is now root\n";
                 } else {
-                    if (z == (side ? z->parent->right : z->parent->left)) {
-                        z = z->parent;
-                        side ? rotate_left(z) : rotate_right(z);
+                    if (new_node == (side ? new_node->parent->right :
+                                new_node->parent->left)) {
+                        new_node = new_node->parent;
+                        side ? rotate_left(new_node) : rotate_right(new_node);
                     }
 
-                    z->parent->color = BLACK;
-                    z->parent->parent->color = RED;
-                    side ? rotate_right(z->parent->parent) :
-                        rotate_left(z->parent->parent);
+                    new_node->parent->color = BLACK;
+                    new_node->parent->parent->color = RED;
+                    side ? rotate_right(new_node->parent->parent) :
+                        rotate_left(new_node->parent->parent);
                 }
             }
 
+            if (root == new_node && root->color == BLACK)
+                std::cout << "root's color is: BLACK\n";
+            else if (root == new_node && root->color == RED)
+                std::cout << "root's color is: RED\n";
+            else
+                std::cout << "no dice\n"
             root->color = BLACK;
         }
 

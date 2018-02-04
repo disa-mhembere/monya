@@ -24,17 +24,15 @@ namespace mc = monya::container;
 
 int main(int argc, char* argv[]) {
 
-    mc::NodeView<double>* root = new mc::BinaryNode<double>(10);
+    std::vector<double> members {10, 8, 14, 6};
 
-    mc::NodeView<double>* left = new mc::BinaryNode<double>(4);
-    mc::BinaryNode<double>::cast2(root)->left(left);
+    mc::RBTree<mc::NodeView<double>*>::ptr tree =
+        mc::RBTree<mc::NodeView<double>* >::create();
 
-    mc::NodeView<double>* right = new mc::BinaryNode<double>(14);
-    mc::BinaryNode<double>::cast2(root)->right(right);
-
-    mc::RBTree<mc::BinaryNode<double>*>::ptr tree =
-        mc::RBTree<mc::BinaryNode<double>* >::create();
-    tree->insert(mc::BinaryNode<double>::cast2(root));
+    for (std::vector<double>::iterator it = members.begin();
+            it != members.end(); ++it) {
+        tree->insert(new mc::BinaryNode<double>(*it));
+    }
 
     tree->echo();
     return EXIT_SUCCESS;
