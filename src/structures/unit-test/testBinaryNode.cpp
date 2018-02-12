@@ -27,6 +27,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Print test: " << root << std::endl;
     root->print();
 
+#if 0
     mc::NodeView<double>* left = new mc::BinaryNode<double>(4);
     static_cast<mc::BinaryNode<double>*>(left)->print();
     static_cast<mc::BinaryNode<double>*>(root)->left(left);
@@ -37,6 +38,7 @@ int main(int argc, char* argv[]) {
 
     delete(left);
     delete(right);
+#endif
     delete(root);
 
     return EXIT_SUCCESS;
