@@ -29,21 +29,16 @@ namespace monya { namespace container {
 template <typename NodeType>
 class RBTree {
     private:
-        enum Color {
-            RED,
-            BLACK
-        };
-
         struct Node {
-            Color color;
+            uint8_t color; // 0 = B, 1 = R
             NodeType key;
             Node* parent;
             Node* left;
             Node* right;
-            short depth; // TODO: Set the depth
         };
 
         Node* root;
+        size_t depth;
 
         void rotate_left(Node* x) {
             Node* y;
@@ -154,6 +149,42 @@ class RBTree {
             return ptr(new RBTree<NodeType>());
         }
 
+        short max_depth = 0;
+
+        Node* get_root() {
+            return root;
+        }
+
+        // Preorder deal
+        void get_max_depth(Node* node) {
+            //if (!node) {
+                //return;
+            //}
+
+            //if (!node->parent) { // Root
+                //node->depth = 1;
+                //max_depth = node->depth;
+            //} else {
+                //node->depth = node->parent->depth + 1;
+                //if (node->depth > max_depth)
+                    //max_depth = node->depth;
+            //}
+
+            //get_max_depth(node->left);
+            //get_max_depth(node->right);
+        }
+
+        size_t get_nnodes(Node* node, size_t& nnodes=0) {
+            if (!node) {
+                return nnodes;
+            }
+
+            nnodes++;
+            get_nnodes(node->left, nnodes);
+            get_nnodes(node->right, nnodes);
+            return nnodes;
+        }
+
         void insert(NodeType key) {
             Node* tmp; // A tmp node used to find the parent
             Node* parent; // Will hold the parent of node being inserted
@@ -172,16 +203,16 @@ class RBTree {
             }
 
             // If the parent is NULL then the tree is empty
-            //  Root is always BLACK
+            //  Root is always black
             if (!parent) {
                 new_node = root = new Node;
                 new_node->key = key;
-                new_node->color = BLACK;
+                new_node->color = 0;
                 new_node->parent = new_node->left = new_node->right = NULL;
             } else {
                 new_node = new Node;
                 new_node->key = key;
-                new_node->color = RED;
+                new_node->color = 1;
                 new_node->parent = parent;
                 new_node->left = new_node->right = NULL;
 
@@ -194,8 +225,7 @@ class RBTree {
 
             Node *uncle;
             bool side;
-            while (new_node->parent && new_node->parent->color == RED) {
-                std::cout << "I'm in this bitch for: "; key->print();
+            while (new_node->parent && new_node->parent->color == 1) {
                 if ((side = (new_node->parent ==
                                 new_node->parent->parent->left))) {
                     uncle = new_node->parent->parent->right;
@@ -203,13 +233,11 @@ class RBTree {
                     uncle = new_node->parent->parent->left;
                 }
 
-                if (uncle && uncle->color == RED) {
-                    std::cout << "In here for: "; key->print();
-                    new_node->parent->color = BLACK;
-                    uncle->color = BLACK;
-                    new_node->parent->parent->color = RED;
+                if (uncle && uncle->color == 1) {
+                    new_node->parent->color = 0;
+                    uncle->color = 0;
+                    new_node->parent->parent->color = 1;
                     new_node = new_node->parent->parent;
-                    if (new_node == root) std::cout << "new_node is now root\n";
                 } else {
                     if (new_node == (side ? new_node->parent->right :
                                 new_node->parent->left)) {
@@ -217,20 +245,13 @@ class RBTree {
                         side ? rotate_left(new_node) : rotate_right(new_node);
                     }
 
-                    new_node->parent->color = BLACK;
-                    new_node->parent->parent->color = RED;
+                    new_node->parent->color = 0;
+                    new_node->parent->parent->color = 1;
                     side ? rotate_right(new_node->parent->parent) :
                         rotate_left(new_node->parent->parent);
                 }
             }
-
-            if (root == new_node && root->color == BLACK)
-                std::cout << "root's color is: BLACK\n";
-            else if (root == new_node && root->color == RED)
-                std::cout << "root's color is: RED\n";
-            else
-                std::cout << "no dice\n"
-            root->color = BLACK;
+            root->color = 0;
         }
 
         NodeType& find(const NodeType& keyshell) {
@@ -264,7 +285,7 @@ class RBTree {
                 return;
             }
 
-            Color original;
+            uint8_t original;
             Node *sub, *old;
             if (!node->left) {
                 transplant(node, sub = node->right);
@@ -290,49 +311,49 @@ class RBTree {
             }
 
             delete node;
-            if (original == BLACK) {
+            if (original == 0) {
                 bool side;
                 Node *sibling;
-                while (old != root && old->color == BLACK) {
+                while (old != root && old->color == 0) {
                     if ((side = (old == old->parent->left))) {
                         sibling = old->parent->right;
                     } else {
                         sibling = old->parent->left;
                     }
 
-                    if (sibling->color == RED) {
-                        sibling->color = BLACK;
-                        old->parent->color = RED;
+                    if (sibling->color == 1) {
+                        sibling->color = 0;
+                        old->parent->color = 1;
                         side ? rotate_left(old->parent) : rotate_right(old->parent);
                         sibling = side ? old->parent->right : old->parent->left;
                     }
 
-                    if (sibling->left->color == BLACK &&
-                            sibling->right->color == RED) {
-                        sibling->color = RED;
+                    if (sibling->left->color == 0 &&
+                            sibling->right->color == 1) {
+                        sibling->color = 1;
                         old = old->parent;
                     } else {
-                        if (BLACK == side ? sibling->right->color :
+                        if (0 == side ? sibling->right->color :
                                 sibling->left->color) {
-                            sibling->color = RED;
+                            sibling->color = 1;
                             if (side) {
-                                sibling->left->color = BLACK;
+                                sibling->left->color = 0;
                                 rotate_right(sibling);
                                 sibling = old->parent->right;
                             } else {
-                                sibling->right->color = BLACK;
+                                sibling->right->color = 0;
                                 rotate_left(sibling);
                                 sibling = old->parent->left;
                             }
                         }
 
                         sibling->color = old->parent->color;
-                        old->parent->color = BLACK;
+                        old->parent->color = 0;
                         if (side) {
-                            sibling->left->color = BLACK;
+                            sibling->left->color = 0;
                             rotate_left(old->parent);
                         } else {
-                            sibling->right->color = BLACK;
+                            sibling->right->color = 0;
                             rotate_right(old->parent);
                         }
 

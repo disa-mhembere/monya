@@ -33,9 +33,6 @@ class BinaryNode: public NodeView<T>, public safs::callback {
     private:
         char* buf; // TODO templatize -- the data read from disk
         int numbytes; // The number of bytes in the read of data from disk
-        short depth;
-        NodeView<T>* l; // Left child
-        NodeView<T>* r; // Right child
 
     public:
         virtual int invoke(safs::io_request *reqs[], int num) override {
@@ -48,18 +45,15 @@ class BinaryNode: public NodeView<T>, public safs::callback {
         }
 
         BinaryNode () {
-            this->l = NULL;
-            this->r = NULL;
         }
 
         BinaryNode (const T data) {
             this->data = data;
-            this->l = NULL;
-            this->r = NULL;
         }
 
         // Given a new node add children to this node
         virtual void spawn(NodeView<T>* node) override {
+#if 0
             if (node->get_data() < this->data) {
                 if (!l)  // No left child
                     left(node);  // Make node my left child
@@ -71,22 +65,7 @@ class BinaryNode: public NodeView<T>, public safs::callback {
                 else
                     r->spawn(node);
             }
-        }
-
-        void left(NodeView<T>* left) {
-            this->l = left;
-        }
-
-        void right(NodeView<T>* right) {
-            this->r = right;
-        }
-
-        NodeView<T>* left() const {
-            return this->l;
-        }
-
-        NodeView<T>* right() const {
-            return this->r;
+#endif
         }
 
         static BinaryNode<T>* cast2(NodeView<T>* nv) {
