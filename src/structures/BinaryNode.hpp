@@ -38,17 +38,8 @@ class BinaryNode: public NodeView<T> {
         BinaryNode<T>* left;
         BinaryNode<T>* right;
 
-        //BinaryNode(): NodeView<T>() {
-        //}
-        //BinaryNode(T val): NodeView<T>(val) {
-        //}
-        //BinaryNode(std::vector<offset_t>& data_index):
-        //      NodeView<T>(data_index) {
-        //}
+        // Inherit constructors
         using NodeView<T>::NodeView;
-
-        // TODO: Other constructors
-
         BinaryNode<T>* get_parent() {
         }
 

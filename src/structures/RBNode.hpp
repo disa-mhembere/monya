@@ -37,15 +37,6 @@ class RBNode : public BinaryNode<DataType> {
         RBNode<DataType>* right;
 
         using BinaryNode<DataType>::BinaryNode;
-        //RBNode(): BinaryNode<DataType>() {
-        //}
-
-        //RBNode(DataType val): BinaryNode<DataType>(val) {
-        //}
-
-        //RBNode(std::vector<offset_t>& data_index):
-            //BinaryNode<DataType>(data_index) {
-        //}
 };
 
 }} // End namespace monya::container
