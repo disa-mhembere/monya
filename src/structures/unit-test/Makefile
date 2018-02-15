@@ -18,8 +18,8 @@ include ../../../Makefile.common
 CXXFLAGS +=-I.. -I../../../SAFS/libsafs
 LDFLAGS := -L.. -L../../../SAFS/libsafs -lsafs -lstructures $(LDFLAGS)
 
-TESTFILES = testBinaryNode testRBNode testRBTree testNAryNode
-			#perftest cppperftest
+TESTFILES = testBinaryNode testRBNode testRBTree testNAryNode \
+			perftest cppperftest
 
 all: $(TESTFILES)
 

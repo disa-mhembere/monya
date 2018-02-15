@@ -1,5 +1,4 @@
-/*
- * Copyright 2017 Neurodata (https://neurodata.io)
+/* * Copyright 2017 Neurodata (https://neurodata.io)
  * Written by Disa Mhembere (disa@cs.jhu.edu)
  *
  * This file is part of Monya.
@@ -18,7 +17,7 @@
  */
 
 #include "RBTree.hpp"
-#include "BinaryNode.hpp"
+#include "RBNode.hpp"
 #include "../io/IO.hpp"
 #include <time.h>
 #include <stdio.h>
@@ -30,23 +29,32 @@
 namespace mc = monya::container;
 namespace mi = monya::io;
 
-void insert_test(mc::RBTree<mc::BinaryNode<double>* >::ptr tree,
+void insert_test(mc::RBTree<mc::RBNode<double>>::ptr tree,
         std::vector<long>& data) {
     clock_t t = clock();
 
     if (data.size() < 1)
         return;
 
+    //short max_depth = 0;
     for (std::vector<long>::iterator it = data.begin(); it != data.end(); ++it) {
-        tree->insert(new mc::BinaryNode<double>(*it));
+        //short depth = tree->insert(new mc::RBNode<double>(*it));
+        tree->insert(new mc::RBNode<double>(*it));
+        //if (depth > max_depth) max_depth = depth;
     }
 
+    //tree->get_max_depth(tree->get_root());
+    ////std::cout << "The max depth is: " << tree->max_depth << std::endl;
+    //size_t nnodes = 0;
+    //tree->get_nnodes(tree->get_root(), nnodes);
+    //assert(nnodes == data.size());
+
     t = clock() - t;
-    printf ("\nIt took %f sec to insert the data into a Monya RBTree.\n",
+    printf("\nIt took %f sec to insert the data into a Monya RBTree.\n",
             ((float)t)/CLOCKS_PER_SEC);
 }
 
-void query_test(mc::RBTree<mc::BinaryNode<double>*>::ptr tree,
+void query_test(mc::RBTree<mc::RBNode<double>>::ptr tree,
         std::vector<long> data) {
     std::cout << "Doing random shuffle ..... ";
     std::srand(1234);
@@ -56,7 +64,7 @@ void query_test(mc::RBTree<mc::BinaryNode<double>*>::ptr tree,
 
     for (std::vector<long>::iterator it = data.begin();
             it != data.end(); ++it) {
-        mc::BinaryNode<double>* node = new mc::BinaryNode<double>(*it);
+        mc::RBNode<double>* node = new mc::RBNode<double>(*it);
         tree->find(node);
         delete node;
     }
@@ -75,12 +83,30 @@ int main(int argc, char* argv[]) {
     size_t DATALEN = 0;
 
 #if 0
-    fn = "ordered_tree_10.bin";
+    fn = "data/ordered_tree_10.bin";
     DATALEN = 10;
-#else
-    fn =  "ordered_tree_10M.bin";
+#endif
+#if 0
+    fn = "data/ordered_tree_10K.bin";
+    DATALEN = 10000;
+#endif
+#if 0
+    fn = "data/ordered_tree_100K.bin";
+    DATALEN = 100000;
+#endif
+#if 1
+    fn =  "data/ordered_tree_10M.bin";
     DATALEN = 10000000;
 #endif
+#if 0
+    fn = "data/data_9959.bin";
+    DATALEN = 9959;
+#endif
+#if 0
+    fn =  "data/ordered_tree_1M.bin";
+    DATALEN = 10000000;
+#endif
+
     std::cout << "Reading " << DATALEN << " dataset in '" << fn << "' ...\n";
     std::vector<long> data(DATALEN);
     mi::SyncIO br(fn, sizeof(long));
@@ -90,8 +116,8 @@ int main(int argc, char* argv[]) {
     t = clock() - t;
     printf ("It took %f sec to read the data.\n",((float)t)/CLOCKS_PER_SEC);
 
-    mc::RBTree<mc::BinaryNode<double>* >::ptr tree =
-        mc::RBTree<mc::BinaryNode<double>* >::create();
+    mc::RBTree<mc::RBNode<double>>::ptr tree =
+        mc::RBTree<mc::RBNode<double>>::create();
     insert_test(tree, data);
 
     // Make sure we inserted correctly

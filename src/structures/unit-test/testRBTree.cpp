@@ -18,20 +18,20 @@
  */
 
 #include "RBTree.hpp"
-#include "BinaryNode.hpp"
+#include "RBNode.hpp"
 
 namespace mc = monya::container;
 
 int main(int argc, char* argv[]) {
-
     std::vector<double> members {10, 8, 14, 6};
 
-    mc::RBTree<mc::NodeView<double>*>::ptr tree =
-        mc::RBTree<mc::NodeView<double>* >::create();
+    mc::RBTree<mc::RBNode<double> >::ptr tree =
+        mc::RBTree<mc::RBNode<double> >::create();
 
     for (std::vector<double>::iterator it = members.begin();
             it != members.end(); ++it) {
-        tree->insert(new mc::BinaryNode<double>(*it));
+        tree->insert(new mc::RBNode<double>((double)*it));
+
     }
 
     tree->echo();

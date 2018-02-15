@@ -23,20 +23,32 @@
 #include <time.h>
 #include <stdio.h>
 
-#include "../BinaryNode.hpp"
+#include "../NodeView.hpp"
 #include "../io/IO.hpp"
 
 namespace mc = monya::container;
 namespace mi = monya::io;
 
-void insert_test(std::map<mc::NodeView<double>*, long>& tree,
+template <typename T>
+class ConcreteNode : public mc::NodeView <T> {
+
+    protected:
+    void prep() override {}
+    void run() override {}
+
+    public:
+    using mc::NodeView<T>::NodeView;
+    void spawn(mc::NodeView<T>* node) override {}
+};
+
+void insert_test(std::map<ConcreteNode<double>*, long>& tree,
         std::vector<long>& data) {
     clock_t t = clock();
 
     for (std::vector<long>::iterator it = data.begin();
             it != data.end(); ++it) {
-        tree.insert(std::pair<mc::NodeView<double>*, long>(
-                    new mc::BinaryNode<double>(*it), *it));
+        tree.insert(std::pair<ConcreteNode<double>*, long>(
+                    new ConcreteNode<double>(*it), *it));
     }
 
     t = clock() - t;
@@ -44,7 +56,7 @@ void insert_test(std::map<mc::NodeView<double>*, long>& tree,
             ((float)t)/CLOCKS_PER_SEC, data.size());
 }
 
-void query_test(std::map<mc::NodeView<double>*, long>& tree,
+void query_test(std::map<ConcreteNode<double>*, long>& tree,
         std::vector<long> data) {
     std::cout << "Doing random shuffle ..... ";
     std::srand(1234);
@@ -54,7 +66,7 @@ void query_test(std::map<mc::NodeView<double>*, long>& tree,
 
     for (std::vector<long>::iterator it = data.begin();
             it != data.end(); ++it) {
-        mc::BinaryNode<double>* node = new mc::BinaryNode<double>(*it);
+        ConcreteNode<double>* node = new ConcreteNode<double>(*it);
         tree.find(node);
         delete(node);
     }
@@ -64,7 +76,7 @@ void query_test(std::map<mc::NodeView<double>*, long>& tree,
             ((float)t)/CLOCKS_PER_SEC);
 
     // Delete them now
-    for (std::map<mc::NodeView<double>*, long>::iterator it = tree.begin();
+    for (std::map<ConcreteNode<double>*, long>::iterator it = tree.begin();
             it != tree.end(); ++it) {
         delete(it->first);
     }
@@ -75,12 +87,30 @@ int main(int argc, char* argv[]) {
     size_t DATALEN = 0;
 
 #if 0
-    fn = "ordered_tree_10.bin";
+    fn = "data/ordered_tree_10.bin";
     DATALEN = 10;
-#else
-    fn =  "ordered_tree_10M.bin";
+#endif
+#if 0
+    fn = "data/ordered_tree_10K.bin";
+    DATALEN = 10000;
+#endif
+#if 0
+    fn = "data/ordered_tree_100K.bin";
+    DATALEN = 100000;
+#endif
+#if 1
+    fn =  "data/ordered_tree_10M.bin";
     DATALEN = 10000000;
 #endif
+#if 0
+    fn = "data/data_9959.bin";
+    DATALEN = 9959;
+#endif
+#if 0
+    fn =  "data/ordered_tree_1M.bin";
+    DATALEN = 10000000;
+#endif
+
     std::cout << "Reading " << DATALEN << " dataset in '" << fn << "' ...\n";
     std::vector<long> data(DATALEN);
     mi::SyncIO br(fn, sizeof(long));
@@ -91,12 +121,12 @@ int main(int argc, char* argv[]) {
     printf ("It took %f sec to read the data.\n",((float)t)/CLOCKS_PER_SEC);
     t = clock();
 
-    std::map<mc::NodeView<double>*, long> tree;
+    std::map<ConcreteNode<double>*, long> tree;
 
     // Test insert speed
     insert_test(tree, data);
 
-    //// Test query speed
+    // Test query speed
     query_test(tree, data);
 
     return EXIT_SUCCESS;
