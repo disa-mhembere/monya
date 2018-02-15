@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-#ifndef RB_TREE_HPP__
-#define RB_TREE_HPP__
+#ifndef MONYA_RB_TREE_HPP__
+#define MONYA_RB_TREE_HPP__
 
 #include <memory>
 #include "../common/types.hpp"
@@ -29,19 +29,11 @@ namespace monya { namespace container {
 template <typename NodeType>
 class RBTree {
     private:
-        struct Node {
-            uint8_t color; // 0 = B, 1 = R
-            NodeType key;
-            Node* parent;
-            Node* left;
-            Node* right;
-        };
-
-        Node* root;
+        NodeType* root;
         size_t depth;
 
-        void rotate_left(Node* x) {
-            Node* y;
+        void rotate_left(NodeType* x) {
+            NodeType* y;
 
             y = x->right;
             x->right = y->left;
@@ -63,8 +55,8 @@ class RBTree {
             x->parent = y;
         }
 
-        void rotate_right(Node* y) {
-            Node* x;
+        void rotate_right(NodeType* y) {
+            NodeType* x;
 
             x = y->left;
             y->left = x->right;
@@ -86,7 +78,7 @@ class RBTree {
             y->parent = x;
         }
 
-        void transplant(Node* dest, Node* src) {
+        void transplant(NodeType* dest, NodeType* src) {
             if (dest->parent == NULL) {
                 root = src;
             } else if (dest == dest->parent->left) {
@@ -100,7 +92,7 @@ class RBTree {
             }
         }
 
-        Node* minimum(Node* tree) {
+        NodeType* minimum(NodeType* tree) {
             while (tree->left) {
                 tree = tree->left;
             }
@@ -108,7 +100,7 @@ class RBTree {
             return tree;
         }
 
-        void echo(Node* node, int tabs) {
+        void echo(NodeType* node, int tabs) {
             if (!node) {
                 return;
             }
@@ -118,12 +110,13 @@ class RBTree {
             for (int i = 0; i < tabs; ++i) {
                 std::cout << "\t\t";
             }
-            std::cout << *node->key << (node->color ? "B" : "R") << std::endl;
+            std::cout << node->comparator <<
+                (node->color ? "B" : "R") << std::endl;
 
             echo(node->right, tabs + 1);
         }
 
-        void delete_node(Node* node) {
+        void delete_node(NodeType* node) {
             if (!node) {
                 return;
             }
@@ -151,12 +144,12 @@ class RBTree {
 
         short max_depth = 0;
 
-        Node* get_root() {
+        NodeType* get_root() {
             return root;
         }
 
         // Preorder deal
-        void get_max_depth(Node* node) {
+        void get_max_depth(NodeType* node) {
             //if (!node) {
                 //return;
             //}
@@ -174,7 +167,7 @@ class RBTree {
             //get_max_depth(node->right);
         }
 
-        size_t get_nnodes(Node* node, size_t& nnodes=0) {
+        size_t get_nnodes(NodeType* node, size_t& nnodes=0) {
             if (!node) {
                 return nnodes;
             }
@@ -185,17 +178,17 @@ class RBTree {
             return nnodes;
         }
 
-        void insert(NodeType key) {
-            Node* tmp; // A tmp node used to find the parent
-            Node* parent; // Will hold the parent of node being inserted
-            Node* new_node; // The new node being inserted
+        void insert(NodeType* node) {
+            NodeType* tmp; // A tmp node used to find the parent
+            NodeType* parent; // Will hold the parent of node being inserted
+            NodeType* new_node; // The new node being inserted
 
             parent = NULL;
             tmp = root;
             // Traverse the tree to find the parent of the node to be inserted
             while (tmp) {
                 parent = tmp;
-                if ((*key) < *(tmp->key)) {
+                if (*node < *tmp) {
                     tmp = tmp->left;
                 } else {
                     tmp = tmp->right;
@@ -205,25 +198,23 @@ class RBTree {
             // If the parent is NULL then the tree is empty
             //  Root is always black
             if (!parent) {
-                new_node = root = new Node;
-                new_node->key = key;
+                new_node = root = node;
                 new_node->color = 0;
                 new_node->parent = new_node->left = new_node->right = NULL;
             } else {
-                new_node = new Node;
-                new_node->key = key;
+                new_node = node;
                 new_node->color = 1;
                 new_node->parent = parent;
                 new_node->left = new_node->right = NULL;
 
-                if (*(new_node->key) < *(parent->key)) {
+                if (*(new_node) < *(parent)) {
                     parent->left = new_node;
                 } else {
                     parent->right = new_node;
                 }
             }
 
-            Node *uncle;
+            NodeType *uncle;
             bool side;
             while (new_node->parent && new_node->parent->color == 1) {
                 if ((side = (new_node->parent ==
@@ -254,39 +245,39 @@ class RBTree {
             root->color = 0;
         }
 
-        NodeType& find(const NodeType& keyshell) {
-            Node *node = root;
+        NodeType* find(const NodeType* shell) {
+            NodeType *node = root;
             while (node) {
-                if (*(node->key) > (*keyshell)) {
+                if (*node > *shell) {
                     node = node->left;
-                } else if (*(node->key) < (*keyshell)) {
+                } else if (*node < *shell) {
                     node = node->right;
                 } else {
-                    return node->key;
+                    return node;
                 }
             }
 
-            throw std::runtime_error("NodeType not found");
+            throw std::runtime_error("node not found");
         }
 
-        void _delete(const NodeType& key) {
-            Node *node = root;
+        void _delete(const NodeType& shell) {
+            NodeType *node = root;
             while (node) {
-                if (*(node->key) > (*key)) {
+                if (*node > shell) {
                     node = node->left;
-                } else if (*(node->key) < (*key)) {
+                } else if (*node < shell) {
                     node = node->right;
                 } else {
                     break;
                 }
             }
 
-            if (!node || *(node->key) != (*key)) {
+            if (!node || *node != shell) {
                 return;
             }
 
             uint8_t original;
-            Node *sub, *old;
+            NodeType *sub, *old;
             if (!node->left) {
                 transplant(node, sub = node->right);
             } else if (!node->right) {
@@ -313,7 +304,7 @@ class RBTree {
             delete node;
             if (original == 0) {
                 bool side;
-                Node *sibling;
+                NodeType *sibling;
                 while (old != root && old->color == 0) {
                     if ((side = (old == old->parent->left))) {
                         sibling = old->parent->right;
@@ -370,8 +361,6 @@ class RBTree {
         ~RBTree() {
             delete_node(root);
         }
-
-
 };
 } } // End monya::container
 
