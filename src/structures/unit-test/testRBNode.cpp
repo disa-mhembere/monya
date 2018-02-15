@@ -17,21 +17,24 @@
  * limitations under the License.
  */
 
-#include "BinaryNode.hpp"
+#include "RBNode.hpp"
 
 namespace mc = monya::container;
 
 int main(int argc, char* argv[]) {
 
-    mc::BinaryNode<double>* root = new mc::BinaryNode<double>(10);
+    mc::RBNode<double>* root = new mc::RBNode<double>(10);
+    root->color = 0;
     std::cout << "Print test: " << *root << std::endl;
     root->print();
 
-    mc::BinaryNode<double>* left = new mc::BinaryNode<double>(4);
+    mc::RBNode<double>* left = new mc::RBNode<double>(4);
+    left->color = 1;
     std::cout << *left << std::endl;
     root->left = left;
 
-    mc::BinaryNode<double>* right = new mc::BinaryNode<double>(14);
+    mc::RBNode<double>* right = new mc::RBNode<double>(14);
+    right->color = 1;
     std::cout << *right << std::endl;
     root->right = right;
 
@@ -42,6 +45,12 @@ int main(int argc, char* argv[]) {
     assert(*(root->left) == *left);
     assert(*(root->left->right) == *right);
     assert(*(root->right->left) == *left);
+    assert(root->right->color == right->color);
+    assert(root->left->color == left->color);
+
+    mc::RBNode<double>* t = new mc::RBNode<double>();
+    t->color = 0;
+    assert(!t->color);
 
     delete(left);
     delete(right);

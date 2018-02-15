@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-#ifndef BINARY_NODE_HPP__
-#define BINARY_NODE_HPP__
+#ifndef MONYA_BINARY_NODE_HPP__
+#define MONYA_BINARY_NODE_HPP__
 
 // Represent a binary node
 
@@ -29,26 +29,27 @@
 namespace monya { namespace container {
 
 template <typename T>
-class BinaryNode: public NodeView<T>, public safs::callback {
-    private:
-        char* buf; // TODO templatize -- the data read from disk
-        int numbytes; // The number of bytes in the read of data from disk
+class BinaryNode: public NodeView<T> {
+    protected:
 
     public:
-        virtual int invoke(safs::io_request *reqs[], int num) override {
-            for (int i = 0; i < num; i++) {
-                this->buf = reqs[i]->get_buf();
-                this->numbytes = reqs[i]->get_size();
-                free(this->buf); // TODO: Verify OK
-            }
-            return EXIT_SUCCESS;
-        }
+        // TODO: Visibility
+        BinaryNode<T>* parent;
+        BinaryNode<T>* left;
+        BinaryNode<T>* right;
 
-        BinaryNode () {
-        }
+        //BinaryNode(): NodeView<T>() {
+        //}
+        //BinaryNode(T val): NodeView<T>(val) {
+        //}
+        //BinaryNode(std::vector<offset_t>& data_index):
+        //      NodeView<T>(data_index) {
+        //}
+        using NodeView<T>::NodeView;
 
-        BinaryNode (const T data) {
-            this->data = data;
+        // TODO: Other constructors
+
+        BinaryNode<T>* get_parent() {
         }
 
         // Given a new node add children to this node

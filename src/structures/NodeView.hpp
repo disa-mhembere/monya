@@ -17,75 +17,122 @@
  * limitations under the License.
  */
 
-#ifndef NODEVIEW_HPP__
-#define NODEVIEW_HPP__
+#ifndef MONYA_NODEVIEW_HPP__
+#define MONYA_NODEVIEW_HPP__
 
 #include <memory>
 #include <utility>
 #include <iostream>
 
-namespace monya {
-    namespace container {
+#include "io_interface.h"
+#include "../common/types.hpp"
+
+namespace monya { namespace container {
 
 // Represent a node in the tree
 template <typename T>
-class NodeView {
-
+class NodeView: public safs::callback {
     protected:
-        T data;
-        NodeView() {}
-        // When the data required is in memory run this computation
         virtual void prep() = 0;
         virtual void run() = 0;
-
     public:
-        virtual void spawn(NodeView<T>* node) = 0;
+        // TODO: Visibility
+        std::vector<offset_t> data_index; // Indexes that nodes hold to data
+        char* buf; // The data read from dataset
+        T comparator; // The split comparator
+        unsigned numbytes; // The number of bytes in the read of data from disk
+        // When the data required is in memory run this computation
+        // TODO: End visibility
 
-        virtual const T get_data() const {
-            return data;
+        virtual int invoke(safs::io_request *reqs[], int num) override {
+            for (int i = 0; i < num; i++) {
+                this->buf = reqs[i]->get_buf();
+                this->numbytes = reqs[i]->get_size();
+                free(this->buf); // TODO: Verify OK
+            }
+            return EXIT_SUCCESS;
         }
 
-        void set_data(const T data) {
-            this->data = data;
+        NodeView() {}
+
+        NodeView(T val) {
+            comparator = val;
+        }
+
+        NodeView(std::vector<offset_t>& data_index) {
+            this->data_index = data_index;
+        }
+
+        NodeView(offset_t* data_index, const size_t nelem) {
+            add_elem(data_index, nelem);
+        }
+
+        void add_elem(offset_t* members, const size_t nelem) {
+            if (data_index.size()) { // We have members so add to them
+                data_index.insert(data_index.end(), members, members+nelem);
+            } else {
+                data_index.resize(nelem);
+                std::copy(members, members+nelem, data_index.begin());
+            }
+        }
+
+        virtual void spawn(NodeView<T>* node) = 0;
+
+        virtual const std::vector<offset_t>& get_data_index() const {
+            return data_index;
+        }
+
+        void set_data_index(const std::vector<offset_t>& data_index) {
+            this->data_index = data_index;
+        }
+
+        void set_data_index(const offset_t* data_index, const size_t nelem) {
+            add_elem(data_index, nelem);
         }
 
         const void print() const {
-            std::cout << this->data << std::endl; 
+            std::cout << comparator << std::endl;
         }
 
-        bool operator==(const NodeView<T>& other) {
-            return this->get_data() == other.get_data();
+        const T get_comparator() const {
+            return comparator;
         }
 
-        bool operator!=(const NodeView<T>& other) {
+        void set_comparator(const T comparator) {
+            this->comparator = comparator;
+        }
+
+        virtual bool operator==(const NodeView<T>& other) {
+            return comparator == other.get_comparator();
+        }
+
+        virtual bool operator!=(const NodeView<T>& other) {
             return !(*this == other);
         }
 
-        bool operator<(const NodeView<T>& other) {
-            return this->get_data() < other.get_data();
+        virtual bool operator<(const NodeView<T>& other) {
+            return comparator < other.get_comparator();
         }
 
-        bool operator>(const NodeView<T>& other) {
-            return this->get_data() > other.get_data();
+        virtual bool operator>(const NodeView<T>& other) {
+            return this->get_comparator() > other.get_comparator();
         }
 
-        bool operator<=(const NodeView<T>& other) {
+        virtual bool operator<=(const NodeView<T>& other) {
             return !(*this > other);
         }
 
-        bool operator>=(const NodeView<T>& other) {
+        virtual bool operator>=(const NodeView<T>& other) {
             return !(*this < other);
         }
 
         virtual ~NodeView() {
         };
-
-        // TODO: Define the operators for less than, greater than, ==
 };
 
 template <typename T> std::ostream& operator<<
     (std::ostream& stream, const NodeView<T>& node) {
-    stream << node.get_data();
+    stream << node.comparator;
     return  stream;
 }
 
