@@ -17,17 +17,12 @@
  * limitations under the License.
  */
 
-#include <cstdlib>
+#ifndef MONYA_MONYA_HPP__
+#define MONYA_MONYA_HPP__
 
-#include "../common/monya.hpp"
+// Represent a binary node
 
-using namespace monya;
+#include "BinaryTreeProgram.hpp"
+#include "../ComputeEngine.hpp"
 
-class kdTreeProgram: public BinaryTreeProgram<double> {
-
-};
-
-int main(int argc, char* argv[]) {
-
-    return EXIT_SUCCESS;
-}
+#endif

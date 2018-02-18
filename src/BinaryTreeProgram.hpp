@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-#ifndef MONYA_TREE_PROGRAM_HPP__
-#define MONYA_TREE_PROGRAM_HPP__
+#ifndef MONYA_BINARY_TREE_PROGRAM_HPP__
+#define MONYA_BINARY_TREE_PROGRAM_HPP__
 
 #include "common/types.hpp"
 #include "structures/RBTree.hpp"
@@ -30,7 +30,7 @@ namespace monya {
     unsigned READ_SZ_BYTES = 4096; // TODO: Alter
 
     template <typename NodeType>
-    class TreeProgram: container::RBTree<NodeType> {
+    class BinaryTreeProgram: container::RBTree<NodeType> {
         private:
             short nnode_id; // NUMA node
             tree_t tree_id; // The ID of this tree
@@ -38,11 +38,21 @@ namespace monya {
             io::IO::raw_ptr ioer;
 
         public:
-            TreeProgram() {
+            typedef std::shared_ptr<BinaryTreeProgram<NodeType> > ptr;
+
+            BinaryTreeProgram() {
             }
 
-            static TreeProgram<NodeType>* create_raw() {
-                return new TreeProgram<NodeType>();
+            static BinaryTreeProgram<NodeType>* create_raw() {
+                return new BinaryTreeProgram<NodeType>();
+            }
+
+            static ptr create() {
+                return ptr(new BinaryTreeProgram<NodeType>());
+            }
+
+            static ptr cast2(typename container::RBTree<NodeType>::ptr rbptr) {
+                return std::static_pointer_cast<ptr>(rbptr);
             }
 
             void set_ioer(io::IO::raw_ptr ioer) {
@@ -63,6 +73,10 @@ namespace monya {
 
             void set_exmem_fn(const std::string exmem_fn) {
                 this->exmem_fn = exmem_fn;
+            }
+
+            void destroy() {
+                ioer->destroy();
             }
     };
 } // End monya

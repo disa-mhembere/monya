@@ -22,39 +22,38 @@
 
 #include <memory>
 #include <vector>
-#include "TreeProgram.hpp"
 
 namespace monya {
     class Params;
 
-    template <typename NodeType>
+    template <typename TreeType>
     class ComputeEngine {
 
         private:
-            std::vector<TreeProgram<NodeType>*> forest; // For when there are more
+            std::vector<TreeType*> forest; // For when there are more
             tree_t ntree;
             Params params;
 
             ComputeEngine(tree_t ntree=1) {
                 this->ntree = ntree;
                 for (tree_t tid = 0; tid < ntree; tid++) {
-                    forest.push_back(TreeProgram<NodeType>::create_raw());
+                    forest.push_back(new TreeType);
                 }
             }
 
-            ComputeEngine(std::vector<TreeProgram<NodeType>*>& forest) {
+            ComputeEngine(std::vector<TreeType*>& forest) {
                 this->forest = forest;
             }
 
         public:
-            typedef std::shared_ptr<ComputeEngine<NodeType> > ptr;
+            typedef std::shared_ptr<ComputeEngine<TreeType> > ptr;
 
-            static ptr create(std::vector<TreeProgram<NodeType>*>& forest) {
+            static ptr create(std::vector<TreeType*>& forest) {
                 return ptr(new ComputeEngine(forest));
             }
 
             static ptr create() {
-                return ptr(new ComputeEngine<NodeType>());
+                return ptr(new ComputeEngine<TreeType>());
             }
 
             void set_params(const Params& params) {
@@ -65,7 +64,7 @@ namespace monya {
                 return this->params;
             }
 
-            void add_tree(TreeProgram<NodeType>* tree) {
+            void add_tree(TreeType* tree) {
                 this->forest.push_back(tree);
             }
 

@@ -142,29 +142,16 @@ class RBTree {
             return ptr(new RBTree<NodeType>());
         }
 
-        short max_depth = 0;
-
         NodeType* get_root() {
             return root;
         }
 
-        // Preorder deal
-        void get_max_depth(NodeType* node) {
-            //if (!node) {
-                //return;
-            //}
+        void set_depth(const size_t depth) {
+            this->depth = depth;
+        }
 
-            //if (!node->parent) { // Root
-                //node->depth = 1;
-                //max_depth = node->depth;
-            //} else {
-                //node->depth = node->parent->depth + 1;
-                //if (node->depth > max_depth)
-                    //max_depth = node->depth;
-            //}
-
-            //get_max_depth(node->left);
-            //get_max_depth(node->right);
+        const size_t get_depth() const {
+            return depth;
         }
 
         size_t get_nnodes(NodeType* node, size_t& nnodes=0) {

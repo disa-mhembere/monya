@@ -90,11 +90,11 @@ int main(int argc, char* argv[]) {
     fn = "data/ordered_tree_10K.bin";
     DATALEN = 10000;
 #endif
-#if 0
+#if 1
     fn = "data/ordered_tree_100K.bin";
     DATALEN = 100000;
 #endif
-#if 1
+#if 0
     fn =  "data/ordered_tree_10M.bin";
     DATALEN = 10000000;
 #endif
