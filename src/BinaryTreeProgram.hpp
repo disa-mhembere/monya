@@ -31,19 +31,25 @@ namespace monya {
 
     template <typename NodeType>
     class BinaryTreeProgram: container::RBTree<NodeType> {
-        private:
+        protected:
             short nnode_id; // NUMA node
             tree_t tree_id; // The ID of this tree
             std::string exmem_fn;
             io::IO::raw_ptr ioer;
+            short max_depth; // Maximum depth the tree can reach
+            short depth; // The current depth of this tree
 
         public:
             typedef std::shared_ptr<BinaryTreeProgram<NodeType> > ptr;
 
             BinaryTreeProgram() {
+                max_depth = -1;
+                depth = 0;
+                ioer = NULL;
             }
 
             static BinaryTreeProgram<NodeType>* create_raw() {
+
                 return new BinaryTreeProgram<NodeType>();
             }
 
@@ -76,8 +82,12 @@ namespace monya {
             }
 
             void destroy() {
-                ioer->destroy();
+                if (ioer)
+                    ioer->destroy();
             }
+
+            // User implemented for training phase
+            virtual void build() = 0;
     };
 } // End monya
 

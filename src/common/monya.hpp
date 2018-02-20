@@ -24,5 +24,6 @@
 
 #include "BinaryTreeProgram.hpp"
 #include "../ComputeEngine.hpp"
+#include "../structures/RBNode.hpp"
 
 #endif

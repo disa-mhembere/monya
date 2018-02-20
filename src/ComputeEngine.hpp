@@ -22,38 +22,59 @@
 
 #include <memory>
 #include <vector>
+#include "common/types.hpp"
 
 namespace monya {
     class Params;
 
-    template <typename TreeType>
+    template <typename TreeProgramType>
     class ComputeEngine {
 
         private:
-            std::vector<TreeType*> forest; // For when there are more
+            std::vector<TreeProgramType*> forest; // For when there are more
             tree_t ntree;
             Params params;
 
-            ComputeEngine(tree_t ntree=1) {
+            ComputeEngine(const tree_t ntree=1) {
                 this->ntree = ntree;
                 for (tree_t tid = 0; tid < ntree; tid++) {
-                    forest.push_back(new TreeType);
+                    forest.push_back(new TreeProgramType);
                 }
             }
 
-            ComputeEngine(std::vector<TreeType*>& forest) {
+            ComputeEngine(Params& params, const tree_t ntree):
+                ComputeEngine(ntree) {
+                this->params = params;
+            }
+
+            ComputeEngine(std::vector<TreeProgramType*>& forest) {
+                this->forest = forest;
+            }
+
+            ComputeEngine(Params& params,
+                    std::vector<TreeProgramType*>& forest) {
+                this->params = params;
                 this->forest = forest;
             }
 
         public:
-            typedef std::shared_ptr<ComputeEngine<TreeType> > ptr;
+            typedef std::shared_ptr<ComputeEngine<TreeProgramType> > ptr;
 
-            static ptr create(std::vector<TreeType*>& forest) {
+            static ptr create() {
+                return ptr(new ComputeEngine<TreeProgramType>());
+            }
+
+            static ptr create(std::vector<TreeProgramType*>& forest) {
                 return ptr(new ComputeEngine(forest));
             }
 
-            static ptr create() {
-                return ptr(new ComputeEngine<TreeType>());
+            static ptr create(Params& params, const tree_t ntree) {
+                return ptr(new ComputeEngine<TreeProgramType>(params, ntree));
+            }
+
+            static ptr create(Params& params,
+                    std::vector<TreeProgramType*>& forest) {
+                return ptr(new ComputeEngine<TreeProgramType>(params, forest));
             }
 
             void set_params(const Params& params) {
@@ -64,14 +85,13 @@ namespace monya {
                 return this->params;
             }
 
-            void add_tree(TreeType* tree) {
+            void add_tree(TreeProgramType* tree) {
                 this->forest.push_back(tree);
             }
 
             void train() {
                 for (size_t tree_id = 0; tree_id < ntree; tree_id++) {
-                    //forest[tree_id]->build();
-                    throw not_implemented_exception();
+                    forest[tree_id]->build();
                 }
             }
 
@@ -79,9 +99,13 @@ namespace monya {
 
             }
 
+            TreeProgramType* get_tree(const tree_t id) {
+                return forest[id];
+            }
+
             ~ComputeEngine() {
                 for (size_t tree_id = 0; tree_id < ntree; tree_id++) {
-                    throw not_implemented_exception();
+                    forest[tree_id]->destroy();
                 }
             }
     };
