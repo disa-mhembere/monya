@@ -76,7 +76,7 @@ class NodeView: public safs::callback {
             }
         }
 
-        virtual void spawn(NodeView<T>* node) = 0;
+        virtual void spawn() = 0;
 
         virtual const std::vector<offset_t>& get_data_index() const {
             return data_index;

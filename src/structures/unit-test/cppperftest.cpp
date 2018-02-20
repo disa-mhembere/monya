@@ -38,7 +38,7 @@ class ConcreteNode : public mc::NodeView <T> {
 
     public:
     using mc::NodeView<T>::NodeView;
-    void spawn(mc::NodeView<T>* node) override {}
+    void spawn() override {}
 };
 
 void insert_test(std::map<ConcreteNode<double>*, long>& tree,

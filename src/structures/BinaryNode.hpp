@@ -44,7 +44,7 @@ class BinaryNode: public NodeView<T> {
         }
 
         // Given a new node add children to this node
-        virtual void spawn(NodeView<T>* node) override {
+        virtual void spawn() override {
 #if 0
             if (node->get_data() < this->data) {
                 if (!l)  // No left child
