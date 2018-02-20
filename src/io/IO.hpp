@@ -235,7 +235,7 @@ class SyncIO: public IO {
                 open();
             }
 
-            size_t size = monya::util::get_file_size(this->fn);
+            size_t size = monya::utils::get_file_size(this->fn);
             fs.read(reinterpret_cast<char*>(buf), size);
         }
 

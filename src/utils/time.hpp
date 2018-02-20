@@ -17,18 +17,35 @@
  * limitations under the License.
  */
 
- #include <sys/stat.h>
+#ifndef MONYA_TIME_HPP__
+#define MONYA_TIME_HPP__
+
+#include <chrono>
+#include <ctime>
 
 namespace monya { namespace utils {
-size_t get_file_size(std::string filename) {
-        struct stat stat_buf;
-        int rc = stat(filename.c_str(), &stat_buf);
-        return rc == 0 ? stat_buf.st_size : -1;
-}
+class time {
+    private:
+        std::chrono::system_clock::time_point start;
+        bool _;
 
-size_t get_file_size(int fd) {
-    struct stat stat_buf;
-    int rc = fstat(fd, &stat_buf);
-    return rc == 0 ? stat_buf.st_size : -1;
-}
-} };
+    public:
+        time() {
+            _ = false;
+        }
+        void tic() {
+            start = std::chrono::system_clock::now();
+            _ = true;
+        }
+
+        double toc() {
+            if (!_)
+                std::cerr << "[WARNING]: time(): multiple calls to `toc`\n";
+
+            _ = false;
+            return (std::chrono::system_clock::now() - start).count();
+        }
+};
+
+} } // End namespace
+#endif
