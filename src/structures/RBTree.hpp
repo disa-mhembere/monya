@@ -165,10 +165,37 @@ class RBTree {
             return nnodes;
         }
 
+        void insert_at(NodeType* new_node, NodeType* node, bchild_t pos) {
+            if (NULL != node->left)
+                throw std::runtime_error("Left child already populated");
+
+            NodeType* parent = node;
+
+            // If the parent is NULL then the tree is empty
+            //  Root is always black
+            if (!parent) {
+                new_node = root = node;
+                new_node->color = 0;
+                new_node->parent = new_node->left = new_node->right = NULL;
+            } else {
+                new_node = node;
+                new_node->color = 1;
+                new_node->parent = parent;
+                new_node->left = new_node->right = NULL;
+
+                if (pos == bchild_t::LEFT)
+                    parent->left = new_node;
+                else
+                    parent->right = new_node;
+            }
+
+            balance(parent, node, new_node);
+        }
+
         void insert(NodeType* node) {
             NodeType* tmp; // A tmp node used to find the parent
             NodeType* parent; // Will hold the parent of node being inserted
-            NodeType* new_node; // The new node being inserted
+            NodeType* new_node = NULL; // The new node being inserted
 
             parent = NULL;
             tmp = root;
@@ -182,6 +209,29 @@ class RBTree {
                 }
             }
 
+            // If the parent is NULL then the tree is empty
+            //  Root is always black
+            if (!parent) {
+                new_node = root = node;
+                new_node->color = 0;
+                new_node->parent = new_node->left = new_node->right = NULL;
+            } else {
+                new_node = node;
+                new_node->color = 1;
+                new_node->parent = parent;
+                new_node->left = new_node->right = NULL;
+
+                if (*(new_node) < *(parent)) {
+                    parent->left = new_node;
+                } else {
+                    parent->right = new_node;
+                }
+            }
+
+            balance(parent, node, new_node);
+        }
+
+        void balance(NodeType* parent, NodeType* node, NodeType* new_node) {
             // If the parent is NULL then the tree is empty
             //  Root is always black
             if (!parent) {

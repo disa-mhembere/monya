@@ -39,6 +39,7 @@ class ConcreteNode : public mc::NodeView <T> {
     public:
     using mc::NodeView<T>::NodeView;
     void spawn() override {}
+    void distance(T val) override {}
 };
 
 void insert_test(std::map<ConcreteNode<double>*, long>& tree,

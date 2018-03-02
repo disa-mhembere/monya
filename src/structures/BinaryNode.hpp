@@ -25,12 +25,20 @@
 #include "NodeView.hpp"
 #include <iostream>
 #include "io_interface.h"
+#include "../common/exception.hpp"
 
 namespace monya { namespace container {
 
 template <typename T>
 class BinaryNode: public NodeView<T> {
     protected:
+        virtual void prep() {
+            throw abstract_exception("BinaryNode::prep");
+        }
+
+        virtual void run() {
+            throw abstract_exception("BinaryNode::run");
+        }
 
     public:
         // TODO: Visibility
@@ -45,6 +53,7 @@ class BinaryNode: public NodeView<T> {
 
         // Given a new node add children to this node
         virtual void spawn() override {
+            throw abstract_exception("BinaryNode::spawn");
 #if 0
             if (node->get_data() < this->data) {
                 if (!l)  // No left child
@@ -60,21 +69,15 @@ class BinaryNode: public NodeView<T> {
 #endif
         }
 
+        virtual void distance(T arg1) {
+            throw abstract_exception("BinaryNode::distance");
+        }
+
         static BinaryNode<T>* cast2(NodeView<T>* nv) {
             return static_cast<BinaryNode<T>* >(nv);
         }
 
         void read_svm() {
-            // TODO
-        }
-
-        // What computation does the user want to run when data hits memory
-        void run() override {
-            // TODO
-        }
-
-        // Does the user want to perm I/O if so then pick the data to read
-        void prep() override {
             // TODO
         }
 

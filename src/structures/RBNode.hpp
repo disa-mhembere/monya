@@ -25,11 +25,9 @@
 namespace monya { namespace container {
 template <typename DataType>
 class RBNode : public BinaryNode<DataType> {
-    protected:
-
     public:
         // TODO: Visibility
-        uint8_t color; //0 = B, 1 = R
+        uint8_t color; // 0 = B, 1 = R
 
         // Couldn't figure out a way out of this variable redundancy
         RBNode<DataType>* parent;

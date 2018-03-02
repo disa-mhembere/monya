@@ -35,9 +35,11 @@ class NodeView: public safs::callback {
     protected:
         virtual void prep() = 0;
         virtual void run() = 0;
+
     public:
         // TODO: Visibility
-        std::vector<offset_t> data_index; // Indexes that nodes hold to data
+        //std::vector<offset_t> data_index; // Indexes that nodes hold to data
+        IndexVector<T> data_index; // Indexes that nodes hold to data & mapping
         char* buf; // The data read from dataset
         T comparator; // The split comparator
         unsigned numbytes; // The number of bytes in the read of data from disk
@@ -59,36 +61,37 @@ class NodeView: public safs::callback {
             comparator = val;
         }
 
-        NodeView(std::vector<offset_t>& data_index) {
+        NodeView(IndexVector<T>& data_index) {
             this->data_index = data_index;
         }
 
-        NodeView(offset_t* data_index, const size_t nelem) {
-            add_elem(data_index, nelem);
-        }
+        //NodeView(offset_t* data_index, const size_t nelem) {
+            //add_elem(data_index, nelem);
+        //}
 
-        void add_elem(offset_t* members, const size_t nelem) {
-            if (data_index.size()) { // We have members so add to them
-                data_index.insert(data_index.end(), members, members+nelem);
-            } else {
-                data_index.resize(nelem);
-                std::copy(members, members+nelem, data_index.begin());
-            }
-        }
+        //void add_elem(offset_t* members, const size_t nelem) {
+            //if (data_index.size()) { // We have members so add to them
+                //data_index.insert(data_index.end(), members, members+nelem);
+            //} else {
+                //data_index.resize(nelem);
+                //std::copy(members, members+nelem, data_index.begin());
+            //}
+        //}
 
         virtual void spawn() = 0;
+        virtual void distance(T arg1) = 0;
 
-        virtual const std::vector<offset_t>& get_data_index() const {
+        virtual const IndexVector<T>& get_data_index() const {
             return data_index;
         }
 
-        void set_data_index(const std::vector<offset_t>& data_index) {
-            this->data_index = data_index;
-        }
+        //void set_data_index(const std::vector<offset_t>& data_index) {
+            //this->data_index = data_index;
+        //}
 
-        void set_data_index(const offset_t* data_index, const size_t nelem) {
-            add_elem(data_index, nelem);
-        }
+        //void set_data_index(const offset_t* data_index, const size_t nelem) {
+            //add_elem(data_index, nelem);
+        //}
 
         const void print() const {
             std::cout << comparator << std::endl;
