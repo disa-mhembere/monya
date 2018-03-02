@@ -15,7 +15,7 @@
 
 include ../Makefile.common
 
-all: libstructures release-test utils libmonya examples
+all: libstructures release-test utils libmonya examples common
 
 libstructures:
 	$(MAKE) -C structures
@@ -33,6 +33,9 @@ utils: libstructures
 examples: libstructures
 	$(MAKE) -C examples
 
+common:
+	$(MAKE) -C common
+
 clean:
 	rm -f *.d
 	rm -f *.o
@@ -42,5 +45,6 @@ clean:
 	$(MAKE) --ignore-errors -C structures clean
 	$(MAKE) --ignore-errors -C utils clean
 	$(MAKE) --ignore-errors -C examples clean
+	$(MAKE) --ignore-errors -C common clean
 
 -include $(DEPS)

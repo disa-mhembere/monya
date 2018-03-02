@@ -38,18 +38,21 @@ namespace monya {
             io::IO::raw_ptr ioer;
             short max_depth; // Maximum depth the tree can reach
             short depth; // The current depth of this tree
+            size_t nsamples; // Max # of samples from which the tree is built
+            size_t nfeatures; // Number of features
 
         public:
             typedef std::shared_ptr<BinaryTreeProgram<NodeType> > ptr;
 
-            BinaryTreeProgram() {
-                max_depth = -1;
-                depth = 0;
-                ioer = NULL;
+            BinaryTreeProgram(size_t nsamples, size_t nfeatures,
+                    short max_depth=-1, typename io::IO::raw_ptr ioer=NULL) {
+                this->nsamples = nsamples;
+                this->nfeatures = nfeatures;
+                this->ioer = ioer;
+                this->max_depth = max_depth;
             }
 
             static BinaryTreeProgram<NodeType>* create_raw() {
-
                 return new BinaryTreeProgram<NodeType>();
             }
 
@@ -79,6 +82,10 @@ namespace monya {
 
             void set_exmem_fn(const std::string exmem_fn) {
                 this->exmem_fn = exmem_fn;
+            }
+
+            void descend() {
+                depth++;
             }
 
             void destroy() {

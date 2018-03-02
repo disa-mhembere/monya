@@ -37,9 +37,6 @@ namespace monya {
 
             ComputeEngine(const tree_t ntree=1) {
                 this->ntree = ntree;
-                for (tree_t tid = 0; tid < ntree; tid++) {
-                    forest.push_back(new TreeProgramType);
-                }
             }
 
             ComputeEngine(Params& params, const tree_t ntree):
