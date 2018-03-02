@@ -25,11 +25,12 @@
 #include <iostream>
 #include <map>
 #include <utility>
+#include <vector>
 
 #define INVALID_ID -1
 
 namespace monya {
-    typedef unsigned node_id_t;
+    typedef unsigned node_id_t; // Tree node identifier type
     typedef unsigned child_t; // The number of children an NAry node can hold
     typedef size_t offset_t; // The offset position of a file
     typedef unsigned tree_t; // The number of trees in the forrest
@@ -43,6 +44,11 @@ namespace monya {
         INORDER,
         POSTORDER,
         LEVELORDER
+    };
+
+    enum bchild_t {
+        LEFT,
+        RIGHT
     };
 
     /**
@@ -81,6 +87,70 @@ namespace monya {
             this->fn = fn;
             this->iotype = iotype;
             this->ntree = ntree;
+        }
+    };
+
+    template <typename T>
+    class IndexVal {
+        private:
+            node_id_t index;
+            T val;
+        public:
+            IndexVal() {
+                index = 0;
+            }
+
+            IndexVal(const node_id_t index, const T val) {
+                set(index, val);
+            }
+
+            void set(const node_id_t index, const T val) {
+                set_index(index);
+                set_val(val);
+            }
+
+            void set_index(const node_id_t index) {
+                this->index = index;
+            }
+
+            const node_id_t get_index() const {
+                return this->index;
+            }
+
+            void set_val(const T val) {
+                this->val = val;
+            }
+
+            const T& get_val() const {
+                return val;
+            }
+
+            bool operator< (const IndexVal& other) const {
+                return val < other.get_val();
+            }
+    };
+
+    template <typename T>
+    class IndexVector {
+        std::vector<IndexVal<T> > _;
+
+        public:
+        IndexVector() { } // Default ctor
+
+        IndexVector(const std::vector<T>& vals) {
+            for (size_t i = 0; i < vals.size(); i++)
+                _.push_back(IndexVal<T>(i, vals[i]));
+        }
+
+        IndexVal<T>& operator[](const int index) {
+            return this->_[index];
+        }
+
+        void print() {
+            for (size_t i = 0; i < _.size(); i++)
+                std::cout << "Index: " <<  _[i].get_index() <<
+                    ", Val: " << _[i].get_val() << std::endl;
+
         }
     };
 } // End monya
