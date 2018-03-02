@@ -41,22 +41,33 @@ class kdnode: public container::RBNode<double> {
 // How the program runs
 class kdTreeProgram: public BinaryTreeProgram<kdnode> {
     private:
+        // Dimension to split on
         size_t split_dim;
         std::default_random_engine generator;
         std::uniform_int_distribution<size_t> distribution;
 
-    public:
-        kdTreeProgram(): BinaryTreeProgram<kdnode>() {
-            split_dim = 0;
-            //generator.a = 0;
-        }
+        // All the trees in the forest (including this one!)
+        std::vector<kdTreeProgram*> copse;
 
-        kdTreeProgram(size_t max_depth): BinaryTreeProgram<kdnode>() {
-            this->split_dim = split_dim;
-        }
+    public:
+
+        // Can be used if we need no more constructors
+        // using BinaryTreeProgram<kdnode>::BinaryTreeProgram;
+
+        kdTreeProgram(size_t nsamples, size_t nfeatures, size_t split_dim,
+                short max_depth=-1, typename io::IO::raw_ptr ioer=NULL) :
+            BinaryTreeProgram(nsamples, nfeatures, max_depth, ioer) {
+                this->split_dim = split_dim;
+                this->distribution =
+                    std::uniform_int_distribution<size_t>(0, nfeatures);
+            }
 
         void set_split_dim(const size_t split_dim) {
             this->split_dim = split_dim;
+        }
+
+        const size_t get_split_dim() const {
+            return this->split_dim;
         }
 
         /**
@@ -64,18 +75,18 @@ class kdTreeProgram: public BinaryTreeProgram<kdnode> {
          * @param randomize: Pick the split dimension at random
          */
         void pick_split_dim(bool randomize=false) {
-            if (depth) {
-                ; // TODO: coordinate
-            } else {
+            if (depth) { // We have more than the root
                 if (randomize)
-                    ; // TODO
+                    this->split_dim = distribution(generator);
                 else
-                    ; // TODO
+                    this->split_dim++;
+            } else { // No nodes in tree
+                this->split_dim = distribution(generator);
             }
         }
 
         void build() override {
-            // TODO: Implement
+            pick_split_dim(); // Choose split
         }
 };
 
@@ -83,7 +94,7 @@ int main(int argc, char* argv[]) {
     Params params("/mnt/nfs/disa/monya/src/structures/unit-test/"
             "data/ordered_tree_10.bin", IOTYPE::SYNC, 1);
 
-    //utils::time t;
+    utils::time t;
     ComputeEngine<kdTreeProgram>::ptr engine =
         ComputeEngine<kdTreeProgram>::create(params, 2);
     //t.tic();
