@@ -35,8 +35,10 @@ public:
 
 class abstract_exception : public std::runtime_error {
 public:
-    abstract_exception() :
-        runtime_error("[ERROR]: Cannot call Base class method!\n") {
+
+    abstract_exception(const std::string msg="") :
+        runtime_error(std::string("[ERROR]: Cannot call Base class method! ")
+                + msg) {
         }
 };
 
