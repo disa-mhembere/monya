@@ -20,9 +20,6 @@ all: libstructures release-test utils libmonya examples common
 libstructures:
 	$(MAKE) -C structures
 
-release-test: libstructures utils
-	$(MAKE) -C release-test
-
 libmonya: libstructures utils $(OBJS)
 	rm -f libmonya
 	ar -cvq libmonya.a $(OBJS)
@@ -30,7 +27,7 @@ libmonya: libstructures utils $(OBJS)
 utils: libstructures
 	$(MAKE) -C utils
 
-examples: libstructures
+examples: libmonya
 	$(MAKE) -C examples
 
 common:
