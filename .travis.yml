@@ -7,5 +7,5 @@ install: sudo ./install.sh
 compiler:
 - g++
 script:
-  - make clean; make -j4
-  - cd src/common/unit-test/ &&  make test && cd -
+  - make clean && make
+  - cd src/common/unit-test/ && make test && cd -
