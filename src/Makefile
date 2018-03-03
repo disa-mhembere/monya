@@ -15,7 +15,7 @@
 
 include ../Makefile.common
 
-all: libstructures release-test utils libmonya examples common
+all: libstructures utils libmonya examples common
 
 libstructures:
 	$(MAKE) -C structures
