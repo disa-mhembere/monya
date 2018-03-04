@@ -3,9 +3,11 @@ sudo: required
 dist: xenial
 notifications:
   email: false
+before_install:
+- sudo apt-get update
 install: sudo ./install.sh
 compiler:
 - g++
 script:
   - make clean && make
-  - cd src/common/unit-test/ && make test && cd -
+  - cd src/common/unit-test && make test && cd -
