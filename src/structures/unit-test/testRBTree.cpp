@@ -31,9 +31,9 @@ int main(int argc, char* argv[]) {
     for (std::vector<double>::iterator it = members.begin();
             it != members.end(); ++it) {
         tree->insert(new mc::RBNode<double>((double)*it));
-
     }
 
     tree->echo();
+    std::cout << "RBTree Test successful!\n\n";
     return EXIT_SUCCESS;
 }

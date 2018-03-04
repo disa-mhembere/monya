@@ -47,5 +47,6 @@ int main(int argc, char* argv[]) {
     delete(right);
     delete(root);
 
+    std::cout << "BinaryNode Test successful!\n\n";
     return EXIT_SUCCESS;
 }

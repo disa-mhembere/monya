@@ -15,16 +15,16 @@
 
 include ../Makefile.common
 
-all: libstructures utils libmonya common examples
+all: libstructures utils libmonya common examples iotag
 
 libstructures:
 	$(MAKE) -C structures
 
-libmonya: libstructures utils common $(OBJS)
+libmonya: libstructures utils common io $(OBJS)
 	rm -f libmonya
 	ar -cvq libmonya.a $(OBJS)
 
-utils: libstructures
+utils: io libstructures
 	$(MAKE) -C utils
 
 examples: libmonya
@@ -33,15 +33,18 @@ examples: libmonya
 common:
 	$(MAKE) -C common
 
+iotag: common
+	$(MAKE) -C io
+
 clean:
 	rm -f *.d
 	rm -f *.o
 	rm -f *~
 	rm -f *.a
-	$(MAKE) --ignore-errors -C release-test clean
 	$(MAKE) --ignore-errors -C structures clean
 	$(MAKE) --ignore-errors -C utils clean
 	$(MAKE) --ignore-errors -C examples clean
 	$(MAKE) --ignore-errors -C common clean
+	$(MAKE) --ignore-errors -C io clean
 
 -include $(DEPS)

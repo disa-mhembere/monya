@@ -56,5 +56,6 @@ int main(int argc, char* argv[]) {
     delete(right);
     delete(root);
 
+    std::cout << "RBNode Test successful!\n\n";
     return EXIT_SUCCESS;
 }

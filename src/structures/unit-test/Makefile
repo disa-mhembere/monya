@@ -23,6 +23,12 @@ TESTFILES = testBinaryNode testRBNode testRBTree testNAryNode \
 
 all: $(TESTFILES)
 
+test: all
+	./testBinaryNode
+	./testRBNode
+	./testRBTree
+	./testNAryNode
+
 testBinaryNode: testBinaryNode.o
 	$(CXX) -o testBinaryNode testBinaryNode.o $(LDFLAGS)
 
