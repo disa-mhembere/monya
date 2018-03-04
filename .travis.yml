@@ -2,14 +2,13 @@ language: cpp
 sudo: required
 dist:
     - trusty
-    - xenial
 notifications:
   email: false
 install: sudo ./install.sh
 compiler:
 - g++
 script:
-    make clean && make &&
-     cd src/common/unit-test && make test && cd - &&
-    cd src/structures/unit-test && make test && cd - &&
-    cd src/io/unit-test && make test && cd -
+- make clean && make
+- cd src/common/unit-test && make test && cd -
+- cd src/structures/unit-test && make test && cd -
+- cd src/io/unit-test && make test && cd -
