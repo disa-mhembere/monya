@@ -20,9 +20,12 @@
 
 cd $HOME
 # Make sure the package information is up-to-date
+apt-get update
+apt-get sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y upgrade
+
 apt-get install -y build-essential
 # In memory dependencies
-apt-get install -y libboost-dev libboost-system-dev libboost-filesystem-dev
+apt-get install -y libboost-all-dev
 
 # NUMA
 apt-get install -y libnuma-dbg libnuma-dev libnuma1
@@ -31,7 +34,6 @@ apt-get install -y libnuma-dbg libnuma-dev libnuma1
 apt-get install -y libaio-dev
 apt-get install -y libatlas-base-dev
 apt-get install -y libgoogle-perftools-dev
-apt-get install -y libhwloc-dev libatlas-base-dev zlib1g-dev numactl
 
 # Source control
 apt-get install -y git
