@@ -15,12 +15,12 @@
 
 include ../Makefile.common
 
-all: libstructures utils libmonya examples common
+all: libstructures utils libmonya common examples
 
 libstructures:
 	$(MAKE) -C structures
 
-libmonya: libstructures utils $(OBJS)
+libmonya: libstructures utils common $(OBJS)
 	rm -f libmonya
 	ar -cvq libmonya.a $(OBJS)
 

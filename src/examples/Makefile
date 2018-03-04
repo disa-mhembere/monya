@@ -15,15 +15,15 @@
 
 include ../../Makefile.common
 
-CXXFLAGS +=-I.. -I../structures -I../../SAFS/libsafs
-LDFLAGS := -L.. -L../../SAFS/libsafs -L../structures \
+CXXFLAGS +=-I../../SAFS/libsafs -I../common -I../structures -I..
+LDFLAGS :=-L../../SAFS/libsafs -L../common -L../structures -L..\
 	-lsafs -lstructures -lmonya $(LDFLAGS)
 
 EXAMPLES=kdtree
 
 all: $(EXAMPLES)
 
-Test: kdtree.o
+kdtree: kdtree.o
 	$(CXX) -o kdtree kdtree.o $(LDFLAGS)
 
 clean:
