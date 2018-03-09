@@ -19,6 +19,7 @@
 
 #include "RBTree.hpp"
 #include "RBNode.hpp"
+#include <random>
 
 namespace mc = monya::container;
 
@@ -32,6 +33,26 @@ int main(int argc, char* argv[]) {
             it != members.end(); ++it) {
         tree->insert(new mc::RBNode<double>((double)*it));
     }
+
+    // Add some numbers in an ad hoc fashion
+    constexpr int NRAND = 100;
+    std::default_random_engine generator;
+    std::uniform_real_distribution<double> distribution(0, 5);
+
+    mc::RBTree<mc::RBNode<double> >::ptr tree2 =
+        mc::RBTree<mc::RBNode<double> >::create();
+    mc::RBNode<double>* node = tree2->get_root();
+
+    std::vector<double> members2;
+    // Test arbitrary insertion
+    for (auto i = 0; i < NRAND; i++) {
+        members2.push_back(distribution(generator));
+        auto* insert_node = new mc::RBNode<double>(members2.back());
+        if (*insert_node > *node) {
+            // TODO
+        }
+    }
+
 
     tree->echo();
     std::cout << "RBTree Test successful!\n\n";

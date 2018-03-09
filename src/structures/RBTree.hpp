@@ -23,6 +23,7 @@
 #include <memory>
 #include "../common/types.hpp"
 #include "../common/exception.hpp"
+#include "Scheduler.hpp"
 
 namespace monya { namespace container {
 
@@ -31,6 +32,7 @@ class RBTree {
     private:
         NodeType* root;
         size_t depth;
+        Scheduler<NodeType> scheduler;
 
         void rotate_left(NodeType* x) {
             NodeType* y;
@@ -177,6 +179,7 @@ class RBTree {
                 new_node = root = node;
                 new_node->color = 0;
                 new_node->parent = new_node->left = new_node->right = NULL;
+                depth = 1; // Data race ok
             } else {
                 new_node = node;
                 new_node->color = 1;
