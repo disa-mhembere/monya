@@ -36,6 +36,10 @@ class kdnode: public container::RBNode<double> {
         void spawn() override {
             // TODO: Implement
         }
+
+        void run() override {
+            // TODO: Implement
+        }
 };
 
 // How the program runs

@@ -19,7 +19,7 @@ CXXFLAGS +=-I.. -I../../../SAFS/libsafs
 LDFLAGS := -L.. -L../../../SAFS/libsafs -lsafs -lstructures $(LDFLAGS)
 
 TESTFILES = testBinaryNode testRBNode testRBTree testNAryNode \
-			perftest cppperftest
+			perftest cppperftest testScheduler
 
 all: $(TESTFILES)
 
@@ -37,6 +37,9 @@ testRBNode: testRBNode.o
 
 testRBTree: testRBTree.o
 	$(CXX) -o testRBTree testRBTree.o $(LDFLAGS)
+
+testScheduler: testScheduler.o
+	$(CXX) -o testScheduler testScheduler.o $(LDFLAGS)
 
 testNAryNode: testNAryNode.o
 	$(CXX) -o testNAryNode testNAryNode.o $(LDFLAGS)
