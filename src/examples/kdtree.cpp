@@ -39,6 +39,7 @@ class kdnode: public container::RBNode<double> {
 
         void run() override {
             // TODO: Implement
+            std::cout << "knode::run()";
         }
 };
 

@@ -96,7 +96,9 @@ namespace monya {
             }
 
             // User implemented for training phase
-            virtual void build() = 0;
+            virtual void build() {
+                scheduler->schedule(this->get_root());
+            };
     };
 } // End monya
 
