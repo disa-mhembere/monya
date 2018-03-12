@@ -21,7 +21,7 @@
 cd $HOME
 # Make sure the package information is up-to-date
 apt-get update
-apt-get sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y upgrade
+apt-get -o Dpkg::Options::="--force-confold" --force-yes -y upgrade
 
 apt-get install -y build-essential
 # In memory dependencies
