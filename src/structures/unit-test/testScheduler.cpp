@@ -61,9 +61,7 @@ void serial_test() {
         scheduler.schedule(v[i], tree_id);
     }
 
-    scheduler.complete();
     std::cout << ".\n";
-
     v.back()->print();
 }
 

@@ -23,6 +23,7 @@
 #include "common/types.hpp"
 #include "structures/RBTree.hpp"
 #include "io/IO.hpp"
+#include "structures/Scheduler.hpp"
 
 // NOTE: We initally assume all the Trees are the same
 namespace monya {
@@ -40,6 +41,7 @@ namespace monya {
             short depth; // The current depth of this tree
             size_t nsamples; // Max # of samples from which the tree is built
             size_t nfeatures; // Number of features
+            container::Scheduler<NodeType>* scheduler;
 
         public:
             typedef std::shared_ptr<BinaryTreeProgram<NodeType> > ptr;

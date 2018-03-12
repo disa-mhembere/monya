@@ -23,6 +23,7 @@
 #include <memory>
 #include <vector>
 #include "common/types.hpp"
+#include "structures/Scheduler.hpp"
 
 namespace monya {
     class Params;
