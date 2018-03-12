@@ -19,6 +19,7 @@
 
 #include "Scheduler.hpp"
 #include "RBNode.hpp"
+#include "../../common/types.hpp"
 
 namespace mc = monya::container;
 
@@ -38,25 +39,35 @@ class MyNode: public mc::RBNode<unsigned> {
         }
 
         void run() override {
-            std::cout << "Run!\n";
+            std::cout << comparator << " ..";
         }
 };
 
-int main(int argc, char* argv[]) {
-
+void serial_test() {
     mc::Scheduler<MyNode> scheduler;
     std::vector<MyNode*> v;
     constexpr unsigned LEVEL = 5;
-    const unsigned NNODES = std::pow(2, LEVEL);
+    const unsigned NNODES = std::pow(2, LEVEL) - 1;
+    std::cout << "Running: " << NNODES << " nodes for test\n\n";
+
+    for (unsigned i = 0; i < NNODES; i++)
+        v.push_back(new MyNode(i));
+
+    assert(v.size() == NNODES);
+
+    constexpr monya::tree_t tree_id = 0;
+    std::cout << "Scheduling and running: ";
     for (unsigned i = 0; i < NNODES; i++) {
-        v.push_back(new MyNode(i*2));
+        scheduler.schedule(v[i], tree_id);
     }
 
-    for (unsigned i = 0; i < NNODES; i++) {
-#if 0
-        scheduler.schedule(v[i]);
-#endif
-    }
+    scheduler.complete();
+    std::cout << ".\n";
 
+    v.back()->print();
+}
+
+int main(int argc, char* argv[]) {
+    serial_test();
     return EXIT_SUCCESS;
 }

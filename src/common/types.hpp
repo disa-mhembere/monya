@@ -34,6 +34,7 @@ namespace monya {
     typedef unsigned child_t; // The number of children an NAry node can hold
     typedef size_t offset_t; // The offset position of a file
     typedef unsigned tree_t; // The number of trees in the forrest
+    typedef size_t depth_t; // The number of trees in the forrest
 
     // Used to express the dimensions of a matrix
     typedef std::pair<offset_t, offset_t> dimpair;
