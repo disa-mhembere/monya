@@ -68,16 +68,10 @@ namespace monya {
                 this->nfeatures = params.nfeatures;
 
                 assert(params.fanout == 2);
-            }
-
-            BinaryTreeProgram(size_t nsamples, size_t nfeatures,
-                    short max_depth=-1, typename io::IO::raw_ptr ioer=NULL) {
-                this->nsamples = nsamples;
-                this->nfeatures = nfeatures;
-                this->ioer = ioer;
-                this->max_depth = max_depth;
-                // TODO: Account for other trees in forest
                 this->scheduler = new container::Scheduler<NodeType>(2, 1);
+
+                // Initialize the root
+                // FIXME now!
             }
 
             static BinaryTreeProgram<NodeType>* create_raw() {
@@ -123,6 +117,7 @@ namespace monya {
 
             // User implemented for training phase
             virtual void build() {
+                assert(NULL == this->get_root());
                 scheduler->schedule(this->get_root());
             }
 
