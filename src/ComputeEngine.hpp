@@ -33,7 +33,6 @@ namespace monya {
 
         private:
             std::vector<TreeProgramType*> forest; // For when there are more
-            tree_t ntree;
             Params params;
 
             ComputeEngine(Params& params) {
@@ -86,7 +85,7 @@ namespace monya {
             }
 
             void train() {
-                assert(forest.size() == ntree);
+                assert(forest.size() == params.ntree);
 
                 for (auto it = forest.begin(); it != forest.end(); ++it)
                     (*it)->build();
@@ -101,7 +100,7 @@ namespace monya {
             }
 
             ~ComputeEngine() {
-                assert(forest.size() == ntree);
+                assert(forest.size() == params.ntree);
                 for (auto it = forest.begin(); it != forest.end(); ++it)
                     (*it)->destroy();
             }
