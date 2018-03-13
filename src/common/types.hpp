@@ -26,6 +26,7 @@
 #include <map>
 #include <utility>
 #include <vector>
+#include <limits>
 
 #define INVALID_ID -1
 
@@ -92,7 +93,8 @@ namespace monya {
 
         Params(size_t nsamples=0, size_t nfeatures=0, std::string fn="",
                 IOTYPE iotype=IOTYPE::MEM, tree_t ntree=1, unsigned nthread=1,
-                MAT_ORIENT orientation=MAT_ORIENT::COL, unsigned fanout=2) {
+                MAT_ORIENT orientation=MAT_ORIENT::COL, unsigned fanout=2,
+                short max_depth=std::numeric_limits<short>::max()) {
 
             this->nsamples = nsamples;
             this->nfeatures = nfeatures;
