@@ -23,7 +23,7 @@
 #include <memory>
 #include <vector>
 #include "common/types.hpp"
-#include "structures/Scheduler.hpp"
+#include "common/exception.hpp"
 
 namespace monya {
     class Params;
@@ -36,13 +36,11 @@ namespace monya {
             tree_t ntree;
             Params params;
 
-            ComputeEngine(const tree_t ntree=1) {
-                this->ntree = ntree;
-            }
-
-            ComputeEngine(Params& params, const tree_t ntree):
-                ComputeEngine(ntree) {
+            ComputeEngine(Params& params) {
                 this->params = params;
+
+                for (tree_t tree_id = 0; tree_id < params.ntree; tree_id++)
+                    forest.push_back(new TreeProgramType(params, tree_id));
             }
 
             ComputeEngine(std::vector<TreeProgramType*>& forest) {
@@ -66,8 +64,8 @@ namespace monya {
                 return ptr(new ComputeEngine(forest));
             }
 
-            static ptr create(Params& params, const tree_t ntree) {
-                return ptr(new ComputeEngine<TreeProgramType>(params, ntree));
+            static ptr create(Params& params) {
+                return ptr(new ComputeEngine<TreeProgramType>(params));
             }
 
             static ptr create(Params& params,
@@ -88,13 +86,14 @@ namespace monya {
             }
 
             void train() {
-                for (size_t tree_id = 0; tree_id < ntree; tree_id++) {
-                    forest[tree_id]->build();
-                }
+                assert(forest.size() == ntree);
+
+                for (auto it = forest.begin(); it != forest.end(); ++it)
+                    (*it)->build();
             }
 
             void predict() {
-
+                throw not_implemented_exception();
             }
 
             TreeProgramType* get_tree(const tree_t id) {
@@ -102,9 +101,9 @@ namespace monya {
             }
 
             ~ComputeEngine() {
-                for (size_t tree_id = 0; tree_id < ntree; tree_id++) {
-                    forest[tree_id]->destroy();
-                }
+                assert(forest.size() == ntree);
+                for (auto it = forest.begin(); it != forest.end(); ++it)
+                    (*it)->destroy();
             }
     };
 } // End monya

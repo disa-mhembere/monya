@@ -136,7 +136,7 @@ class NodeView: public safs::callback {
 template <typename T> std::ostream& operator<<
     (std::ostream& stream, const NodeView<T>& node) {
     stream << node.comparator;
-    return  stream;
+    return stream;
 }
 
 } } // End monya::container

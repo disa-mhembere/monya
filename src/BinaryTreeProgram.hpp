@@ -22,7 +22,7 @@
 
 #include "common/types.hpp"
 #include "structures/RBTree.hpp"
-#include "io/IO.hpp"
+#include "io/IOfactory.hpp"
 #include "structures/Scheduler.hpp"
 
 // NOTE: We initally assume all the Trees are the same
@@ -46,12 +46,38 @@ namespace monya {
         public:
             typedef std::shared_ptr<BinaryTreeProgram<NodeType> > ptr;
 
+            void set_nnode_id(const short nnode_id) {
+                this->nnode_id = nnode_id;
+            }
+
+            const short get_nnode_id() const {
+                return nnode_id;
+            }
+
+            BinaryTreeProgram(Params& params, const tree_t tree_id) {
+                this->tree_id = tree_id;
+                this->exmem_fn = params.fn;
+                ioer = IOfactory::create(params.iotype);
+                ioer->set_fn(this->exmem_fn);
+                ioer->set_dtype_size(8); // FIXME now!
+                ioer->set_orientation(params.orientation);
+
+                this->max_depth = params.max_depth;
+                this->depth = 0;
+                this->nsamples = params.nsamples;
+                this->nfeatures = params.nfeatures;
+
+                assert(params.fanout == 2);
+            }
+
             BinaryTreeProgram(size_t nsamples, size_t nfeatures,
                     short max_depth=-1, typename io::IO::raw_ptr ioer=NULL) {
                 this->nsamples = nsamples;
                 this->nfeatures = nfeatures;
                 this->ioer = ioer;
                 this->max_depth = max_depth;
+                // TODO: Account for other trees in forest
+                this->scheduler = new container::Scheduler<NodeType>(2, 1);
             }
 
             static BinaryTreeProgram<NodeType>* create_raw() {
@@ -98,7 +124,11 @@ namespace monya {
             // User implemented for training phase
             virtual void build() {
                 scheduler->schedule(this->get_root());
-            };
+            }
+
+            ~BinaryTreeProgram() {
+                delete scheduler;
+            }
     };
 } // End monya
 

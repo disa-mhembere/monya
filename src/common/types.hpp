@@ -80,16 +80,51 @@ namespace monya {
 
     class Params {
         public:
+            size_t nsamples; // Max # of samples from which the tree is built
+            size_t nfeatures; // Number of features
             std::string fn;
             IOTYPE iotype;
             tree_t ntree;
+            unsigned nthread;
+            MAT_ORIENT orientation;
+            unsigned fanout; // The number of children a node a can have
+            short max_depth; // Maximum depth the tree can reach
 
-        Params(std::string fn="", IOTYPE iotype=IOTYPE::MEM, tree_t ntree=1) {
+        Params(size_t nsamples=0, size_t nfeatures=0, std::string fn="",
+                IOTYPE iotype=IOTYPE::MEM, tree_t ntree=1, unsigned nthread=1,
+                MAT_ORIENT orientation=MAT_ORIENT::COL, unsigned fanout=2) {
+
+            this->nsamples = nsamples;
+            this->nfeatures = nfeatures;
             this->fn = fn;
             this->iotype = iotype;
             this->ntree = ntree;
+            this->nthread = nthread;
+            this->orientation = orientation;
+            this->fanout = fanout;
+            this->max_depth = max_depth;
         }
     };
+
+    std::ostream& operator<<
+        (std::ostream& stream, const Params& params) {
+            stream << "Params: \n" <<
+            "# features: " << params.nfeatures << std::endl <<
+            "# samples: "<< params.nsamples << std::endl <<
+            "fn: " << params.fn << std::endl <<
+            "iotype: " << (params.iotype == MEM ? "Memory" :
+                params.iotype == SEM ? "Semi-External Memory" :
+                "Synchronous") << std::endl <<
+            "# trees " << params.ntree << std::endl <<
+            "# threads " << params.nthread << std::endl <<
+            "orientation: " << (params.orientation == ROW ? "Row" :
+                params.orientation == COL ? "Column" :
+                params.orientation == BAND ? "Band" : "Invalid") << std::endl <<
+            "fanout: " << params.fanout << std::endl <<
+            "max depth: " << params.max_depth << std::endl;
+
+            return stream;
+        }
 
     template <typename T>
     class IndexVal {
