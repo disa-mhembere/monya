@@ -57,7 +57,7 @@ class kdTreeProgram: public BinaryTreeProgram<kdnode> {
     public:
 
         // Can be used if we need no more constructors
-        // using BinaryTreeProgram<kdnode>::BinaryTreeProgram;
+        using BinaryTreeProgram<kdnode>::BinaryTreeProgram;
 
         kdTreeProgram(size_t nsamples, size_t nfeatures, size_t split_dim,
                 short max_depth=-1, typename io::IO::raw_ptr ioer=NULL) :
@@ -96,12 +96,24 @@ class kdTreeProgram: public BinaryTreeProgram<kdnode> {
 };
 
 int main(int argc, char* argv[]) {
-    Params params("/mnt/nfs/disa/monya/src/structures/unit-test/"
-            "data/ordered_tree_10.bin", IOTYPE::SYNC, 1);
+    // TODO: Read from argv[]
+    size_t nsamples = 10;
+    size_t nfeatures = 1;
+    tree_t ntree = 1;
+    unsigned nthread = 1;
+    MAT_ORIENT mo = MAT_ORIENT::COL;
+
+    Params params(nsamples, nfeatures,
+            "/Research/monya/src/examples/data/ordered_tree_10.bin",
+            IOTYPE::SYNC, ntree, nthread, mo);
+    std::cout << params;
 
     utils::time t;
     ComputeEngine<kdTreeProgram>::ptr engine =
-        ComputeEngine<kdTreeProgram>::create(params, 2);
+        ComputeEngine<kdTreeProgram>::create(params);
+    // TODO: Add number of threads
+
+    std::cout << "Engine created\n\n";
     //t.tic();
     engine->train();
     std::cout << "I'm well trained!\n";
