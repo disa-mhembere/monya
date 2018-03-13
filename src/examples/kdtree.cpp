@@ -41,6 +41,10 @@ class kdnode: public container::RBNode<double> {
             // TODO: Implement
             std::cout << "knode::run()";
         }
+
+        const void print() const override {
+            std::cout << "\n\nHA!\n\n";
+        }
 };
 
 // How the program runs
@@ -59,13 +63,11 @@ class kdTreeProgram: public BinaryTreeProgram<kdnode> {
         // Can be used if we need no more constructors
         using BinaryTreeProgram<kdnode>::BinaryTreeProgram;
 
-        kdTreeProgram(size_t nsamples, size_t nfeatures, size_t split_dim,
-                short max_depth=-1, typename io::IO::raw_ptr ioer=NULL) :
-            BinaryTreeProgram(nsamples, nfeatures, max_depth, ioer) {
-                this->split_dim = split_dim;
+        kdTreeProgram(Params& params, const tree_t tree_id):
+            BinaryTreeProgram<kdnode>(params, tree_id) {
                 this->distribution =
                     std::uniform_int_distribution<size_t>(0, nfeatures);
-            }
+        }
 
         void set_split_dim(const size_t split_dim) {
             this->split_dim = split_dim;
@@ -92,6 +94,7 @@ class kdTreeProgram: public BinaryTreeProgram<kdnode> {
 
         void build() override {
             pick_split_dim(); // Choose split
+            BinaryTreeProgram<kdnode>::build();
         }
 };
 
@@ -111,9 +114,8 @@ int main(int argc, char* argv[]) {
     utils::time t;
     ComputeEngine<kdTreeProgram>::ptr engine =
         ComputeEngine<kdTreeProgram>::create(params);
-    // TODO: Add number of threads
 
-    std::cout << "Engine created\n\n";
+    std::cout << "Engine created\n";
     //t.tic();
     engine->train();
     std::cout << "I'm well trained!\n";
