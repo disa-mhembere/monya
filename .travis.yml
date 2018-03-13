@@ -3,7 +3,7 @@ sudo: required
 dist: xenial
 notifications:
   email: false
-install: sudo ./install.sh
+install: ./install.sh
 compiler:
 - g++
 script:
