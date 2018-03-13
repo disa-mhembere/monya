@@ -65,19 +65,6 @@ class NodeView: public safs::callback {
             this->data_index = data_index;
         }
 
-        //NodeView(offset_t* data_index, const size_t nelem) {
-            //add_elem(data_index, nelem);
-        //}
-
-        //void add_elem(offset_t* members, const size_t nelem) {
-            //if (data_index.size()) { // We have members so add to them
-                //data_index.insert(data_index.end(), members, members+nelem);
-            //} else {
-                //data_index.resize(nelem);
-                //std::copy(members, members+nelem, data_index.begin());
-            //}
-        //}
-
         virtual void spawn() = 0;
         virtual void distance(T arg1) = 0;
 
@@ -85,15 +72,7 @@ class NodeView: public safs::callback {
             return data_index;
         }
 
-        //void set_data_index(const std::vector<offset_t>& data_index) {
-            //this->data_index = data_index;
-        //}
-
-        //void set_data_index(const offset_t* data_index, const size_t nelem) {
-            //add_elem(data_index, nelem);
-        //}
-
-        const void print() const {
+        virtual const void print() const {
             std::cout << comparator << std::endl;
         }
 

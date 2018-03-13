@@ -144,7 +144,7 @@ class RBTree {
             return ptr(new RBTree<NodeType>());
         }
 
-        NodeType* get_root() {
+        virtual NodeType* get_root() {
             return root;
         }
 
