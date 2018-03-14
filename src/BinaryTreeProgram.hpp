@@ -74,6 +74,10 @@ namespace monya {
                 // FIXME now!
             }
 
+            virtual void initialize_tree() {
+                NodeType* root = new NodeType();
+            }
+
             static BinaryTreeProgram<NodeType>* create_raw() {
                 return new BinaryTreeProgram<NodeType>();
             }
