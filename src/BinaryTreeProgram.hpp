@@ -68,14 +68,20 @@ namespace monya {
                 this->nfeatures = params.nfeatures;
 
                 assert(params.fanout == 2);
-                this->scheduler = new container::Scheduler<NodeType>(2, 1);
+                this->scheduler = new container::Scheduler<NodeType>(
+                        params.fanout, params.ntree);
 
-                // Initialize the root
-                // FIXME now!
+                initialize_tree();
             }
 
+            NodeType* create_node() {
+                return new NodeType;
+            }
+
+            // TODO: Have users override this to determine root's index
+
             virtual void initialize_tree() {
-                NodeType* root = new NodeType();
+                this->insert(new NodeType());
             }
 
             static BinaryTreeProgram<NodeType>* create_raw() {

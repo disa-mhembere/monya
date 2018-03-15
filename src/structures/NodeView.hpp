@@ -44,6 +44,7 @@ class NodeView: public safs::callback {
         T comparator; // The split comparator
         unsigned numbytes; // The number of bytes in the read of data from disk
         // When the data required is in memory run this computation
+        short depth; // Depth of the node
         // TODO: End visibility
 
         virtual int invoke(safs::io_request *reqs[], int num) override {
@@ -55,7 +56,9 @@ class NodeView: public safs::callback {
             return EXIT_SUCCESS;
         }
 
-        NodeView() {}
+        NodeView() {
+            depth = 0;
+        }
 
         NodeView(T val) {
             comparator = val;
@@ -63,6 +66,28 @@ class NodeView: public safs::callback {
 
         NodeView(IndexVector<T>& data_index) {
             this->data_index = data_index;
+        }
+
+        // Range index
+        NodeView(sample_id_t start_idx, const sample_id_t nsamples) {
+            // TODO
+        }
+
+        NodeView(sample_id_t* indexes, const sample_id_t nsamples) {
+        }
+
+        void set_index(sample_id_t* indexes, const sample_id_t nsamples) {
+        }
+
+        NodeView(std::vector<sample_id_t>& indexes) :
+            NodeView(&indexes[0], indexes.size()) { }
+
+        void set_depth(short depth) {
+            this->depth = depth;
+        }
+
+        const short get_depth() const {
+            return depth;
         }
 
         virtual void spawn() = 0;

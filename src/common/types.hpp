@@ -32,6 +32,7 @@
 
 namespace monya {
     typedef unsigned node_id_t; // Tree node identifier type
+    typedef unsigned sample_id_t; // Tree node identifier type
     typedef unsigned child_t; // The number of children an NAry node can hold
     typedef size_t offset_t; // The offset position of a file
     typedef unsigned tree_t; // The number of trees in the forrest
@@ -131,27 +132,27 @@ namespace monya {
     template <typename T>
     class IndexVal {
         private:
-            node_id_t index;
+            sample_id_t index;
             T val;
         public:
             IndexVal() {
                 index = 0;
             }
 
-            IndexVal(const node_id_t index, const T val) {
+            IndexVal(const sample_id_t index, const T val) {
                 set(index, val);
             }
 
-            void set(const node_id_t index, const T val) {
+            void set(const sample_id_t index, const T val) {
                 set_index(index);
                 set_val(val);
             }
 
-            void set_index(const node_id_t index) {
+            void set_index(const sample_id_t index) {
                 this->index = index;
             }
 
-            const node_id_t get_index() const {
+            const sample_id_t get_index() const {
                 return this->index;
             }
 
