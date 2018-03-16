@@ -54,6 +54,7 @@ namespace monya {
 
         public:
             typedef std::shared_ptr<ComputeEngine<TreeProgramType> > ptr;
+            typedef typename std::vector<TreeProgramType*>::iterator forest_iterator;
 
             static ptr create() {
                 return ptr(new ComputeEngine<TreeProgramType>());
@@ -78,6 +79,14 @@ namespace monya {
 
             const Params& get_params() {
                 return this->params;
+            }
+
+            forest_iterator forest_begin() {
+                return this->forest.begin();
+            }
+
+            forest_iterator forest_end() {
+                return this->forest.end();
             }
 
             void add_tree(TreeProgramType* tree) {

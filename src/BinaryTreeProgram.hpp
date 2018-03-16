@@ -31,7 +31,7 @@ namespace monya {
     unsigned READ_SZ_BYTES = 4096; // TODO: Alter
 
     template <typename NodeType>
-    class BinaryTreeProgram: container::RBTree<NodeType> {
+    class BinaryTreeProgram: public container::RBTree<NodeType> {
         protected:
             short nnode_id; // NUMA node
             tree_t tree_id; // The ID of this tree
@@ -70,18 +70,10 @@ namespace monya {
                 assert(params.fanout == 2);
                 this->scheduler = new container::Scheduler<NodeType>(
                         params.fanout, params.ntree);
-
-                initialize_tree();
             }
 
             NodeType* create_node() {
                 return new NodeType;
-            }
-
-            // TODO: Have users override this to determine root's index
-
-            virtual void initialize_tree() {
-                this->insert(new NodeType());
             }
 
             static BinaryTreeProgram<NodeType>* create_raw() {
@@ -127,7 +119,7 @@ namespace monya {
 
             // User implemented for training phase
             virtual void build() {
-                assert(NULL == this->get_root());
+                assert(NULL != this->get_root());
                 scheduler->schedule(this->get_root());
             }
 
