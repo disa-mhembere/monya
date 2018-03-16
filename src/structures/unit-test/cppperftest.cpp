@@ -35,6 +35,7 @@ class ConcreteNode : public mc::NodeView <T> {
     protected:
     void prep() override {}
     void run() override {}
+    void init(monya::Params&) override {}
 
     public:
     using mc::NodeView<T>::NodeView;

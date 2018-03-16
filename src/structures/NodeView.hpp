@@ -32,19 +32,24 @@ namespace monya { namespace container {
 // Represent a node in the tree
 template <typename T>
 class NodeView: public safs::callback {
-    protected:
+    public:
         virtual void prep() = 0;
         virtual void run() = 0;
+        virtual void init(Params&) = 0;
+        virtual void spawn() = 0;
+        virtual void distance(T arg1) = 0;
 
-    public:
         // TODO: Visibility
         //std::vector<offset_t> data_index; // Indexes that nodes hold to data
         IndexVector<T> data_index; // Indexes that nodes hold to data & mapping
+
+        // FIXME: mem waster
+        std::vector<sample_id_t> req_indxs; // Indexes a vertex will request from ioer
         char* buf; // The data read from dataset
         T comparator; // The split comparator
         unsigned numbytes; // The number of bytes in the read of data from disk
         // When the data required is in memory run this computation
-        short depth; // Depth of the node
+        short depth; // Depth of the node used as an idendifier
         // TODO: End visibility
 
         virtual int invoke(safs::io_request *reqs[], int num) override {
@@ -60,27 +65,25 @@ class NodeView: public safs::callback {
             depth = 0;
         }
 
-        NodeView(T val) {
+        NodeView(T val): NodeView() {
             comparator = val;
         }
 
-        NodeView(IndexVector<T>& data_index) {
+        NodeView(IndexVector<T>& data_index): NodeView() {
             this->data_index = data_index;
         }
 
         // Range index
-        NodeView(sample_id_t start_idx, const sample_id_t nsamples) {
-            // TODO
+        virtual void set_index(sample_id_t start_idx,
+                const sample_id_t nsamples) {
+            for (sample_id_t idx = start_idx; idx < start_idx; idx++)
+                req_indxs.push_back(idx);
         }
 
-        NodeView(sample_id_t* indexes, const sample_id_t nsamples) {
+        // Iterative index
+        void set_index(const std::vector<sample_id_t>& indexes) {
+                req_indxs = indexes; // TODO: Verify copy
         }
-
-        void set_index(sample_id_t* indexes, const sample_id_t nsamples) {
-        }
-
-        NodeView(std::vector<sample_id_t>& indexes) :
-            NodeView(&indexes[0], indexes.size()) { }
 
         void set_depth(short depth) {
             this->depth = depth;
@@ -89,9 +92,6 @@ class NodeView: public safs::callback {
         const short get_depth() const {
             return depth;
         }
-
-        virtual void spawn() = 0;
-        virtual void distance(T arg1) = 0;
 
         virtual const IndexVector<T>& get_data_index() const {
             return data_index;
@@ -131,6 +131,10 @@ class NodeView: public safs::callback {
 
         virtual bool operator>=(const NodeView<T>& other) {
             return !(*this < other);
+        }
+
+        bool is_root() {
+            return depth == 0;
         }
 
         virtual ~NodeView() {

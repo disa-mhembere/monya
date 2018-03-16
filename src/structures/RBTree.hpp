@@ -148,6 +148,10 @@ class RBTree {
             return root;
         }
 
+        void set_root(NodeType* node) {
+            insert(node);
+        }
+
         void set_depth(const size_t depth) {
             this->depth = depth;
         }

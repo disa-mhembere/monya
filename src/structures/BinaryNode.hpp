@@ -31,15 +31,6 @@ namespace monya { namespace container {
 
 template <typename T>
 class BinaryNode: public NodeView<T> {
-    protected:
-        virtual void prep() {
-            throw abstract_exception("BinaryNode::prep");
-        }
-
-        virtual void run() {
-            throw abstract_exception("BinaryNode::run");
-        }
-
     public:
         // TODO: Visibility
         BinaryNode<T>* parent;
@@ -69,8 +60,20 @@ class BinaryNode: public NodeView<T> {
 #endif
         }
 
-        virtual void distance(T arg1) {
+        virtual void prep() override {
+            throw abstract_exception("BinaryNode::prep");
+        }
+
+        virtual void run() override {
+            throw abstract_exception("BinaryNode::run");
+        }
+
+        virtual void distance(T arg1) override {
             throw abstract_exception("BinaryNode::distance");
+        }
+
+        virtual void init(Params&) override {
+            throw abstract_exception("BinaryNode::init");
         }
 
         static BinaryNode<T>* cast2(NodeView<T>* nv) {
