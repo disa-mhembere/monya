@@ -19,6 +19,7 @@
 
 #include <cstdlib>
 #include <random>
+#include <set>
 
 #include "../common/monya.hpp"
 #include "../utils/time.hpp"
@@ -26,8 +27,10 @@
 using namespace monya;
 
 class kdnode: public container::RBNode<double> {
-    public:
+    private:
+        size_t split_dim;
 
+    public:
         // TODO: How to overcome this!? Not good ...
         kdnode* parent;
         kdnode* left;
@@ -37,9 +40,25 @@ class kdnode: public container::RBNode<double> {
             // TODO: Implement
         }
 
+        void set_split_dim(size_t split_dim) {
+            this->split_dim = split_dim;
+        }
+
+        const size_t get_split_dim() const {
+            return split_dim;
+        }
+
+        void init(Params& params) override {
+            if (is_root()) {
+                auto nsamples = params.nsamples;
+                set_index(0, nsamples);
+            } else {
+            }
+        }
+
         void run() override {
             // TODO: Implement
-            std::cout << "knode::run()";
+            std::cout << "PLACEHOLDER: knode::run()\n";
         }
 
         const void print() const override {
@@ -50,51 +69,25 @@ class kdnode: public container::RBNode<double> {
 // How the program runs
 class kdTreeProgram: public BinaryTreeProgram<kdnode> {
     private:
-        // Dimension to split on
-        size_t split_dim;
-        std::default_random_engine generator;
-        std::uniform_int_distribution<size_t> distribution;
-
         // All the trees in the forest (including this one!)
         std::vector<kdTreeProgram*> copse;
 
     public:
-
         // Can be used if we need no more constructors
         using BinaryTreeProgram<kdnode>::BinaryTreeProgram;
+};
 
-        kdTreeProgram(Params& params, const tree_t tree_id):
-            BinaryTreeProgram<kdnode>(params, tree_id) {
-                this->distribution =
-                    std::uniform_int_distribution<size_t>(0, nfeatures);
+class RandomSplit {
+    private:
+        std::default_random_engine generator;
+        std::uniform_int_distribution<size_t> distribution;
+    public:
+        RandomSplit(size_t nfeatures) {
+            distribution = std::uniform_int_distribution<size_t>(0, nfeatures);
         }
 
-        void set_split_dim(const size_t split_dim) {
-            this->split_dim = split_dim;
-        }
-
-        const size_t get_split_dim() const {
-            return this->split_dim;
-        }
-
-        /**
-         * Should be coordinated effort over all trees in the forest
-         * @param randomize: Pick the split dimension at random
-         */
-        void pick_split_dim(bool randomize=false) {
-            if (depth) { // We have more than the root
-                if (randomize)
-                    this->split_dim = distribution(generator);
-                else
-                    this->split_dim++;
-            } else { // No nodes in tree
-                this->split_dim = distribution(generator);
-            }
-        }
-
-        void build() override {
-            pick_split_dim(); // Choose split
-            BinaryTreeProgram<kdnode>::build();
+        size_t generate() {
+            return distribution(generator);
         }
 };
 
@@ -114,8 +107,30 @@ int main(int argc, char* argv[]) {
     utils::time t;
     ComputeEngine<kdTreeProgram>::ptr engine =
         ComputeEngine<kdTreeProgram>::create(params);
+    std::cout << "Engine created ...\n";
 
-    std::cout << "Engine created\n";
+    // Create the root with no duplicates for split dimension
+    // TODO: Create root/node initializer that is passed to node
+    RandomSplit rs(params.nfeatures);
+    std::set<size_t> splits;
+    for (auto it = engine->forest_begin(); it != engine->forest_end(); ++it) {
+        while (true) {
+            size_t split_dim = rs.generate();
+            auto sp = splits.find(split_dim); // Pick the split dim
+            if (sp == splits.end()) {
+                std::cout << "Choosing split: " << split_dim << std::endl;
+
+                kdnode* root = new kdnode;
+                root->set_split_dim(split_dim);
+                (*it)->set_root(root);
+
+                splits.insert(split_dim); // Keep track of used split dims
+                break;
+            }
+        }
+    }
+    std::cout << "Roots initialized ...\n";
+
     //t.tic();
     engine->train();
     std::cout << "I'm well trained!\n";
