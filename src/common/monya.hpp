@@ -22,7 +22,7 @@
 
 // Represent a binary node
 
-#include "BinaryTreeProgram.hpp"
+#include "../BinaryTreeProgram.hpp"
 #include "../ComputeEngine.hpp"
 #include "../structures/RBNode.hpp"
 #include "types.hpp"
@@ -30,17 +30,5 @@
 #include <algorithm>
 #include <parallel/numeric>
 #include <parallel/algorithm>
-
-namespace monya {
-    template <typename T>
-    void serial_sort(std::vector<T>& seq) {
-        std::sort<T>(seq);
-    }
-
-    template <typename T>
-    void parallel_sort(std::vector<T>& seq) {
-        __gnu_parallel::sort<T>(seq.begin(), seq.end());
-    }
-} // End namespace monya
 
 #endif

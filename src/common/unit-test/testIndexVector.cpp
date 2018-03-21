@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-#include "../types.hpp"
+#include "../monya.hpp"
 #include <random>
 
 #include <cassert>
@@ -25,7 +25,7 @@
 int main(int argv, char* argc[]) {
     monya::IndexVector<double> t = monya::IndexVector<double>();
 
-    constexpr unsigned NELEM = 1000;
+    constexpr unsigned NELEM = 1000000;
     std::vector<double> v;
 
     std::default_random_engine generator;
@@ -35,10 +35,32 @@ int main(int argv, char* argc[]) {
         v.push_back(distribution(generator));
 
     monya::IndexVector<double> c = monya::IndexVector<double>(v);
-    for (unsigned i = 0; i < NELEM; i++) {
+    for (unsigned i = 0; i < NELEM; i++)
         assert(c[i].get_val() == v[i] && c[i].get_index() == i);
-    }
-    std::cout << "Test successful!\n";
 
+    // Serial Sort test
+    std::sort(v.begin(), v.end());
+    std::sort(c.begin(), c.end());
+
+    for (unsigned i = 0; i < NELEM; i++)
+        assert(c[i].get_val() == v[i]);
+    std::cout << "Serial sort test successful\n";
+
+    // Shuffle
+    std::random_shuffle (v.begin(), v.end());
+    std::random_shuffle (c.begin(), c.end());
+    // Parallel sort
+    __gnu_parallel::sort(v.begin(), v.end());
+    __gnu_parallel::sort(c.begin(), c.end());
+
+    for (unsigned i = 0; i < NELEM; i++)
+        assert(c[i].get_val() == v[i]);
+    std::cout << "Parallel sort test successful\n";
+
+    // Echo
+    //for (auto i = c.begin(); i != c.end(); ++i)
+        //std::cout << *i;
+
+    std::cout << "Test successful!\n";
     return EXIT_SUCCESS;
 }

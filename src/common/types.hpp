@@ -170,10 +170,19 @@ namespace monya {
     };
 
     template <typename T>
+    std::ostream& operator<<
+        (std::ostream& stream, const IndexVal<T>& iv) {
+            stream << iv.get_index() << " " <<
+                iv.get_val() << "\n";
+            return stream;
+        }
+
+    template <typename T>
     class IndexVector {
-        std::vector<IndexVal<T> > _;
+        std::vector<IndexVal<T> >_;
 
         public:
+        typedef typename std::vector<IndexVal<T> >::iterator iterator;
         IndexVector() { } // Default ctor
 
         IndexVector(const std::vector<T>& vals) {
@@ -189,8 +198,10 @@ namespace monya {
             for (size_t i = 0; i < _.size(); i++)
                 std::cout << "Index: " <<  _[i].get_index() <<
                     ", Val: " << _[i].get_val() << std::endl;
-
         }
+
+        iterator begin() { return _.begin(); }
+        iterator end() { return _.end(); }
     };
 } // End monya
 
