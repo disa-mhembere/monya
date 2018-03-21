@@ -30,6 +30,7 @@
 #include <pthread.h>
 
 namespace monya { namespace container {
+
     template<typename NodeType>
     class Scheduler {
 
@@ -110,6 +111,7 @@ namespace monya { namespace container {
                 if (level == 0 || completed_levels[tree_id] >= (level-1)) {
                     for (auto it = level_nodes.begin();
                             it != level_nodes.end(); it++) {
+                        (*it)->prep();
                         (*it)->run();
                     }
                     // TODO: Remove completed nodes

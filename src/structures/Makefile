@@ -15,6 +15,9 @@
 
 include ../../Makefile.common
 
+CXXFLAGS += -I../../SAFS/libsafs
+LDFLAGS := -L../../SAFS/libsafs -lsafs $(LDFLAGS)
+
 all: libstructures unit-test
 
 libstructures: $(OBJS)

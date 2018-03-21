@@ -23,9 +23,13 @@
 #include <memory>
 #include <utility>
 #include <iostream>
+#include <algorithm>
+#include <parallel/algorithm>
 
-#include "io_interface.h"
+#include "../../SAFS/libsafs/io_interface.h"
+
 #include "../common/types.hpp"
+//#include "Scheduler.hpp"
 
 namespace monya { namespace container {
 
@@ -44,7 +48,7 @@ class NodeView: public safs::callback {
         IndexVector<T> data_index; // Indexes that nodes hold to data & mapping
 
         // FIXME: mem waster
-        std::vector<sample_id_t> req_indxs; // Indexes a vertex will request from ioer
+        std::vector<sample_id_t> req_indxs; // Indexes a vertex will req from ioer
         char* buf; // The data read from dataset
         T comparator; // The split comparator
         unsigned numbytes; // The number of bytes in the read of data from disk
@@ -91,6 +95,18 @@ class NodeView: public safs::callback {
 
         const short get_depth() const {
             return depth;
+        }
+
+        void get_data() {
+            // TODO
+        }
+
+        void sort_data_index(bool par=false) {
+            if (par)
+                __gnu_parallel::sort(data_index.begin(),
+                        data_index.end());
+            else
+                std::sort(data_index.begin(), data_index.end());
         }
 
         virtual const IndexVector<T>& get_data_index() const {
