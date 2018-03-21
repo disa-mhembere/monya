@@ -48,17 +48,24 @@ class kdnode: public container::RBNode<double> {
             return split_dim;
         }
 
-        void init(Params& params) override {
-            if (is_root()) {
-                auto nsamples = params.nsamples;
-                set_index(0, nsamples);
-            } else {
-            }
+        // This is run first
+        void prep() override {
+            get_data(); // Put data into mem
         }
 
+        // This is run next
         void run() override {
-            // TODO: Implement
             std::cout << "PLACEHOLDER: knode::run()\n";
+            if (depth == 0) { // Root node
+                sort_data_index(true);
+                //for (size_t sample_id = 0; sample_id < req_indx.size();
+                        //sample_id++) {
+                //}
+            } else {
+                // TODO
+            }
+
+            //data_index = ;
         }
 
         const void print() const override {
@@ -104,7 +111,7 @@ int main(int argc, char* argv[]) {
             IOTYPE::SYNC, ntree, nthread, mo);
     std::cout << params;
 
-    utils::time t;
+    //utils::time t;
     ComputeEngine<kdTreeProgram>::ptr engine =
         ComputeEngine<kdTreeProgram>::create(params);
     std::cout << "Engine created ...\n";
@@ -121,7 +128,9 @@ int main(int argc, char* argv[]) {
                 std::cout << "Choosing split: " << split_dim << std::endl;
 
                 kdnode* root = new kdnode;
-                root->set_split_dim(split_dim);
+                root->set_split_dim(split_dim); // Which dim to split on
+                root->set_index(0, params.nsamples); // Which samples it owns
+                //root->set_scheduler((*it)->get_scheduler());
                 (*it)->set_root(root);
 
                 splits.insert(split_dim); // Keep track of used split dims

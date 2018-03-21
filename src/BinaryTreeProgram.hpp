@@ -32,6 +32,9 @@ namespace monya {
 
     template <typename NodeType>
     class BinaryTreeProgram: public container::RBTree<NodeType> {
+        private:
+            typedef typename container::Scheduler<NodeType> sched_t;
+
         protected:
             short nnode_id; // NUMA node
             tree_t tree_id; // The ID of this tree
@@ -41,7 +44,7 @@ namespace monya {
             short depth; // The current depth of this tree
             size_t nsamples; // Max # of samples from which the tree is built
             size_t nfeatures; // Number of features
-            container::Scheduler<NodeType>* scheduler;
+            sched_t* scheduler;
 
         public:
             typedef std::shared_ptr<BinaryTreeProgram<NodeType> > ptr;
@@ -68,12 +71,19 @@ namespace monya {
                 this->nfeatures = params.nfeatures;
 
                 assert(params.fanout == 2);
-                this->scheduler = new container::Scheduler<NodeType>(
-                        params.fanout, params.ntree);
+                this->scheduler = new sched_t(params.fanout, params.ntree);
             }
 
             NodeType* create_node() {
                 return new NodeType;
+            }
+
+            sched_t* get_scheduler() {
+                return scheduler;
+            }
+
+            void set_scheduler(sched_t* scheduler) {
+                this->scheduler = scheduler;
             }
 
             static BinaryTreeProgram<NodeType>* create_raw() {
