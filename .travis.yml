@@ -1,9 +1,9 @@
 language: cpp
 sudo: required
-dist: xenial
+dist: trusty
 notifications:
   email: false
-install: ./install.sh
+install: sudo ./install.sh
 compiler:
 - g++
 script:
