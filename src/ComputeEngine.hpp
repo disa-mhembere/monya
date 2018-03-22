@@ -26,8 +26,6 @@
 #include "common/exception.hpp"
 
 namespace monya {
-    class Params;
-
     template <typename TreeProgramType>
     class ComputeEngine {
 

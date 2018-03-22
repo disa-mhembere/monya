@@ -28,17 +28,18 @@
 
 namespace monya { namespace container {
 
-template <typename T>
-class BinaryNode: public NodeView<T> {
+class BinaryNode: public NodeView {
     public:
         // TODO: Visibility
-        BinaryNode<T>* parent;
-        BinaryNode<T>* left;
-        BinaryNode<T>* right;
+        BinaryNode* parent;
+        BinaryNode* left;
+        BinaryNode* right;
 
         // Inherit constructors
-        using NodeView<T>::NodeView;
-        BinaryNode<T>* get_parent() {
+        using NodeView::NodeView;
+
+        BinaryNode* get_parent() {
+            return parent;
         }
 
         // Given a new node add children to this node
@@ -67,7 +68,7 @@ class BinaryNode: public NodeView<T> {
             throw abstract_exception("BinaryNode::run");
         }
 
-        virtual void distance(T arg1) override {
+        virtual void distance(data_t arg1) override {
             throw abstract_exception("BinaryNode::distance");
         }
 
@@ -75,8 +76,8 @@ class BinaryNode: public NodeView<T> {
             throw abstract_exception("BinaryNode::init");
         }
 
-        static BinaryNode<T>* cast2(NodeView<T>* nv) {
-            return static_cast<BinaryNode<T>* >(nv);
+        static BinaryNode* cast2(NodeView* nv) {
+            return static_cast<BinaryNode*>(nv);
         }
 
         void read_svm() {

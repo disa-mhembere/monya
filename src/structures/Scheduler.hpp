@@ -31,7 +31,8 @@
 
 namespace monya { namespace container {
 
-    template<typename NodeType>
+    class NodeView;
+
     class Scheduler {
 
         private:
@@ -42,23 +43,13 @@ namespace monya { namespace container {
             std::vector<depth_t> current_level;
             unsigned fanout;
             // Map is: level, nodes in level
-            typedef std::unordered_map<unsigned, std::vector<NodeType*> > ln_t;
+            typedef std::unordered_map<unsigned, std::vector<NodeView*> > ln_t;
             ln_t nodes;
             pthread_mutex_t mutex;
             pthread_mutexattr_t mutex_attr;
 
         public:
-            Scheduler(unsigned fanout=2, tree_t ntree=1) {
-                completed_levels.assign(ntree, 0);
-                current_level.assign(ntree, 0);
-                this->fanout = fanout; // Single fanout for all trees in forest
-
-                // TODO: One per tree?
-                pthread_mutexattr_init(&mutex_attr);
-                pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_ERRORCHECK);
-                pthread_mutex_init(&mutex, &mutex_attr);
-            }
-
+            Scheduler(unsigned fanout=2, tree_t ntree=1);
             // TODO: Remove default value for tree_id
             // Have all the nodes in this level been placed in the queue
             bool is_full(unsigned level, tree_t tree_id=0) {
@@ -66,63 +57,20 @@ namespace monya { namespace container {
                 return std::pow(fanout, level) == nodes[level].size();
             }
 
-            bool is_complete(unsigned level) {
-                if (level >= 0) {
-                    return true; // FIXME: figure out how to interrogate the trees
-                }
-                return true;
-            }
+            bool is_complete(unsigned level);
 
-            // Add a node to the schedulers list given a particular tree id
-            // TODO: Batch the scheduling the reduce lock contention
-            void schedule(NodeType* node, const tree_t tree_id=0) {
-                // TODO: Fix lock contention here
-                pthread_mutex_lock(&mutex);
-                typename ln_t::iterator it = nodes.find(current_level[tree_id]);
-                if (it == nodes.end()) {
-                    nodes[current_level[tree_id]] = std::vector<NodeType*>{ node };
-                } else {
-                    nodes[current_level[tree_id]].push_back(node);
-                }
+            /**
+              \brief Add a node to the schedulers list given a particular
+              tree id
+              */
+            void schedule(NodeView* node, const tree_t tree_id=0);
 
-                // TODO: We don't need to get all nodes before running
-                if (is_full(current_level[tree_id])) {
-                    // TODO: This is true, but on a tree_id basis
-                    current_level[tree_id]++;
-                    pthread_mutex_unlock(&mutex);
+            /**
+              \brief Handoff nodes to threads
+              */
+            void run_level(const depth_t level, const tree_t tree_id);
 
-                    run_level(current_level[tree_id]-1, tree_id);
-                } else {
-                    pthread_mutex_unlock(&mutex);
-                }
-            }
-
-            // Handoff nodes to threads
-            void run_level(const depth_t level, const tree_t tree_id) {
-                // TODO: We don't need this either & can go async
-                // TODO: Async
-                std::cout << "\nRunning level: " << level << "\n";
-
-                // TODO: Will include others when more than 1 tree
-                std::vector<NodeType*> level_nodes = nodes[level];
-
-                // Encodes dependency on levels below
-                // Accounts underflow for level = 0
-                if (level == 0 || completed_levels[tree_id] >= (level-1)) {
-                    for (auto it = level_nodes.begin();
-                            it != level_nodes.end(); it++) {
-                        (*it)->prep();
-                        (*it)->run();
-                    }
-                    // TODO: Remove completed nodes
-                    completed_levels[tree_id]++;
-                }
-            }
-
-            ~Scheduler() {
-                pthread_mutex_destroy(&mutex);
-                pthread_mutexattr_destroy(&mutex_attr);
-            }
+            ~Scheduler();
     };
 } } // End namespace monya::container
 #endif

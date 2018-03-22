@@ -6,6 +6,9 @@ notifications:
 install: ./install.sh
 compiler:
 - g++
+branches:
+    except:
+        - min-template
 script:
   - make clean && make
   - cd src/common/unit-test && make test && cd -

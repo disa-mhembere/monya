@@ -37,6 +37,7 @@ namespace monya {
     typedef size_t offset_t; // The offset position of a file
     typedef unsigned tree_t; // The number of trees in the forrest
     typedef size_t depth_t; // The number of trees in the forrest
+    typedef double data_t; // The type of the data
 
     // Used to express the dimensions of a matrix
     typedef std::pair<offset_t, offset_t> dimpair;
@@ -58,8 +59,8 @@ namespace monya {
       Whether we are running in memory, semi-external memory or in memory
       with synchronous I/O
       */
-    std::map<std::string, short> IOTYPE_t =
-        {{"mem", 0}, {"sem", 1}, {"sync", 2}};
+    //std::map<std::string, short> IOTYPE_t =
+        //{{"mem", 0}, {"sem", 1}, {"sync", 2}};
 
     enum IOTYPE {
         MEM = 0,
@@ -109,6 +110,7 @@ namespace monya {
         }
     };
 
+#if 0
     std::ostream& operator<<
         (std::ostream& stream, const Params& params) {
             stream << "Params: \n" <<
@@ -128,6 +130,7 @@ namespace monya {
 
             return stream;
         }
+#endif
 
     template <typename T>
     class IndexVal {
@@ -169,6 +172,7 @@ namespace monya {
             }
     };
 
+#if 0
     template <typename T>
     std::ostream& operator<<
         (std::ostream& stream, const IndexVal<T>& iv) {
@@ -176,6 +180,7 @@ namespace monya {
                 iv.get_val() << "\n";
             return stream;
         }
+#endif
 
     template <typename T>
     class IndexVector {

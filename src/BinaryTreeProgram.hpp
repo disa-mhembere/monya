@@ -31,9 +31,9 @@ namespace monya {
     unsigned READ_SZ_BYTES = 4096; // TODO: Alter
 
     template <typename NodeType>
-    class BinaryTreeProgram: public container::RBTree<NodeType> {
+    class BinaryTreeProgram: public container::RBTree {
         private:
-            typedef typename container::Scheduler<NodeType> sched_t;
+            typedef typename container::Scheduler sched_t;
 
         protected:
             short nnode_id; // NUMA node
@@ -94,9 +94,9 @@ namespace monya {
                 return ptr(new BinaryTreeProgram<NodeType>());
             }
 
-            static ptr cast2(typename container::RBTree<NodeType>::ptr rbptr) {
-                return std::static_pointer_cast<ptr>(rbptr);
-            }
+            //static ptr cast2(typename container::RBTree<NodeType>::ptr rbptr) {
+                //return std::static_pointer_cast<ptr>(rbptr);
+            //}
 
             void set_ioer(io::IO::raw_ptr ioer) {
                 this->ioer = ioer;

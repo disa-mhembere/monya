@@ -29,8 +29,7 @@
 namespace mc = monya::container;
 namespace mi = monya::io;
 
-template <typename T>
-class ConcreteNode : public mc::NodeView <T> {
+class ConcreteNode : public mc::NodeView {
 
     protected:
     void prep() override {}
@@ -38,19 +37,19 @@ class ConcreteNode : public mc::NodeView <T> {
     void init(monya::Params&) override {}
 
     public:
-    using mc::NodeView<T>::NodeView;
+    using mc::NodeView::NodeView;
     void spawn() override {}
-    void distance(T val) override {}
+    void distance(monya::data_t val) override {}
 };
 
-void insert_test(std::map<ConcreteNode<double>*, long>& tree,
+void insert_test(std::map<ConcreteNode*, long>& tree,
         std::vector<long>& data) {
     clock_t t = clock();
 
     for (std::vector<long>::iterator it = data.begin();
             it != data.end(); ++it) {
-        tree.insert(std::pair<ConcreteNode<double>*, long>(
-                    new ConcreteNode<double>(*it), *it));
+        tree.insert(std::pair<ConcreteNode*, long>(
+                    new ConcreteNode(*it), *it));
     }
 
     t = clock() - t;
@@ -58,7 +57,7 @@ void insert_test(std::map<ConcreteNode<double>*, long>& tree,
             ((float)t)/CLOCKS_PER_SEC, data.size());
 }
 
-void query_test(std::map<ConcreteNode<double>*, long>& tree,
+void query_test(std::map<ConcreteNode*, long>& tree,
         std::vector<long> data) {
     std::cout << "Doing random shuffle ..... ";
     std::srand(1234);
@@ -68,7 +67,7 @@ void query_test(std::map<ConcreteNode<double>*, long>& tree,
 
     for (std::vector<long>::iterator it = data.begin();
             it != data.end(); ++it) {
-        ConcreteNode<double>* node = new ConcreteNode<double>(*it);
+        ConcreteNode* node = new ConcreteNode(*it);
         tree.find(node);
         delete(node);
     }
@@ -78,7 +77,7 @@ void query_test(std::map<ConcreteNode<double>*, long>& tree,
             ((float)t)/CLOCKS_PER_SEC);
 
     // Delete them now
-    for (std::map<ConcreteNode<double>*, long>::iterator it = tree.begin();
+    for (std::map<ConcreteNode*, long>::iterator it = tree.begin();
             it != tree.end(); ++it) {
         delete(it->first);
     }
@@ -123,7 +122,7 @@ int main(int argc, char* argv[]) {
     printf ("It took %f sec to read the data.\n",((float)t)/CLOCKS_PER_SEC);
     t = clock();
 
-    std::map<ConcreteNode<double>*, long> tree;
+    std::map<ConcreteNode*, long> tree;
 
     // Test insert speed
     insert_test(tree, data);

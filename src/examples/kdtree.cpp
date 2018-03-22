@@ -26,12 +26,12 @@
 
 using namespace monya;
 
-class kdnode: public container::RBNode<double> {
+class kdnode: public container::RBNode {
     private:
         size_t split_dim;
 
     public:
-        // TODO: How to overcome this!? Not good ...
+        // Define lineage
         kdnode* parent;
         kdnode* left;
         kdnode* right;
@@ -99,6 +99,7 @@ class RandomSplit {
 };
 
 int main(int argc, char* argv[]) {
+
     // TODO: Read from argv[]
     size_t nsamples = 10;
     size_t nfeatures = 1;
@@ -109,7 +110,9 @@ int main(int argc, char* argv[]) {
     Params params(nsamples, nfeatures,
             "/Research/monya/src/examples/data/ordered_tree_10.bin",
             IOTYPE::SYNC, ntree, nthread, mo);
+#if 0
     std::cout << params;
+#endif
 
     //utils::time t;
     ComputeEngine<kdTreeProgram>::ptr engine =

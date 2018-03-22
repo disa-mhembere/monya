@@ -22,134 +22,38 @@
 
 #include <memory>
 #include "../common/types.hpp"
-#include "../common/exception.hpp"
-#include "Scheduler.hpp"
 
 namespace monya { namespace container {
 
-template <typename NodeType>
+class RBNode;
+//class Scheduler;
+
 class RBTree {
     private:
-        NodeType* root;
+        RBNode* root;
         size_t depth;
-        Scheduler<NodeType> scheduler;
+        //Scheduler scheduler;
 
-        void rotate_left(NodeType* x) {
-            NodeType* y;
+        void rotate_left(RBNode* x);
+        void rotate_right(RBNode* y);
+        void transplant(RBNode* dest, RBNode* src);
 
-            y = x->right;
-            x->right = y->left;
-
-            if (y->left) {
-                y->left->parent = x;
-            }
-
-            y->parent = x->parent;
-            y->left = x;
-
-            if (!x->parent) {
-                root = y;
-            } else if (x == x->parent->left) {
-                x->parent->left = y;
-            } else {
-                x->parent->right = y;
-            }
-            x->parent = y;
-        }
-
-        void rotate_right(NodeType* y) {
-            NodeType* x;
-
-            x = y->left;
-            y->left = x->right;
-            if (x->right) {
-                x->right->parent = y;
-            }
-
-            x->parent = y->parent;
-            x->right = y;
-
-            if (!y->parent) {
-                root = x;
-            } else if (y == y->parent->left) {
-                y->parent->left = x;
-            } else {
-                y->parent->right = x;
-            }
-
-            y->parent = x;
-        }
-
-        void transplant(NodeType* dest, NodeType* src) {
-            if (dest->parent == NULL) {
-                root = src;
-            } else if (dest == dest->parent->left) {
-                dest->parent->left = src;
-            } else {
-                dest->parent->right = src;
-            }
-
-            if (src) {
-                src->parent = dest->parent;
-            }
-        }
-
-        NodeType* minimum(NodeType* tree) {
-            while (tree->left) {
-                tree = tree->left;
-            }
-
-            return tree;
-        }
-
-        void echo(NodeType* node, int tabs) {
-            if (!node) {
-                return;
-            }
-
-            echo(node->left, tabs + 1);
-
-            for (int i = 0; i < tabs; ++i) {
-                std::cout << "\t\t";
-            }
-            std::cout << node->comparator <<
-                (node->color ? "B" : "R") << std::endl;
-
-            echo(node->right, tabs + 1);
-        }
-
-        void delete_node(NodeType* node) {
-            if (!node) {
-                return;
-            }
-
-            if (node->left) {
-                delete_node(node->left);
-            }
-
-            if (node->right) {
-                delete_node(node->right);
-            }
-
-            delete node;
-        }
+        RBNode* minimum(RBNode* tree);
+        void echo(RBNode* node, int tabs);
+        void delete_node(RBNode* node);
 
     public:
-        typedef std::shared_ptr<RBTree<NodeType> > ptr;
+        typedef std::shared_ptr<RBTree> ptr;
 
         RBTree(): root(NULL) {
         }
 
         static ptr create() {
-            return ptr(new RBTree<NodeType>());
+            return ptr(new RBTree());
         }
 
-        virtual NodeType* get_root() {
+        virtual RBNode* get_root() {
             return root;
-        }
-
-        void set_root(NodeType* node) {
-            insert(node);
         }
 
         void set_depth(const size_t depth) {
@@ -160,251 +64,15 @@ class RBTree {
             return depth;
         }
 
-        size_t get_nnodes(NodeType* node, size_t& nnodes=0) {
-            if (!node) {
-                return nnodes;
-            }
-
-            nnodes++;
-            get_nnodes(node->left, nnodes);
-            get_nnodes(node->right, nnodes);
-            return nnodes;
-        }
-
-        void insert_at(NodeType* new_node, NodeType* node, bchild_t pos) {
-            if (NULL != node->left)
-                throw std::runtime_error("Left child already populated");
-
-            NodeType* parent = node;
-
-            // If the parent is NULL then the tree is empty
-            //  Root is always black
-            if (!parent) {
-                new_node = root = node;
-                new_node->color = 0;
-                new_node->parent = new_node->left = new_node->right = NULL;
-                depth = 1; // Data race ok
-            } else {
-                new_node = node;
-                new_node->color = 1;
-                new_node->parent = parent;
-                new_node->left = new_node->right = NULL;
-
-                if (pos == bchild_t::LEFT)
-                    parent->left = new_node;
-                else
-                    parent->right = new_node;
-            }
-
-            balance(parent, node, new_node);
-        }
-
-        void insert(NodeType* node) {
-            NodeType* tmp; // A tmp node used to find the parent
-            NodeType* parent; // Will hold the parent of node being inserted
-            NodeType* new_node = NULL; // The new node being inserted
-
-            parent = NULL;
-            tmp = root;
-            // Traverse the tree to find the parent of the node to be inserted
-            while (tmp) {
-                parent = tmp;
-                if (*node < *tmp) {
-                    tmp = tmp->left;
-                } else {
-                    tmp = tmp->right;
-                }
-            }
-
-            // If the parent is NULL then the tree is empty
-            //  Root is always black
-            if (!parent) {
-                new_node = root = node;
-                new_node->color = 0;
-                new_node->parent = new_node->left = new_node->right = NULL;
-            } else {
-                new_node = node;
-                new_node->color = 1;
-                new_node->parent = parent;
-                new_node->left = new_node->right = NULL;
-
-                if (*(new_node) < *(parent)) {
-                    parent->left = new_node;
-                } else {
-                    parent->right = new_node;
-                }
-            }
-
-            balance(parent, node, new_node);
-        }
-
-        void balance(NodeType* parent, NodeType* node, NodeType* new_node) {
-            // If the parent is NULL then the tree is empty
-            //  Root is always black
-            if (!parent) {
-                new_node = root = node;
-                new_node->color = 0;
-                new_node->parent = new_node->left = new_node->right = NULL;
-            } else {
-                new_node = node;
-                new_node->color = 1;
-                new_node->parent = parent;
-                new_node->left = new_node->right = NULL;
-
-                if (*(new_node) < *(parent)) {
-                    parent->left = new_node;
-                } else {
-                    parent->right = new_node;
-                }
-            }
-
-            NodeType *uncle;
-            bool side;
-            while (new_node->parent && new_node->parent->color == 1) {
-                if ((side = (new_node->parent ==
-                                new_node->parent->parent->left))) {
-                    uncle = new_node->parent->parent->right;
-                } else {
-                    uncle = new_node->parent->parent->left;
-                }
-
-                if (uncle && uncle->color == 1) {
-                    new_node->parent->color = 0;
-                    uncle->color = 0;
-                    new_node->parent->parent->color = 1;
-                    new_node = new_node->parent->parent;
-                } else {
-                    if (new_node == (side ? new_node->parent->right :
-                                new_node->parent->left)) {
-                        new_node = new_node->parent;
-                        side ? rotate_left(new_node) : rotate_right(new_node);
-                    }
-
-                    new_node->parent->color = 0;
-                    new_node->parent->parent->color = 1;
-                    side ? rotate_right(new_node->parent->parent) :
-                        rotate_left(new_node->parent->parent);
-                }
-            }
-            root->color = 0;
-        }
-
-        NodeType* find(const NodeType* shell) {
-            NodeType *node = root;
-            while (node) {
-                if (*node > *shell) {
-                    node = node->left;
-                } else if (*node < *shell) {
-                    node = node->right;
-                } else {
-                    return node;
-                }
-            }
-
-            throw std::runtime_error("node not found");
-        }
-
-        void _delete(const NodeType& shell) {
-            NodeType *node = root;
-            while (node) {
-                if (*node > shell) {
-                    node = node->left;
-                } else if (*node < shell) {
-                    node = node->right;
-                } else {
-                    break;
-                }
-            }
-
-            if (!node || *node != shell) {
-                return;
-            }
-
-            uint8_t original;
-            NodeType *sub, *old;
-            if (!node->left) {
-                transplant(node, sub = node->right);
-            } else if (!node->right) {
-                transplant(node, sub = node->left);
-            } else {
-                old = minimum(node->right);
-                original = old->color;
-                sub = old->right;
-
-                if (old->parent == node) {
-                    sub->parent = node;
-                } else {
-                    transplant(old, old->right);
-                    old->right = node->right;
-                    old->right->parent = old;
-                }
-
-                transplant(node, old);
-                old->left = node->left;
-                old->left->parent = old;
-                old->color = node->color;
-            }
-
-            delete node;
-            if (original == 0) {
-                bool side;
-                NodeType *sibling;
-                while (old != root && old->color == 0) {
-                    if ((side = (old == old->parent->left))) {
-                        sibling = old->parent->right;
-                    } else {
-                        sibling = old->parent->left;
-                    }
-
-                    if (sibling->color == 1) {
-                        sibling->color = 0;
-                        old->parent->color = 1;
-                        side ? rotate_left(old->parent) : rotate_right(old->parent);
-                        sibling = side ? old->parent->right : old->parent->left;
-                    }
-
-                    if (sibling->left->color == 0 &&
-                            sibling->right->color == 1) {
-                        sibling->color = 1;
-                        old = old->parent;
-                    } else {
-                        if (0 == side ? sibling->right->color :
-                                sibling->left->color) {
-                            sibling->color = 1;
-                            if (side) {
-                                sibling->left->color = 0;
-                                rotate_right(sibling);
-                                sibling = old->parent->right;
-                            } else {
-                                sibling->right->color = 0;
-                                rotate_left(sibling);
-                                sibling = old->parent->left;
-                            }
-                        }
-
-                        sibling->color = old->parent->color;
-                        old->parent->color = 0;
-                        if (side) {
-                            sibling->left->color = 0;
-                            rotate_left(old->parent);
-                        } else {
-                            sibling->right->color = 0;
-                            rotate_right(old->parent);
-                        }
-
-                        old = root;
-                    }
-                }
-            }
-        }
-
-        void echo() {
-            echo(root, 0);
-        }
-
-        ~RBTree() {
-            delete_node(root);
-        }
+        void set_root(RBNode* node);
+        size_t get_nnodes(RBNode* node, size_t& nnodes);
+        void insert_at(RBNode* new_node, RBNode* node, bchild_t pos);
+        void insert(RBNode* node);
+        void balance(RBNode* parent, RBNode* node, RBNode* new_node);
+        RBNode* find(const RBNode* shell);
+        void _delete(const RBNode& shell);
+        void echo();
+        ~RBTree();
 };
 } } // End monya::container
 

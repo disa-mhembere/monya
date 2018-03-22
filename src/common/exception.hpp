@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-#ifndef EXCEPTIONS_HPP__
-#define EXCEPTIONS_HPP__
+#ifndef MONYA_EXCEPTION_HPP__
+#define MONYA_EXCEPTION_HPP__
 
 #include <exception>
 #include <stdexcept>
@@ -91,4 +91,4 @@ public:
     }
 };
 }
-#endif // EXCEPTIONS_HPP__
+#endif // MONYA_EXCEPTION_HPP__

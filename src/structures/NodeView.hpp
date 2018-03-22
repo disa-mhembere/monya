@@ -29,32 +29,34 @@
 #include "../../SAFS/libsafs/io_interface.h"
 
 #include "../common/types.hpp"
-//#include "Scheduler.hpp"
 
 namespace monya { namespace container {
 
+// Fwd decl
+class Scheduler;
+
 // Represent a node in the tree
-template <typename T>
 class NodeView: public safs::callback {
     public:
         virtual void prep() = 0;
         virtual void run() = 0;
         virtual void init(Params&) = 0;
         virtual void spawn() = 0;
-        virtual void distance(T arg1) = 0;
+        virtual void distance(data_t arg1) = 0;
 
         // TODO: Visibility
         //std::vector<offset_t> data_index; // Indexes that nodes hold to data
-        IndexVector<T> data_index; // Indexes that nodes hold to data & mapping
+        IndexVector<double> data_index; // Indexes that nodes hold to data & mapping
 
         // FIXME: mem waster
         std::vector<sample_id_t> req_indxs; // Indexes a vertex will req from ioer
         char* buf; // The data read from dataset
-        T comparator; // The split comparator
+        data_t comparator; // The split comparator
         unsigned numbytes; // The number of bytes in the read of data from disk
         // When the data required is in memory run this computation
         short depth; // Depth of the node used as an idendifier
         // TODO: End visibility
+
 
         virtual int invoke(safs::io_request *reqs[], int num) override {
             for (int i = 0; i < num; i++) {
@@ -69,11 +71,11 @@ class NodeView: public safs::callback {
             depth = 0;
         }
 
-        NodeView(T val): NodeView() {
+        NodeView(data_t val): NodeView() {
             comparator = val;
         }
 
-        NodeView(IndexVector<T>& data_index): NodeView() {
+        NodeView(IndexVector<data_t>& data_index): NodeView() {
             this->data_index = data_index;
         }
 
@@ -109,7 +111,7 @@ class NodeView: public safs::callback {
                 std::sort(data_index.begin(), data_index.end());
         }
 
-        virtual const IndexVector<T>& get_data_index() const {
+        const IndexVector<data_t>& get_data_index() const {
             return data_index;
         }
 
@@ -117,35 +119,35 @@ class NodeView: public safs::callback {
             std::cout << comparator << std::endl;
         }
 
-        const T get_comparator() const {
+        const data_t get_comparator() const {
             return comparator;
         }
 
-        void set_comparator(const T comparator) {
+        void set_comparator(const data_t comparator) {
             this->comparator = comparator;
         }
 
-        virtual bool operator==(const NodeView<T>& other) {
+        virtual bool operator==(const NodeView& other) {
             return comparator == other.get_comparator();
         }
 
-        virtual bool operator!=(const NodeView<T>& other) {
+        virtual bool operator!=(const NodeView& other) {
             return !(*this == other);
         }
 
-        virtual bool operator<(const NodeView<T>& other) {
+        virtual bool operator<(const NodeView& other) {
             return comparator < other.get_comparator();
         }
 
-        virtual bool operator>(const NodeView<T>& other) {
+        virtual bool operator>(const NodeView& other) {
             return this->get_comparator() > other.get_comparator();
         }
 
-        virtual bool operator<=(const NodeView<T>& other) {
+        virtual bool operator<=(const NodeView& other) {
             return !(*this > other);
         }
 
-        virtual bool operator>=(const NodeView<T>& other) {
+        virtual bool operator>=(const NodeView& other) {
             return !(*this < other);
         }
 
@@ -157,11 +159,13 @@ class NodeView: public safs::callback {
         };
 };
 
-template <typename T> std::ostream& operator<<
-    (std::ostream& stream, const NodeView<T>& node) {
+#if 0
+std::ostream& operator<<
+    (std::ostream& stream, const NodeView& node) {
     stream << node.comparator;
     return stream;
 }
+#endif
 
 } } // End monya::container
 #endif

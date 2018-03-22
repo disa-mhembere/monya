@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-#ifndef NODEVIEW_HPP__
-#define NODEVIEW_HPP__
+#ifndef MONYA_EMNODE_HPP__
+#define MONYA_EMNODE_HPP__
 
 #include <memory>
 #include <utility>
@@ -72,7 +72,6 @@ class VarNodeHeader: public NodeHeader {
 };
 
 // Represent a node in the tree
-template <typename T>
 class EMNode {
     // TODO
 };

@@ -26,12 +26,11 @@ namespace mc = monya::container;
 int main(int argc, char* argv[]) {
     std::vector<double> members {10, 8, 14, 6};
 
-    mc::RBTree<mc::RBNode<double> >::ptr tree =
-        mc::RBTree<mc::RBNode<double> >::create();
+    mc::RBTree::ptr tree = mc::RBTree::create();
 
     for (std::vector<double>::iterator it = members.begin();
             it != members.end(); ++it) {
-        tree->insert(new mc::RBNode<double>((double)*it));
+        tree->insert(new mc::RBNode((double)*it));
     }
 
     // Add some numbers in an ad hoc fashion
@@ -39,15 +38,14 @@ int main(int argc, char* argv[]) {
     std::default_random_engine generator;
     std::uniform_real_distribution<double> distribution(0, 5);
 
-    mc::RBTree<mc::RBNode<double> >::ptr tree2 =
-        mc::RBTree<mc::RBNode<double> >::create();
-    mc::RBNode<double>* node = tree2->get_root();
+    mc::RBTree::ptr tree2 = mc::RBTree::create();
+    mc::RBNode* node = tree2->get_root();
 
     std::vector<double> members2;
     // Test arbitrary insertion
     for (auto i = 0; i < NRAND; i++) {
         members2.push_back(distribution(generator));
-        auto* insert_node = new mc::RBNode<double>(members2.back());
+        auto* insert_node = new mc::RBNode(members2.back());
         if (*insert_node > *node) {
             // TODO
         }

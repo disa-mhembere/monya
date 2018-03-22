@@ -19,11 +19,10 @@
 
 #include "Scheduler.hpp"
 #include "RBNode.hpp"
-#include "../../common/types.hpp"
 
 namespace mc = monya::container;
 
-class MyNode: public mc::RBNode<unsigned> {
+class MyNode: public mc::RBNode {
     public:
 
         MyNode* parent;
@@ -44,8 +43,8 @@ class MyNode: public mc::RBNode<unsigned> {
 };
 
 void serial_test() {
-    mc::Scheduler<MyNode> scheduler;
-    std::vector<MyNode*> v;
+    mc::Scheduler scheduler;
+    std::vector<mc::RBNode*> v;
     constexpr unsigned LEVEL = 5;
     const unsigned NNODES = std::pow(2, LEVEL) - 1;
     std::cout << "Running: " << NNODES << " nodes for test\n\n";

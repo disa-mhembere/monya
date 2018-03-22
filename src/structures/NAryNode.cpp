@@ -17,27 +17,30 @@
  * limitations under the License.
  */
 
-#ifndef MONYA_RB_NODE_HPP__
-#define MONYA_RB_NODE_HPP__
+// Represent an nary node
 
-#include "BinaryNode.hpp"
+#include "NAryNode.hpp"
 
 namespace monya { namespace container {
-class RBNode : public BinaryNode {
-    public:
-        // TODO: Visibility
-        uint8_t color; // 0 = B, 1 = R
 
-        RBNode* parent;
-        RBNode* left;
-        RBNode* right;
-
-        using BinaryNode::BinaryNode;
-
-        static RBNode* cast2(BinaryNode* node) {
-            return static_cast<RBNode*>(node);
+         NAryNode::NAryNode () {
+            this->nchild = 0;
         }
-};
 
-}} // End namespace monya::container
-#endif
+        NAryNode::NAryNode (NodeView** childs, child_t nchild,
+                child_t container_size) {
+            /**
+              * \param container_size: the length of the array containing children
+              */
+            this->childs = childs;
+            this->nchild = nchild;
+        }
+
+        void  NAryNode::add_child(NodeView* child) {
+            // TODO
+        }
+
+        void  NAryNode::remove_child() {
+            // TODO
+        }
+} } // End monya::container

@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-#ifndef TASK_QUEUE_HPP__
-#define TASK_QUEUE_HPP__
+#ifndef MONYA_TASK_QUEUE_HPP__
+#define MONYA_TASK_QUEUE_HPP__
 
 namespace monya { namespace structures {
 
@@ -28,3 +28,5 @@ class TaskQueue {
 };
 
 }} // End monya::structures
+
+#endif

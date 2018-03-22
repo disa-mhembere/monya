@@ -17,37 +17,20 @@
  * limitations under the License.
  */
 
-#ifndef NARY_NODE_HPP__
-#define NARY_NODE_HPP__
+#ifndef MONYA_NARY_NODE_HPP__
+#define MONYA_NARY_NODE_HPP__
 
 // Represent an nary node
 
-#include <exception>
-#include <iostream>
 #include "NodeView.hpp"
-#include "../common/types.hpp"
 
 namespace monya { namespace container {
 
-// TODO: Complete
-template <typename T>
-static bool powerof(T num, size_t pow) {
-
-    if (pow == 2) {
-        // TODO
-    } else {
-        throw std::runtime_error("Not implemented yet!");
-    }
-
-    return false;
-}
-
-template <typename T>
-class NAryNode: public NodeView<T> {
+class NAryNode: public NodeView {
 
     private:
-        T data;
         child_t nchild;
+        NodeView** childs;
 
         void resize_child_container(size_t to) {
             // TODO
@@ -63,51 +46,16 @@ class NAryNode: public NodeView<T> {
 
     public:
 
-        NAryNode () {
-            this->nchild = 0;
-        }
-
-        NAryNode (NodeView<T>** childs, child_t nchild,
-                child_t container_size) {
-            /**
-              * \param container_size: the length of the array containing children
-              */
-            this->childs = childs;
-            this->nchild = nchild;
-            if (!powerof(container_size, 2)) {
-                // TODO
-            }
-        }
-
-        T get_data() {
-            return data;
-        }
-
-        void set_data(T data) {
-            this->data = data;
-        }
-
-        void add_child(NodeView<T>* child) {
-            // TODO
-        }
-
-        void remove_child() {
-            // TODO
-        }
-
-        static NAryNode<T>* cast2(NodeView<T>* nv) {
-            return static_cast<NAryNode<T> >(nv);
-        }
-
-        void print() {
-            std::cout << data << std::endl;
-        }
+        NAryNode ();
+        NAryNode (NodeView** childs, child_t nchild,
+                child_t container_size);
+        void add_child(NodeView* child);
+        void remove_child();
+        static NAryNode* cast2(NodeView* nv);
 
         virtual void prep() override { /*TODO*/ };
         virtual void run() override { /*TODO*/ };
-
-        virtual void spawn(NodeView<T>* node) override { /*TODO*/ };
-;
+        virtual void spawn() override { /*TODO*/ };
 };
 } } // End monya::container
 
