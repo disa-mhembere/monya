@@ -25,6 +25,7 @@
 #include "../utils/time.hpp"
 
 using namespace monya;
+constexpr short MAX_DEPTH = 3;
 
 class kdnode: public container::RBNode {
     private:
@@ -36,8 +37,9 @@ class kdnode: public container::RBNode {
         kdnode* left;
         kdnode* right;
 
-        void spawn() override {
-            // TODO: Implement
+        void spawn(std::vector<sample_id_t>& idxs,
+                std::vector<offset_t>& offsets) override {
+            std::cout << "TODO\n";
         }
 
         void set_split_dim(size_t split_dim) {
@@ -55,17 +57,23 @@ class kdnode: public container::RBNode {
 
         // This is run next
         void run() override {
-            std::cout << "PLACEHOLDER: knode::run()\n";
-            if (depth == 0) { // Root node
-                sort_data_index(true);
-                //for (size_t sample_id = 0; sample_id < req_indx.size();
-                        //sample_id++) {
-                //}
-            } else {
-                // TODO
-            }
+            std::cout << "kdnode at depth: " << depth << " run()\n";
+            if (depth < 3)
+                sort_data_index(true); // Paralleize the sort
+            else
+                sort_data_index(false);
 
-            //data_index = ;
+            std::vector<sample_id_t> idxs;
+            data_index.get_indexes(idxs);
+
+            // Integer division
+            std::vector<offset_t> offsets = { data_index.size() / 2 };
+            assert(idxs.size() == data_index.size());
+
+            // TODO: How to handle max depth handled elsewhere ??
+            if (depth < MAX_DEPTH) {
+                spawn(idxs, offsets);
+            }
         }
 
         const void print() const override {
@@ -110,9 +118,8 @@ int main(int argc, char* argv[]) {
     Params params(nsamples, nfeatures,
             "/Research/monya/src/examples/data/ordered_tree_10.bin",
             IOTYPE::SYNC, ntree, nthread, mo);
-#if 0
-    std::cout << params;
-#endif
+
+    params.print();
 
     //utils::time t;
     ComputeEngine<kdTreeProgram>::ptr engine =
@@ -133,9 +140,9 @@ int main(int argc, char* argv[]) {
                 kdnode* root = new kdnode;
                 root->set_split_dim(split_dim); // Which dim to split on
                 root->set_index(0, params.nsamples); // Which samples it owns
-                //root->set_scheduler((*it)->get_scheduler());
-                (*it)->set_root(root);
+                root->set_scheduler((*it)->get_scheduler());
 
+                (*it)->set_root(root);
                 splits.insert(split_dim); // Keep track of used split dims
                 break;
             }
