@@ -27,6 +27,7 @@
 #include <utility>
 #include <vector>
 #include <limits>
+#include <cassert>
 
 #define INVALID_ID -1
 
@@ -108,29 +109,24 @@ namespace monya {
             this->fanout = fanout;
             this->max_depth = max_depth;
         }
-    };
 
-#if 0
-    std::ostream& operator<<
-        (std::ostream& stream, const Params& params) {
-            stream << "Params: \n" <<
-            "# features: " << params.nfeatures << std::endl <<
-            "# samples: "<< params.nsamples << std::endl <<
-            "fn: " << params.fn << std::endl <<
-            "iotype: " << (params.iotype == MEM ? "Memory" :
-                params.iotype == SEM ? "Semi-External Memory" :
-                "Synchronous") << std::endl <<
-            "# trees " << params.ntree << std::endl <<
-            "# threads " << params.nthread << std::endl <<
-            "orientation: " << (params.orientation == ROW ? "Row" :
-                params.orientation == COL ? "Column" :
-                params.orientation == BAND ? "Band" : "Invalid") << std::endl <<
-            "fanout: " << params.fanout << std::endl <<
-            "max depth: " << params.max_depth << std::endl;
-
-            return stream;
+        const void print () const {
+            std::cout << "Params: \n" <<
+                "# features: " << nfeatures << std::endl <<
+                "# samples: "<< nsamples << std::endl <<
+                "fn: " << fn << std::endl <<
+                "iotype: " << (iotype == MEM ? "Memory" :
+                        iotype == SEM ? "Semi-External Memory" :
+                        "Synchronous") << std::endl <<
+                "# trees " << ntree << std::endl <<
+                "# threads " << nthread << std::endl <<
+                "orientation: " << (orientation == ROW ? "Row" :
+                        orientation == COL ? "Column" :
+                        orientation == BAND ? "Band" : "Invalid") << std::endl <<
+                "fanout: " << fanout << std::endl <<
+                "max depth: " << max_depth << std::endl;
         }
-#endif
+    };
 
     template <typename T>
     class IndexVal {
@@ -170,9 +166,13 @@ namespace monya {
             bool operator< (const IndexVal& other) const {
                 return val < other.get_val();
             }
+
+            const void print() const {
+                std::cout << "(" << get_index() << ", " <<
+                get_val() << ")" << "\n";
+            }
     };
 
-#if 0
     template <typename T>
     std::ostream& operator<<
         (std::ostream& stream, const IndexVal<T>& iv) {
@@ -180,7 +180,6 @@ namespace monya {
                 iv.get_val() << "\n";
             return stream;
         }
-#endif
 
     template <typename T>
     class IndexVector {
@@ -200,9 +199,22 @@ namespace monya {
         }
 
         void print() {
-            for (size_t i = 0; i < _.size(); i++)
+            for (size_t i = 0; i < _.size(); i++) {
                 std::cout << "Index: " <<  _[i].get_index() <<
-                    ", Val: " << _[i].get_val() << std::endl;
+                    ", Val: "; _[i].get_val().print();
+            }
+        }
+
+        void get_indexes(std::vector<sample_id_t>& v) {
+            assert(v.empty());
+
+            for (auto i = begin(); i != end(); ++i) {
+                v.push_back(i->get_index());
+            }
+        }
+
+        const size_t size() const {
+            return _.size();
         }
 
         iterator begin() { return _.begin(); }
