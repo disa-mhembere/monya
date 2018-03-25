@@ -125,7 +125,7 @@ namespace monya { namespace container {
     }
 
     void RBTree::set_root(RBNode* node) {
-        assert (NULL == node);
+        assert(NULL != node);
         insert(node);
     }
 
