@@ -38,7 +38,6 @@ class ConcreteNode : public mc::NodeView {
 
     public:
     using mc::NodeView::NodeView;
-    void spawn() override {}
     void distance(monya::data_t val) override {}
 };
 

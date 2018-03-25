@@ -42,24 +42,6 @@ class BinaryNode: public NodeView {
             return parent;
         }
 
-        // Given a new node add children to this node
-        virtual void spawn() override {
-            throw abstract_exception("BinaryNode::spawn");
-#if 0
-            if (node->get_data() < this->data) {
-                if (!l)  // No left child
-                    left(node);  // Make node my left child
-                else
-                    l->spawn(node);
-            } else if (node->get_data() > this->data) {
-                if (!r)  // No right child
-                    right(node);
-                else
-                    r->spawn(node);
-            }
-#endif
-        }
-
         virtual void prep() override {
             throw abstract_exception("BinaryNode::prep");
         }

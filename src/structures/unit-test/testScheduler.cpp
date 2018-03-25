@@ -24,22 +24,13 @@ namespace mc = monya::container;
 
 class MyNode: public mc::RBNode {
     public:
-
         MyNode* parent;
         MyNode* left;
         MyNode* right;
 
-        MyNode(unsigned val) {
-            comparator = val;
-        }
-
-        void spawn() override {
-            // TODO: Implement
-        }
-
-        void run() override {
-            std::cout << comparator << " ..";
-        }
+        MyNode(unsigned val) { comparator = val; }
+        void prep() override { }
+        void run() override { std::cout << comparator << " .."; }
 };
 
 void serial_test() {

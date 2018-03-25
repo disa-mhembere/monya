@@ -20,15 +20,8 @@
 #ifndef MONYA_NODEVIEW_HPP__
 #define MONYA_NODEVIEW_HPP__
 
-#include <memory>
-#include <utility>
-#include <iostream>
-#include <algorithm>
-#include <parallel/algorithm>
-
-#include "../../SAFS/libsafs/io_interface.h"
-
 #include "../common/types.hpp"
+#include "../../SAFS/libsafs/io_interface.h"
 
 namespace monya { namespace container {
 
@@ -41,8 +34,10 @@ class NodeView: public safs::callback {
         virtual void prep() = 0;
         virtual void run() = 0;
         virtual void init(Params&) = 0;
-        virtual void spawn() = 0;
         virtual void distance(data_t arg1) = 0;
+
+        virtual void spawn(std::vector<sample_id_t>& idxs,
+                std::vector<offset_t>& offsets);
 
         // TODO: Visibility
         //std::vector<offset_t> data_index; // Indexes that nodes hold to data
@@ -55,10 +50,11 @@ class NodeView: public safs::callback {
         unsigned numbytes; // The number of bytes in the read of data from disk
         // When the data required is in memory run this computation
         short depth; // Depth of the node used as an idendifier
+        Scheduler* scheduler;
         // TODO: End visibility
 
-
-        virtual int invoke(safs::io_request *reqs[], int num) override {
+        virtual int invoke(safs::io_request *reqs[], int num)
+            override {
             for (int i = 0; i < num; i++) {
                 this->buf = reqs[i]->get_buf();
                 this->numbytes = reqs[i]->get_size();
@@ -67,96 +63,35 @@ class NodeView: public safs::callback {
             return EXIT_SUCCESS;
         }
 
-        NodeView() {
-            depth = 0;
-        }
-
-        NodeView(data_t val): NodeView() {
-            comparator = val;
-        }
-
-        NodeView(IndexVector<data_t>& data_index): NodeView() {
-            this->data_index = data_index;
-        }
+        NodeView();
+        NodeView(data_t val);
+        NodeView(IndexVector<data_t>& data_index);
 
         // Range index
         virtual void set_index(sample_id_t start_idx,
-                const sample_id_t nsamples) {
-            for (sample_id_t idx = start_idx; idx < start_idx; idx++)
-                req_indxs.push_back(idx);
-        }
+                const sample_id_t nsamples);
 
         // Iterative index
-        void set_index(const std::vector<sample_id_t>& indexes) {
-                req_indxs = indexes; // TODO: Verify copy
-        }
+        void set_index(const std::vector<sample_id_t>& indexes);
 
-        void set_depth(short depth) {
-            this->depth = depth;
-        }
-
-        const short get_depth() const {
-            return depth;
-        }
-
-        void get_data() {
-            // TODO
-        }
-
-        void sort_data_index(bool par=false) {
-            if (par)
-                __gnu_parallel::sort(data_index.begin(),
-                        data_index.end());
-            else
-                std::sort(data_index.begin(), data_index.end());
-        }
-
-        const IndexVector<data_t>& get_data_index() const {
-            return data_index;
-        }
-
-        virtual const void print() const {
-            std::cout << comparator << std::endl;
-        }
-
-        const data_t get_comparator() const {
-            return comparator;
-        }
-
-        void set_comparator(const data_t comparator) {
-            this->comparator = comparator;
-        }
-
-        virtual bool operator==(const NodeView& other) {
-            return comparator == other.get_comparator();
-        }
-
-        virtual bool operator!=(const NodeView& other) {
-            return !(*this == other);
-        }
-
-        virtual bool operator<(const NodeView& other) {
-            return comparator < other.get_comparator();
-        }
-
-        virtual bool operator>(const NodeView& other) {
-            return this->get_comparator() > other.get_comparator();
-        }
-
-        virtual bool operator<=(const NodeView& other) {
-            return !(*this > other);
-        }
-
-        virtual bool operator>=(const NodeView& other) {
-            return !(*this < other);
-        }
-
-        bool is_root() {
-            return depth == 0;
-        }
-
-        virtual ~NodeView() {
-        };
+        void set_depth(short depth);
+        const short get_depth() const;
+        void get_data();
+        void set_scheduler(Scheduler* scheduler);
+        Scheduler* get_scheduler();
+        void sort_data_index(bool par=false);
+        const IndexVector<data_t>& get_data_index() const;
+        virtual const void print() const;
+        const data_t get_comparator() const;
+        void set_comparator(const data_t comparator);
+        virtual bool operator==(const NodeView& other);
+        virtual bool operator!=(const NodeView& other);
+        virtual bool operator<(const NodeView& other);
+        virtual bool operator>(const NodeView& other);
+        virtual bool operator<=(const NodeView& other);
+        virtual bool operator>=(const NodeView& other);
+        bool is_root();
+        virtual ~NodeView();
 };
 
 #if 0
