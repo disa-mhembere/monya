@@ -23,6 +23,7 @@
 
 #include "../common/monya.hpp"
 #include "../utils/time.hpp"
+#include "../io/IO.hpp"
 
 using namespace monya;
 constexpr short MAX_DEPTH = 3;
@@ -39,7 +40,21 @@ class kdnode: public container::RBNode {
 
         void spawn(std::vector<sample_id_t>& idxs,
                 std::vector<offset_t>& offsets) override {
-            std::cout << "TODO\n";
+
+            assert(offsets.size() == 2);
+            left = new kdnode;
+            right = new kdnode;
+
+            left->parent = this;
+            right->parent = this;
+
+            left->set_index(&idxs[offsets[0]], (offsets[1]-offsets[0]));
+            // TODO: Make sure indexing is ok
+            right->set_index(&idxs[offsets[1]], (offsets[1]-offsets.size()));
+
+            // Call Schedule
+            scheduler->schedule(left);
+            scheduler->schedule(right);
         }
 
         void set_split_dim(size_t split_dim) {
@@ -65,6 +80,12 @@ class kdnode: public container::RBNode {
 
             std::vector<sample_id_t> idxs;
             data_index.get_indexes(idxs);
+
+            std::cout << "Printing data_index\n";
+            data_index.print();
+            std::cout << "Printing idxs";
+            io::print_arr<sample_id_t>(&idxs[0], idxs.size());
+            exit(-1);
 
             // Integer division
             std::vector<offset_t> offsets = { data_index.size() / 2 };
@@ -109,14 +130,14 @@ class RandomSplit {
 int main(int argc, char* argv[]) {
 
     // TODO: Read from argv[]
-    size_t nsamples = 10;
-    size_t nfeatures = 1;
+    size_t nsamples = 32;
+    size_t nfeatures = 16;
     tree_t ntree = 1;
     unsigned nthread = 1;
     MAT_ORIENT mo = MAT_ORIENT::COL;
 
     Params params(nsamples, nfeatures,
-            "/Research/monya/src/examples/data/ordered_tree_10.bin",
+            "/Research/monya/src/data/rand_32_16.bin",
             IOTYPE::SYNC, ntree, nthread, mo);
 
     params.print();
@@ -139,7 +160,7 @@ int main(int argc, char* argv[]) {
 
                 kdnode* root = new kdnode;
                 root->set_split_dim(split_dim); // Which dim to split on
-                root->set_index(0, params.nsamples); // Which samples it owns
+                root->set_index_range(0, params.nsamples); // Which samples it owns
                 root->set_scheduler((*it)->get_scheduler());
 
                 (*it)->set_root(root);
