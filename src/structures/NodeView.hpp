@@ -67,12 +67,15 @@ class NodeView: public safs::callback {
         NodeView(data_t val);
         NodeView(IndexVector<data_t>& data_index);
 
+        void schedule();
+
         // Range index
-        virtual void set_index(sample_id_t start_idx,
+        virtual void set_index_range(sample_id_t start_idx,
                 const sample_id_t nsamples);
 
         // Iterative index
         void set_index(const std::vector<sample_id_t>& indexes);
+        void set_index(const sample_id_t*, const size_t);
 
         void set_depth(short depth);
         const short get_depth() const;

@@ -29,6 +29,7 @@ namespace monya { namespace container {
 
     NodeView::NodeView() {
         depth = 0;
+        req_indxs.resize(0);
     }
 
     NodeView::NodeView(data_t val): NodeView() {
@@ -40,7 +41,7 @@ namespace monya { namespace container {
     }
 
     // Range index
-    void NodeView::set_index(sample_id_t start_idx,
+    void NodeView::set_index_range(sample_id_t start_idx,
             const sample_id_t nsamples) {
         for (sample_id_t idx = start_idx; idx < start_idx; idx++)
             req_indxs.push_back(idx);
@@ -49,6 +50,10 @@ namespace monya { namespace container {
     // Iterative index
     void NodeView::set_index(const std::vector<sample_id_t>& indexes) {
         req_indxs = indexes; // TODO: Verify copy
+    }
+
+    void NodeView::set_index(const sample_id_t* indexes, const size_t nelem) {
+        req_indxs.insert(req_indxs.begin(), indexes, indexes+nelem);
     }
 
     void NodeView::set_depth(short depth) {
@@ -125,6 +130,10 @@ namespace monya { namespace container {
 
     void NodeView::spawn(std::vector<sample_id_t>& idxs,
             std::vector<offset_t>& offsets) {
+    }
+
+    void NodeView::schedule() {
+        scheduler->schedule(this);
     }
 
     NodeView::~NodeView() {
