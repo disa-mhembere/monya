@@ -198,10 +198,9 @@ namespace monya {
             return this->_[index];
         }
 
-        void print() {
+        const void print() const {
             for (size_t i = 0; i < _.size(); i++) {
-                std::cout << "Index: " <<  _[i].get_index() <<
-                    ", Val: "; _[i].get_val().print();
+                _[i].print();
             }
         }
 
