@@ -24,6 +24,7 @@
 #include <iostream>
 #include <algorithm>
 #include <parallel/algorithm>
+#include "../io/IO.hpp"
 
 namespace monya { namespace container {
 
@@ -42,9 +43,10 @@ namespace monya { namespace container {
 
     // Range index
     void NodeView::set_index_range(sample_id_t start_idx,
-            const sample_id_t nsamples) {
-        for (sample_id_t idx = start_idx; idx < start_idx; idx++)
+            const sample_id_t stop_idx) {
+        for (sample_id_t idx = start_idx; idx < stop_idx; idx++) {
             req_indxs.push_back(idx);
+        }
     }
 
     // Iterative index
@@ -56,12 +58,26 @@ namespace monya { namespace container {
         req_indxs.insert(req_indxs.begin(), indexes, indexes+nelem);
     }
 
+    void NodeView::set_ioer(io::IO* ioer) {
+        this->ioer = ioer;
+    }
+
+    io::IO* NodeView::get_ioer() {
+        assert(NULL != ioer);
+        return ioer;
+    }
+
     void NodeView::set_depth(short depth) {
         this->depth = depth;
     }
 
     const short NodeView::get_depth() const {
         return depth;
+    }
+
+    // This is run first
+    void NodeView::prep() {
+        get_data(); // Put data into mem
     }
 
     void NodeView::get_data() {

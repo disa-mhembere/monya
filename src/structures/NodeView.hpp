@@ -23,7 +23,12 @@
 #include "../common/types.hpp"
 #include "../../SAFS/libsafs/io_interface.h"
 
-namespace monya { namespace container {
+namespace monya {
+    namespace io {
+        class IO;
+    }
+
+    namespace container {
 
 // Fwd decl
 class Scheduler;
@@ -31,7 +36,6 @@ class Scheduler;
 // Represent a node in the tree
 class NodeView: public safs::callback {
     public:
-        virtual void prep() = 0;
         virtual void run() = 0;
         virtual void init(Params&) = 0;
         virtual void distance(data_t arg1) = 0;
@@ -51,6 +55,8 @@ class NodeView: public safs::callback {
         // When the data required is in memory run this computation
         short depth; // Depth of the node used as an idendifier
         Scheduler* scheduler;
+        io::IO* ioer;
+
         // TODO: End visibility
 
         virtual int invoke(safs::io_request *reqs[], int num)
@@ -73,9 +79,16 @@ class NodeView: public safs::callback {
         virtual void set_index_range(sample_id_t start_idx,
                 const sample_id_t nsamples);
 
+        // Defaults to grabbing index data
+        virtual void prep();
+
         // Iterative index
         void set_index(const std::vector<sample_id_t>& indexes);
         void set_index(const sample_id_t*, const size_t);
+
+        // IO
+        void set_ioer(io::IO* ioer);
+        typename io::IO* get_ioer();
 
         void set_depth(short depth);
         const short get_depth() const;

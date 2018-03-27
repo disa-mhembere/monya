@@ -17,7 +17,10 @@
  * limitations under the License.
  */
 
- #include <sys/stat.h>
+#ifndef MONYA_FILEUTIL_HPP__
+#define MONYA_FILEUTIL_HPP__
+
+#include <sys/stat.h>
 
 namespace monya { namespace utils {
 size_t get_file_size(std::string filename) {
@@ -32,3 +35,5 @@ size_t get_file_size(int fd) {
     return rc == 0 ? stat_buf.st_size : -1;
 }
 } };
+
+#endif

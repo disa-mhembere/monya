@@ -102,6 +102,11 @@ namespace monya {
                 this->ioer = ioer;
             }
 
+            io::IO::raw_ptr get_ioer() {
+                assert(NULL != this->ioer);
+                return ioer;
+            }
+
             void set_tree_id(const tree_t tid) {
                 this->tree_id = tid;
             }

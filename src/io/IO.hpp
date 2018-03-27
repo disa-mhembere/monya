@@ -130,7 +130,9 @@ class IO {
             throw not_implemented_exception();
         }
 
-        virtual void destroy() = 0;
+        virtual void destroy() {
+            throw abstract_exception("IO::destroy");
+        }
 };
 
 // Basically a matrix represented as a vector

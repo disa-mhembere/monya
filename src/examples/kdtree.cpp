@@ -65,11 +65,6 @@ class kdnode: public container::RBNode {
             return split_dim;
         }
 
-        // This is run first
-        void prep() override {
-            get_data(); // Put data into mem
-        }
-
         // This is run next
         void run() override {
             std::cout << "kdnode at depth: " << depth << " run()\n";
