@@ -46,9 +46,11 @@ int main(int argc, char* argv[]) {
     for (auto i = 0; i < NRAND; i++) {
         members2.push_back(distribution(generator));
         auto* insert_node = new mc::RBNode(members2.back());
-        if (*insert_node > *node) {
-            // TODO
-        }
+        insert_node->print();
+
+        //if (*insert_node > *node) {
+            //// TODO
+        //}
     }
 
 
