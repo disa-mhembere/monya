@@ -42,10 +42,6 @@ class BinaryNode: public NodeView {
             return parent;
         }
 
-        virtual void prep() override {
-            throw abstract_exception("BinaryNode::prep");
-        }
-
         virtual void run() override {
             throw abstract_exception("BinaryNode::run");
         }

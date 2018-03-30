@@ -29,7 +29,6 @@ class MyNode: public mc::RBNode {
         MyNode* right;
 
         MyNode(unsigned val) { comparator = val; }
-        void prep() override { }
         void run() override { std::cout << comparator << " .."; }
 };
 

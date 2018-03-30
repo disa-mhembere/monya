@@ -32,7 +32,6 @@ namespace mi = monya::io;
 class ConcreteNode : public mc::NodeView {
 
     protected:
-    void prep() override {}
     void run() override {}
     void init(monya::Params&) override {}
 
