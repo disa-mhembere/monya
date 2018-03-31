@@ -17,41 +17,47 @@
  * limitations under the License.
  */
 
-#include "RBTree.hpp"
-#include "RBNode.hpp"
+#include "BinaryTree.hpp"
+#include "BinaryNode.hpp"
 #include <random>
 
 #include "sucommon.hpp"
-
 namespace mc = monya::container;
-namespace mt = monya::test;
 
 int main(int argc, char* argv[]) {
     std::vector<double> members {0.10, 0.8, 0.14, 0.6};
 
-    mc::RBTree::ptr tree = mc::RBTree::create();
+    mc::BinaryTree::ptr tree = mc::BinaryTree::create();
 
     for (std::vector<double>::iterator it = members.begin();
             it != members.end(); ++it) {
-        tree->insert(new mc::RBNode((double)*it));
+        tree->insert(new mc::BinaryNode((double)*it));
     }
 
-    // Add some numbers in an ad hoc fashion
-    constexpr int NRAND = std::pow(2, 6) - 1;
-    std::default_random_engine generator;
-    std::uniform_real_distribution<double> distribution(0, 5);
+    for (auto i : members) {
+        // Asserts on failure to find
+        mc::BinaryNode* q = new mc::BinaryNode(i);
+        mc::BinaryNode* a = tree->find(q);
+        assert(*q == *a);
+        delete(q);
+    }
 
-    mc::RBTree::ptr tree2 = mc::RBTree::create();
 
-    mt::NodeMapper nm;
-    // Test arbitrary insertion
-    for (auto i = 0; i < NRAND; i++)
-        nm.insert(new mc::RBNode(distribution(generator)));
-    nm.print();
-    nm.populate_tree(tree2);
+    //// Add some numbers in an ad hoc fashion
+    //constexpr int NRAND = std::pow(2, 6) - 1;
+    //std::default_random_engine generator;
+    //std::uniform_real_distribution<double> distribution(0, 5);
+
+    //mc::BinaryTree::ptr tree2 = mc::BinaryTree::create();
+
+    //NodeMapper nm;
+    //// Test arbitrary insertion
+    //for (auto i = 0; i < NRAND; i++)
+        //nm.insert(new mc::BinaryNode(distribution(generator)));
+
 
 
     tree->echo();
-    std::cout << "RBTree Test successful!\n\n";
+    std::cout << "BinaryTree Test successful!\n\n";
     return EXIT_SUCCESS;
 }
