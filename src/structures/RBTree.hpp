@@ -64,6 +64,10 @@ class RBTree {
             return depth;
         }
 
+        const bool empty() const {
+            return NULL == root;
+        }
+
         void set_root(RBNode* node);
         size_t get_nnodes(RBNode* node, size_t& nnodes);
         void insert_at(RBNode* new_node, RBNode* node, bchild_t pos);
