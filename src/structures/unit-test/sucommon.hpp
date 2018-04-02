@@ -23,10 +23,11 @@
 #include <unordered_map>
 #include <vector>
 #include <cmath>
+#include <memory>
+
 #include "sucommon.hpp"
 
 // Not good
-#include "../RBNode.hpp"
 #include "../RBTree.hpp"
 #include "../BinaryNode.hpp"
 #include "../BinaryTree.hpp"
@@ -37,23 +38,22 @@ namespace monya {
 
     namespace test {
     class NodeMapper {
-        private:
-        std::unordered_map<unsigned, std::vector<mc::RBNode*> > map;
+        public:
+        std::unordered_map<unsigned, std::vector<mc::BinaryNode*> > map;
         unsigned depth;
 
-        public:
         NodeMapper() {
             depth = 0;
         }
 
-        void init(mc::RBNode* node) {
+        void init(mc::BinaryNode* node) {
             assert(NULL != node);
-            std::vector<mc::RBNode*> v;
+            std::vector<mc::BinaryNode*> v;
             v.push_back(node);
             map[depth] = v;
         }
 
-        void insert(mc::RBNode* node) {
+        void insert(mc::BinaryNode* node) {
             assert(NULL != node);
 
             if (map.empty()) {
@@ -67,19 +67,66 @@ namespace monya {
 
         void check() {
             if (std::pow(2, depth) == map[depth].size()) {
-                map[++depth] = std::vector<mc::RBNode*>();
+                map[++depth] = std::vector<mc::BinaryNode*>();
             }
         }
 
-        void populate_tree(mc::RBTree::ptr tree) {
+        const size_t size() {
+            return map.size();
+        }
+
+        void populate_tree(std::shared_ptr<mc::BinaryTree> tree) {
+            constexpr unsigned FANOUT = 2;
             assert(tree->empty());
-            mc::RBNode* parent = NULL;
-            for (unsigned key = 0; key < depth; key++) {
+            mc::BinaryNode* parent = NULL;
+
+            for (unsigned key = 0; key < map.size(); key++) {
                 if (key == 0) {
                     parent = map[key][0];
-                    tree->insert(parent);
+                    tree->insert(parent); // root
+
+#ifdef MONYA_VERBOSE
+                    std::cout << "Inserting root: "; parent->print();
+                    std::cout << "\n";
+#endif
+                } else {
+                    // All other levels
+                    auto nodes = map[key]; // vector of nodes on the level
+                    mc::BinaryNode* left = NULL;
+                    mc::BinaryNode* right = NULL;
+
+                    for (size_t id = 0; id < nodes.size(); id+=FANOUT) {
+                        parent = map[key-1][id/FANOUT];
+
+                        // These shouldn't be populated
+                        assert(NULL == parent->left);
+                        assert(NULL == parent->right);
+
+#ifdef MONYA_VERBOSE
+                        std::cout << "Parent node: "; parent->print();
+                        std::cout << "\n";
+#endif
+
+                        if (*nodes[id] < *nodes[id+1]) {
+                            left = nodes[id];
+                            right = nodes[id+1];
+                        } else {
+                            left = nodes[id+1];
+                            right = nodes[id];
+                        }
+
+#ifdef MONYA_VERBOSE
+                        std::cout << "Inserting left as: "; left->print();
+                        std::cout << "\n";
+                        std::cout << "Inserting right as: "; right->print();
+                        std::cout << "\n";
+#endif
+
+                        // Set left and right
+                        tree->insert_at(left, parent, bchild_t::LEFT);
+                        tree->insert_at(right, parent, bchild_t::RIGHT);
+                    }
                 }
-                // TODO
             }
         }
 

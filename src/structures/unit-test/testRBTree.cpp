@@ -37,18 +37,19 @@ int main(int argc, char* argv[]) {
     }
 
     // Add some numbers in an ad hoc fashion
-    constexpr int NRAND = std::pow(2, 6) - 1;
+    //constexpr int NRAND = std::pow(2, 6) - 1;
     std::default_random_engine generator;
     std::uniform_real_distribution<double> distribution(0, 5);
 
-    mc::RBTree::ptr tree2 = mc::RBTree::create();
+    // TODO: Subclass RBTree from BinaryTree then add back
+    //mc::RBTree::ptr tree2 = mc::RBTree::create();
 
-    mt::NodeMapper nm;
-    // Test arbitrary insertion
-    for (auto i = 0; i < NRAND; i++)
-        nm.insert(new mc::RBNode(distribution(generator)));
-    nm.print();
-    nm.populate_tree(tree2);
+    //mt::NodeMapper nm;
+    //// Test arbitrary insertion
+    //for (auto i = 0; i < NRAND; i++)
+        //nm.insert(new mc::RBNode(distribution(generator)));
+    //nm.print();
+    //nm.populate_tree(tree2);
 
 
     tree->echo();
