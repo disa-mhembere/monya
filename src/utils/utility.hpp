@@ -17,26 +17,20 @@
  * limitations under the License.
  */
 
-#ifndef MONYA_FILEUTIL_HPP__
-#define MONYA_FILEUTIL_HPP__
+#ifndef MONYA_UTILITY_NODE_HPP__
+#define MONYA_UTILITY_NODE_HPP__
 
-#include <sys/stat.h>
+#include <limits>
+#include <algorithm>
 
 namespace monya { namespace utils {
-static size_t get_file_size(std::string filename) {
-        struct stat stat_buf;
-        int rc = stat(filename.c_str(), &stat_buf);
-        return rc == 0 ? stat_buf.st_size : -1;
-}
 
-#if 0
-static size_t get_file_size(const int fd) {
-    struct stat stat_buf;
-    int rc = fstat(fd, &stat_buf);
-    return rc == 0 ? stat_buf.st_size : -1;
+template<class T=data_t>
+typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
+    approx_equal(T x, T y, T ulp =0.1) {
+    return std::abs(x-y) <= std::numeric_limits<T>::epsilon() * std::abs(x+y)
+        * ulp || std::abs(x-y) < std::numeric_limits<T>::min();
 }
-#endif
 
 } } // End namespace monya::utils
-
 #endif
