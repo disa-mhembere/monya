@@ -154,7 +154,6 @@ namespace monya { namespace container {
             new_node->parent = new_node->left = new_node->right = NULL;
             depth = 1; // Data race ok
         } else {
-            new_node = node;
             new_node->color = 1;
             new_node->parent = parent;
             new_node->left = new_node->right = NULL;

@@ -72,8 +72,13 @@ namespace monya { namespace container {
 
     void BinaryTree::insert_at(BinaryNode* new_node,
             BinaryNode* node, bchild_t pos) {
-        if (NULL != node->left)
-            throw std::runtime_error("Left child already populated");
+        if (pos == bchild_t::LEFT && NULL != node->left) {
+            throw std::runtime_error("BinaryTree::insert_at: "
+                    "Left child already populated");
+        } else if (pos == bchild_t::RIGHT && NULL != node->right) {
+            throw std::runtime_error("BinaryTree::insert_at: "
+                    "Right child already populated");
+        }
 
         BinaryNode* parent = node;
 
@@ -83,7 +88,6 @@ namespace monya { namespace container {
             new_node->parent = new_node->left = new_node->right = NULL;
             depth = 1; // Data race ok
         } else {
-            new_node = node;
             new_node->parent = parent;
             new_node->left = new_node->right = NULL;
 
@@ -132,8 +136,10 @@ namespace monya { namespace container {
         BinaryNode *node = root;
         while (node) {
             if (*node > *shell) {
+
                 node = node->left;
             } else if (*node < *shell) {
+
                 node = node->right;
             } else {
                 return node;

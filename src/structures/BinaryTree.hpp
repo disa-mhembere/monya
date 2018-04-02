@@ -58,6 +58,10 @@ class BinaryTree {
             return depth;
         }
 
+        const bool empty() const {
+            return NULL == root;
+        }
+
         void set_root(BinaryNode* node);
         virtual size_t get_nnodes(BinaryNode* node, size_t& nnodes);
         virtual void insert_at(BinaryNode* new_node,
