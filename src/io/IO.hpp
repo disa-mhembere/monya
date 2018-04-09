@@ -86,48 +86,48 @@ class IO {
 
         // Read everything in the file
         virtual void read(void* buf) {
-            throw not_implemented_exception();
+            throw not_implemented_exception(__FILE__, __LINE__);
         }
 
         // Write everything in the buffer out
         virtual void write(const void* buf, const size_t nbytes) {
-            throw not_implemented_exception();
+            throw not_implemented_exception(__FILE__, __LINE__);
         };
 
         // Read `nbytes` at `offset` location in the file to `buf`
         virtual void read(void* buf, const size_t offset,
                 const size_t nbytes) {
-            throw not_implemented_exception();
+            throw not_implemented_exception(__FILE__, __LINE__);
         }
 
         virtual void write() {
-            throw not_implemented_exception();
+            throw not_implemented_exception(__FILE__, __LINE__);
         }
 
         // Write `nbytes` at `offset` location in the file to `buf`
         virtual void write(const void* buf, const size_t offset,
                 const size_t nbytes) {
-            throw not_implemented_exception();
+            throw not_implemented_exception(__FILE__, __LINE__);
         }
 
         virtual void append(const void* buf, const size_t nbytes) {
-            throw not_implemented_exception();
+            throw not_implemented_exception(__FILE__, __LINE__);
         }
 
         virtual void shape(const dimpair dim) {
-            throw not_implemented_exception();
+            this->dim = dim;
         }
 
         virtual const dimpair& shape() {
-            throw not_implemented_exception();
+            return this->dim;
         }
 
         virtual void* get_row(const offset_t offset) {
-            throw not_implemented_exception();
+            throw not_implemented_exception(__FILE__, __LINE__);
         }
 
         virtual void* get_col(const offset_t offset) {
-            throw not_implemented_exception();
+            throw not_implemented_exception(__FILE__, __LINE__);
         }
 
         virtual void destroy() {
@@ -154,14 +154,6 @@ class MemoryIO: public IO {
             buf = data + (dtype_size*offset);
         }
 
-        void shape(dimpair dim) override {
-            this->dim = dim;
-        }
-
-        const dimpair& shape() override {
-            return this->dim;
-        }
-
         void set_data(void* data) {
             this->data = reinterpret_cast<char*>(data);
         }
@@ -184,9 +176,9 @@ class MemoryIO: public IO {
                 return &data[(dtype_size*offset*this->dim.first)];
             }
             else if (this->orientation == MAT_ORIENT::ROW)
-                throw not_implemented_exception();
+                throw not_implemented_exception(__FILE__, __LINE__);
             else
-                throw not_implemented_exception();
+                throw not_implemented_exception(__FILE__, __LINE__);
         }
 
         // No copying
@@ -194,9 +186,9 @@ class MemoryIO: public IO {
             if (this->orientation == MAT_ORIENT::ROW)
                 return &data[(dtype_size*offset*this->dim.second)];
             else if (this->orientation == MAT_ORIENT::COL)
-                throw not_implemented_exception();
+                throw not_implemented_exception(__FILE__, __LINE__);
             else
-                throw not_implemented_exception();
+                throw not_implemented_exception(__FILE__, __LINE__);
         }
 
         static MemoryIO* cast2(IO::raw_ptr iop) {
@@ -270,19 +262,19 @@ class SyncIO: public IO {
                 fs.read(&data[0], dtype_size*dim.first);
                 return data;
             } else if (this->orientation == MAT_ORIENT::ROW)
-                throw not_implemented_exception();
+                throw not_implemented_exception(__FILE__, __LINE__);
             else
-                throw not_implemented_exception();
+                throw not_implemented_exception(__FILE__, __LINE__);
         }
 
         // No copying
         void* get_row(const offset_t offset) override {
             if (this->orientation == MAT_ORIENT::ROW)
-                throw not_implemented_exception();
+                throw not_implemented_exception(__FILE__, __LINE__);
             else if (this->orientation == MAT_ORIENT::COL)
-                throw not_implemented_exception();
+                throw not_implemented_exception(__FILE__, __LINE__);
             else
-                throw not_implemented_exception();
+                throw not_implemented_exception(__FILE__, __LINE__);
         }
 
         void destroy() override {
