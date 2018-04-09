@@ -58,6 +58,13 @@ namespace monya { namespace container {
         req_indxs.insert(req_indxs.begin(), indexes, indexes+nelem);
     }
 
+    void NodeView::set_index(const sample_id_t index) {
+        if (req_indxs.size())
+            req_indxs.clear();
+
+        req_indxs.push_back(index);
+    }
+
     void NodeView::set_ioer(io::IO* ioer) {
         this->ioer = ioer;
     }
@@ -81,7 +88,11 @@ namespace monya { namespace container {
     }
 
     void NodeView::get_data() {
-        // TODO
+        assert(ioer->get_orientation() == MAT_ORIENT::COL); // TODO: Impl
+        // FIXME
+        assert(req_indxs.size() == 1); // TODO: Impl
+        data_t* ret = static_cast<data_t*>(ioer->get_col(req_indxs[0]));
+        data_index.set_indexes(ret, ioer->shape().first);
     }
 
     void NodeView::set_scheduler(Scheduler* scheduler) {

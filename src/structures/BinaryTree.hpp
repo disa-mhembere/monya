@@ -29,9 +29,10 @@ class BinaryNode;
 
 // NOTE: No deletion!
 class BinaryTree {
-    private:
+    protected:
         BinaryNode* root;
         size_t depth;
+        size_t max_depth; // Maximum depth the tree can reach
 
         void echo(BinaryNode* node, int tabs);
         void delete_node(BinaryNode* node); // Used for cleanup only

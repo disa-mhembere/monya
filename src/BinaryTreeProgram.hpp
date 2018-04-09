@@ -21,7 +21,7 @@
 #define MONYA_BINARY_TREE_PROGRAM_HPP__
 
 #include "common/types.hpp"
-#include "structures/RBTree.hpp"
+#include "structures/BinaryTree.hpp"
 #include "io/IOfactory.hpp"
 #include "structures/Scheduler.hpp"
 
@@ -31,7 +31,7 @@ namespace monya {
     unsigned READ_SZ_BYTES = 4096; // TODO: Alter
 
     template <typename NodeType>
-    class BinaryTreeProgram: public container::RBTree {
+    class BinaryTreeProgram: public container::BinaryTree {
         private:
             typedef typename container::Scheduler sched_t;
 
@@ -40,8 +40,6 @@ namespace monya {
             tree_t tree_id; // The ID of this tree
             std::string exmem_fn;
             io::IO::raw_ptr ioer;
-            short max_depth; // Maximum depth the tree can reach
-            short depth; // The current depth of this tree
             size_t nsamples; // Max # of samples from which the tree is built
             size_t nfeatures; // Number of features
             sched_t* scheduler;
@@ -74,6 +72,14 @@ namespace monya {
                 this->scheduler = new sched_t(params.fanout, params.ntree);
             }
 
+            void set_root(NodeType* node) {
+                assert(NULL != node);
+                assert(NULL != ioer);
+
+                node->set_ioer(ioer);
+                BinaryTree::set_root(node);
+            }
+
             NodeType* create_node() {
                 return new NodeType;
             }
@@ -94,7 +100,7 @@ namespace monya {
                 return ptr(new BinaryTreeProgram<NodeType>());
             }
 
-            //static ptr cast2(typename container::RBTree<NodeType>::ptr rbptr) {
+            //static ptr cast2(typename container::BinaryTree::ptr rbptr) {
                 //return std::static_pointer_cast<ptr>(rbptr);
             //}
 

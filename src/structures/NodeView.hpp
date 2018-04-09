@@ -49,9 +49,7 @@ class NodeView: public safs::callback {
 
         // FIXME: mem waster
         std::vector<sample_id_t> req_indxs; // Indexes a vertex will req from ioer
-        char* buf; // The data read from dataset
         data_t comparator; // The split comparator
-        unsigned numbytes; // The number of bytes in the read of data from disk
         // When the data required is in memory run this computation
         short depth; // Depth of the node used as an idendifier
         Scheduler* scheduler;
@@ -62,9 +60,12 @@ class NodeView: public safs::callback {
         virtual int invoke(safs::io_request *reqs[], int num)
             override {
             for (int i = 0; i < num; i++) {
-                this->buf = reqs[i]->get_buf();
-                this->numbytes = reqs[i]->get_size();
-                free(this->buf); // TODO: Verify OK
+                char* buf = reqs[i]->get_buf();
+                size_t numbytes = reqs[i]->get_size();
+
+                // TODO: Do something with buf and numbytes
+                assert(numbytes);
+                free(buf);
             }
             return EXIT_SUCCESS;
         }
@@ -85,6 +86,7 @@ class NodeView: public safs::callback {
         // Iterative index
         void set_index(const std::vector<sample_id_t>& indexes);
         void set_index(const sample_id_t*, const size_t);
+        void set_index(const sample_id_t index);
 
         // IO
         void set_ioer(io::IO* ioer);
