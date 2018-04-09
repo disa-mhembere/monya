@@ -82,8 +82,7 @@ class kdnode: public container::RBNode {
             io::print_arr<sample_id_t>(&idxs[0], idxs.size());
             exit(-1);
 
-            // Integer division
-            std::vector<offset_t> offsets = { data_index.size() / 2 };
+            std::vector<offset_t> offsets = { 0, data_index.size() / 2 };
             assert(idxs.size() == data_index.size());
 
             // TODO: How to handle max depth handled elsewhere ??
@@ -146,7 +145,7 @@ int main(int argc, char* argv[]) {
     // TODO: Create root/node initializer that is passed to node
     RandomSplit rs(params.nfeatures);
     std::set<size_t> splits;
-    for (auto it = engine->forest_begin(); it != engine->forest_end(); ++it) {
+    for (auto tree : engine->get_forest()) {
         while (true) {
             size_t split_dim = rs.generate();
             auto sp = splits.find(split_dim); // Pick the split dim
@@ -155,10 +154,10 @@ int main(int argc, char* argv[]) {
 
                 kdnode* root = new kdnode;
                 root->set_split_dim(split_dim); // Which dim to split on
-                root->set_index_range(0, params.nsamples); // Which samples it owns
-                root->set_scheduler((*it)->get_scheduler());
+                root->set_index(split_dim); // Which samples it owns
+                root->set_scheduler(tree->get_scheduler());
 
-                (*it)->set_root(root);
+                tree->set_root(root);
                 splits.insert(split_dim); // Keep track of used split dims
                 break;
             }

@@ -79,6 +79,10 @@ namespace monya {
                 return this->params;
             }
 
+            std::vector<TreeProgramType*>& get_forest() {
+                return this->forest;
+            }
+
             forest_iterator forest_begin() {
                 return this->forest.begin();
             }
