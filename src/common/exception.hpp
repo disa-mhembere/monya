@@ -31,6 +31,11 @@ public:
     not_implemented_exception() :
         runtime_error("Method not Implemented!\n") {
         }
+
+    not_implemented_exception(const std::string file, const int line) :
+        runtime_error(std::string("[ERROR]: '") + file + std::string(":") +
+            std::to_string(line) + std::string("' not implemented!\n")) {
+        }
 };
 
 class abstract_exception : public std::runtime_error {

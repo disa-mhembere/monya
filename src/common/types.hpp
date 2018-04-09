@@ -92,12 +92,12 @@ namespace monya {
             unsigned nthread;
             MAT_ORIENT orientation;
             unsigned fanout; // The number of children a node a can have
-            short max_depth; // Maximum depth the tree can reach
+            size_t max_depth; // Maximum depth the tree can reach
 
         Params(size_t nsamples=0, size_t nfeatures=0, std::string fn="",
                 IOTYPE iotype=IOTYPE::MEM, tree_t ntree=1, unsigned nthread=1,
                 MAT_ORIENT orientation=MAT_ORIENT::COL, unsigned fanout=2,
-                short max_depth=std::numeric_limits<short>::max()) {
+                size_t max_depth=std::numeric_limits<size_t>::max()) {
 
             this->nsamples = nsamples;
             this->nfeatures = nfeatures;
@@ -202,6 +202,14 @@ namespace monya {
             for (size_t i = 0; i < _.size(); i++) {
                 _[i].print();
             }
+        }
+
+        void set_indexes(T* vals, const size_t nelem) {
+            if (_.size())
+                _.clear();
+
+            for (size_t i = 0; i < nelem; i++)
+                _.push_back(IndexVal<T>(i, vals[i]));
         }
 
         void get_indexes(std::vector<sample_id_t>& v) {
