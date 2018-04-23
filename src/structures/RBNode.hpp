@@ -23,18 +23,20 @@
 #include "BinaryNode.hpp"
 
 namespace monya { namespace container {
-template <typename DataType>
-class RBNode : public BinaryNode<DataType> {
+class RBNode : public BinaryNode {
     public:
         // TODO: Visibility
         uint8_t color; // 0 = B, 1 = R
 
-        // Couldn't figure out a way out of this variable redundancy
-        RBNode<DataType>* parent;
-        RBNode<DataType>* left;
-        RBNode<DataType>* right;
+        RBNode* parent;
+        RBNode* left;
+        RBNode* right;
 
-        using BinaryNode<DataType>::BinaryNode;
+        using BinaryNode::BinaryNode;
+
+        static RBNode* cast2(BinaryNode* node) {
+            return static_cast<RBNode*>(node);
+        }
 };
 
 }} // End namespace monya::container

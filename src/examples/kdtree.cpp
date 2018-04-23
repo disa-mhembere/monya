@@ -19,84 +19,152 @@
 
 #include <cstdlib>
 #include <random>
+#include <set>
 
 #include "../common/monya.hpp"
 #include "../utils/time.hpp"
+#include "../io/IO.hpp"
 
 using namespace monya;
+constexpr short MAX_DEPTH = 3;
 
-class kdnode: public container::RBNode<double> {
+class kdnode: public container::RBNode {
+    private:
+        size_t split_dim;
+
     public:
-
-        // TODO: How to overcome this!? Not good ...
+        // Define lineage
         kdnode* parent;
         kdnode* left;
         kdnode* right;
 
-        void spawn() override {
-            // TODO: Implement
+        void spawn(std::vector<sample_id_t>& idxs,
+                std::vector<offset_t>& offsets) override {
+
+            assert(offsets.size() == 2);
+            left = new kdnode;
+            right = new kdnode;
+
+            left->parent = this;
+            right->parent = this;
+
+            left->set_index(&idxs[offsets[0]], (offsets[1]-offsets[0]));
+            // TODO: Make sure indexing is ok
+            right->set_index(&idxs[offsets[1]], (offsets[1]-offsets.size()));
+
+            // Call Schedule
+            scheduler->schedule(left);
+            scheduler->schedule(right);
+        }
+
+        void set_split_dim(size_t split_dim) {
+            this->split_dim = split_dim;
+        }
+
+        const size_t get_split_dim() const {
+            return split_dim;
+        }
+
+        // This is run next
+        void run() override {
+            std::cout << "kdnode at depth: " << depth << " run()\n";
+            if (depth < 3)
+                sort_data_index(true); // Paralleize the sort
+            else
+                sort_data_index(false);
+
+            std::vector<sample_id_t> idxs;
+            data_index.get_indexes(idxs);
+
+            std::cout << "Printing data_index\n";
+            data_index.print();
+            std::cout << "Printing idxs";
+            io::print_arr<sample_id_t>(&idxs[0], idxs.size());
+            exit(-1);
+
+            std::vector<offset_t> offsets = { 0, data_index.size() / 2 };
+            assert(idxs.size() == data_index.size());
+
+            // TODO: How to handle max depth handled elsewhere ??
+            if (depth < MAX_DEPTH) {
+                spawn(idxs, offsets);
+            }
+        }
+
+        const void print() const override {
+            std::cout << "\n\nHA!\n\n";
         }
 };
 
 // How the program runs
 class kdTreeProgram: public BinaryTreeProgram<kdnode> {
     private:
-        // Dimension to split on
-        size_t split_dim;
-        std::default_random_engine generator;
-        std::uniform_int_distribution<size_t> distribution;
-
         // All the trees in the forest (including this one!)
         std::vector<kdTreeProgram*> copse;
 
     public:
-
         // Can be used if we need no more constructors
-        // using BinaryTreeProgram<kdnode>::BinaryTreeProgram;
+        using BinaryTreeProgram<kdnode>::BinaryTreeProgram;
+};
 
-        kdTreeProgram(size_t nsamples, size_t nfeatures, size_t split_dim,
-                short max_depth=-1, typename io::IO::raw_ptr ioer=NULL) :
-            BinaryTreeProgram(nsamples, nfeatures, max_depth, ioer) {
-                this->split_dim = split_dim;
-                this->distribution =
-                    std::uniform_int_distribution<size_t>(0, nfeatures);
-            }
-
-        void set_split_dim(const size_t split_dim) {
-            this->split_dim = split_dim;
+class RandomSplit {
+    private:
+        std::default_random_engine generator;
+        std::uniform_int_distribution<size_t> distribution;
+    public:
+        RandomSplit(size_t nfeatures) {
+            distribution = std::uniform_int_distribution<size_t>(0, nfeatures);
         }
 
-        const size_t get_split_dim() const {
-            return this->split_dim;
-        }
-
-        /**
-         * Should be coordinated effort over all trees in the forest
-         * @param randomize: Pick the split dimension at random
-         */
-        void pick_split_dim(bool randomize=false) {
-            if (depth) { // We have more than the root
-                if (randomize)
-                    this->split_dim = distribution(generator);
-                else
-                    this->split_dim++;
-            } else { // No nodes in tree
-                this->split_dim = distribution(generator);
-            }
-        }
-
-        void build() override {
-            pick_split_dim(); // Choose split
+        size_t generate() {
+            return distribution(generator);
         }
 };
 
 int main(int argc, char* argv[]) {
-    Params params("/mnt/nfs/disa/monya/src/structures/unit-test/"
-            "data/ordered_tree_10.bin", IOTYPE::SYNC, 1);
 
-    utils::time t;
+    // TODO: Read from argv[]
+    size_t nsamples = 32;
+    size_t nfeatures = 16;
+    tree_t ntree = 1;
+    unsigned nthread = 1;
+    MAT_ORIENT mo = MAT_ORIENT::COL;
+
+    Params params(nsamples, nfeatures,
+            "/Research/monya/src/data/rand_32_16.bin",
+            IOTYPE::SYNC, ntree, nthread, mo);
+
+    params.print();
+
+    //utils::time t;
     ComputeEngine<kdTreeProgram>::ptr engine =
-        ComputeEngine<kdTreeProgram>::create(params, 2);
+        ComputeEngine<kdTreeProgram>::create(params);
+    std::cout << "Engine created ...\n";
+
+    // Create the root with no duplicates for split dimension
+    // TODO: Create root/node initializer that is passed to node
+    RandomSplit rs(params.nfeatures);
+    std::set<size_t> splits;
+    for (auto tree : engine->get_forest()) {
+        while (true) {
+            size_t split_dim = rs.generate();
+            auto sp = splits.find(split_dim); // Pick the split dim
+            if (sp == splits.end()) {
+                std::cout << "Choosing split: " << split_dim << std::endl;
+
+                kdnode* root = new kdnode;
+                root->set_split_dim(split_dim); // Which dim to split on
+                root->set_index(split_dim); // Which samples it owns
+                root->set_scheduler(tree->get_scheduler());
+
+                tree->set_root(root);
+                splits.insert(split_dim); // Keep track of used split dims
+                break;
+            }
+        }
+    }
+    std::cout << "Roots initialized ...\n";
+
     //t.tic();
     engine->train();
     std::cout << "I'm well trained!\n";

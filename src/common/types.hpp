@@ -26,14 +26,19 @@
 #include <map>
 #include <utility>
 #include <vector>
+#include <limits>
+#include <cassert>
 
 #define INVALID_ID -1
 
 namespace monya {
     typedef unsigned node_id_t; // Tree node identifier type
+    typedef unsigned sample_id_t; // Tree node identifier type
     typedef unsigned child_t; // The number of children an NAry node can hold
     typedef size_t offset_t; // The offset position of a file
     typedef unsigned tree_t; // The number of trees in the forrest
+    typedef size_t depth_t; // The number of trees in the forrest
+    typedef double data_t; // The type of the data
 
     // Used to express the dimensions of a matrix
     typedef std::pair<offset_t, offset_t> dimpair;
@@ -55,8 +60,8 @@ namespace monya {
       Whether we are running in memory, semi-external memory or in memory
       with synchronous I/O
       */
-    std::map<std::string, short> IOTYPE_t =
-        {{"mem", 0}, {"sem", 1}, {"sync", 2}};
+    //std::map<std::string, short> IOTYPE_t =
+        //{{"mem", 0}, {"sem", 1}, {"sync", 2}};
 
     enum IOTYPE {
         MEM = 0,
@@ -79,41 +84,74 @@ namespace monya {
 
     class Params {
         public:
+            size_t nsamples; // Max # of samples from which the tree is built
+            size_t nfeatures; // Number of features
             std::string fn;
             IOTYPE iotype;
             tree_t ntree;
+            unsigned nthread;
+            MAT_ORIENT orientation;
+            unsigned fanout; // The number of children a node a can have
+            size_t max_depth; // Maximum depth the tree can reach
 
-        Params(std::string fn="", IOTYPE iotype=IOTYPE::MEM, tree_t ntree=1) {
+        Params(size_t nsamples=0, size_t nfeatures=0, std::string fn="",
+                IOTYPE iotype=IOTYPE::MEM, tree_t ntree=1, unsigned nthread=1,
+                MAT_ORIENT orientation=MAT_ORIENT::COL, unsigned fanout=2,
+                size_t max_depth=std::numeric_limits<size_t>::max()) {
+
+            this->nsamples = nsamples;
+            this->nfeatures = nfeatures;
             this->fn = fn;
             this->iotype = iotype;
             this->ntree = ntree;
+            this->nthread = nthread;
+            this->orientation = orientation;
+            this->fanout = fanout;
+            this->max_depth = max_depth;
+        }
+
+        const void print () const {
+            std::cout << "Params: \n" <<
+                "# features: " << nfeatures << std::endl <<
+                "# samples: "<< nsamples << std::endl <<
+                "fn: " << fn << std::endl <<
+                "iotype: " << (iotype == MEM ? "Memory" :
+                        iotype == SEM ? "Semi-External Memory" :
+                        "Synchronous") << std::endl <<
+                "# trees " << ntree << std::endl <<
+                "# threads " << nthread << std::endl <<
+                "orientation: " << (orientation == ROW ? "Row" :
+                        orientation == COL ? "Column" :
+                        orientation == BAND ? "Band" : "Invalid") << std::endl <<
+                "fanout: " << fanout << std::endl <<
+                "max depth: " << max_depth << std::endl;
         }
     };
 
     template <typename T>
     class IndexVal {
         private:
-            node_id_t index;
+            sample_id_t index;
             T val;
         public:
             IndexVal() {
                 index = 0;
             }
 
-            IndexVal(const node_id_t index, const T val) {
+            IndexVal(const sample_id_t index, const T val) {
                 set(index, val);
             }
 
-            void set(const node_id_t index, const T val) {
+            void set(const sample_id_t index, const T val) {
                 set_index(index);
                 set_val(val);
             }
 
-            void set_index(const node_id_t index) {
+            void set_index(const sample_id_t index) {
                 this->index = index;
             }
 
-            const node_id_t get_index() const {
+            const sample_id_t get_index() const {
                 return this->index;
             }
 
@@ -128,13 +166,27 @@ namespace monya {
             bool operator< (const IndexVal& other) const {
                 return val < other.get_val();
             }
+
+            const void print() const {
+                std::cout << "(" << get_index() << ", " <<
+                get_val() << ")" << "\n";
+            }
     };
 
     template <typename T>
+    std::ostream& operator<<
+        (std::ostream& stream, const IndexVal<T>& iv) {
+            stream << iv.get_index() << " " <<
+                iv.get_val() << "\n";
+            return stream;
+        }
+
+    template <typename T>
     class IndexVector {
-        std::vector<IndexVal<T> > _;
+        std::vector<IndexVal<T> >_;
 
         public:
+        typedef typename std::vector<IndexVal<T> >::iterator iterator;
         IndexVector() { } // Default ctor
 
         IndexVector(const std::vector<T>& vals) {
@@ -146,12 +198,34 @@ namespace monya {
             return this->_[index];
         }
 
-        void print() {
-            for (size_t i = 0; i < _.size(); i++)
-                std::cout << "Index: " <<  _[i].get_index() <<
-                    ", Val: " << _[i].get_val() << std::endl;
-
+        const void print() const {
+            for (size_t i = 0; i < _.size(); i++) {
+                _[i].print();
+            }
         }
+
+        void set_indexes(T* vals, const size_t nelem) {
+            if (_.size())
+                _.clear();
+
+            for (size_t i = 0; i < nelem; i++)
+                _.push_back(IndexVal<T>(i, vals[i]));
+        }
+
+        void get_indexes(std::vector<sample_id_t>& v) {
+            assert(v.empty());
+
+            for (auto i = begin(); i != end(); ++i) {
+                v.push_back(i->get_index());
+            }
+        }
+
+        const size_t size() const {
+            return _.size();
+        }
+
+        iterator begin() { return _.begin(); }
+        iterator end() { return _.end(); }
     };
 } // End monya
 

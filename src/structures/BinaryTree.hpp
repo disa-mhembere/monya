@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Neurodata (https://neurodata.io)
+ * Copyright 2018 Neurodata (https://neurodata.io)
  * Written by Disa Mhembere (disa@cs.jhu.edu)
  *
  * This file is part of Monya.
@@ -17,42 +17,37 @@
  * limitations under the License.
  */
 
-#ifndef MONYA_RB_TREE_HPP__
-#define MONYA_RB_TREE_HPP__
+#ifndef MONYA_BINARY_TREE_HPP__
+#define MONYA_BINARY_TREE_HPP__
 
 #include <memory>
 #include "../common/types.hpp"
 
 namespace monya { namespace container {
 
-class RBNode;
-//class Scheduler;
+class BinaryNode;
 
-class RBTree {
-    private:
-        RBNode* root;
+// NOTE: No deletion!
+class BinaryTree {
+    protected:
+        BinaryNode* root;
         size_t depth;
-        //Scheduler scheduler;
+        size_t max_depth; // Maximum depth the tree can reach
 
-        void rotate_left(RBNode* x);
-        void rotate_right(RBNode* y);
-        void transplant(RBNode* dest, RBNode* src);
-
-        RBNode* minimum(RBNode* tree);
-        void echo(RBNode* node, int tabs);
-        void delete_node(RBNode* node);
+        void echo(BinaryNode* node, int tabs);
+        void delete_node(BinaryNode* node); // Used for cleanup only
 
     public:
-        typedef std::shared_ptr<RBTree> ptr;
+        typedef std::shared_ptr<BinaryTree> ptr;
 
-        RBTree(): root(NULL) {
+        BinaryTree(): root(NULL) {
         }
 
         static ptr create() {
-            return ptr(new RBTree());
+            return ptr(new BinaryTree());
         }
 
-        virtual RBNode* get_root() {
+        virtual BinaryNode* get_root() {
             return root;
         }
 
@@ -68,16 +63,16 @@ class RBTree {
             return NULL == root;
         }
 
-        void set_root(RBNode* node);
-        size_t get_nnodes(RBNode* node, size_t& nnodes);
-        void insert_at(RBNode* new_node, RBNode* node, bchild_t pos);
-        void insert(RBNode* node);
-        void balance(RBNode* parent, RBNode* node, RBNode* new_node);
-        RBNode* find(const RBNode* shell);
-        void _delete(const RBNode& shell);
+        void set_root(BinaryNode* node);
+        virtual size_t get_nnodes(BinaryNode* node, size_t& nnodes);
+        virtual void insert_at(BinaryNode* new_node,
+                BinaryNode* node, bchild_t pos);
+        virtual void insert(BinaryNode* node);
+        BinaryNode* find(const BinaryNode* shell);
         void echo();
-        ~RBTree();
+        ~BinaryTree();
 };
+
 } } // End monya::container
 
 #endif

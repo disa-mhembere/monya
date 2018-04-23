@@ -19,19 +19,38 @@
 
 #include "RBTree.hpp"
 #include "RBNode.hpp"
+#include <random>
+
+#include "sucommon.hpp"
 
 namespace mc = monya::container;
+namespace mt = monya::test;
 
 int main(int argc, char* argv[]) {
-    std::vector<double> members {10, 8, 14, 6};
+    std::vector<double> members {0.10, 0.8, 0.14, 0.6};
 
-    mc::RBTree<mc::RBNode<double> >::ptr tree =
-        mc::RBTree<mc::RBNode<double> >::create();
+    mc::RBTree::ptr tree = mc::RBTree::create();
 
     for (std::vector<double>::iterator it = members.begin();
             it != members.end(); ++it) {
-        tree->insert(new mc::RBNode<double>((double)*it));
+        tree->insert(new mc::RBNode((double)*it));
     }
+
+    // Add some numbers in an ad hoc fashion
+    //constexpr int NRAND = std::pow(2, 6) - 1;
+    std::default_random_engine generator;
+    std::uniform_real_distribution<double> distribution(0, 5);
+
+    // TODO: Subclass RBTree from BinaryTree then add back
+    //mc::RBTree::ptr tree2 = mc::RBTree::create();
+
+    //mt::NodeMapper nm;
+    //// Test arbitrary insertion
+    //for (auto i = 0; i < NRAND; i++)
+        //nm.insert(new mc::RBNode(distribution(generator)));
+    //nm.print();
+    //nm.populate_tree(tree2);
+
 
     tree->echo();
     std::cout << "RBTree Test successful!\n\n";

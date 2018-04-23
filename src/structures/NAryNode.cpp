@@ -17,18 +17,30 @@
  * limitations under the License.
  */
 
-#ifndef MONYA_MONYA_HPP__
-#define MONYA_MONYA_HPP__
+// Represent an nary node
 
-// Represent a binary node
+#include "NAryNode.hpp"
 
-#include "../BinaryTreeProgram.hpp"
-#include "../ComputeEngine.hpp"
-#include "../structures/RBNode.hpp"
-#include "types.hpp"
+namespace monya { namespace container {
 
-#include <algorithm>
-#include <parallel/numeric>
-#include <parallel/algorithm>
+         NAryNode::NAryNode () {
+            this->nchild = 0;
+        }
 
-#endif
+        NAryNode::NAryNode (NodeView** childs, child_t nchild,
+                child_t container_size) {
+            /**
+              * \param container_size: the length of the array containing children
+              */
+            this->childs = childs;
+            this->nchild = nchild;
+        }
+
+        void  NAryNode::add_child(NodeView* child) {
+            // TODO
+        }
+
+        void  NAryNode::remove_child() {
+            // TODO
+        }
+} } // End monya::container

@@ -17,18 +17,20 @@
  * limitations under the License.
  */
 
-#ifndef MONYA_MONYA_HPP__
-#define MONYA_MONYA_HPP__
+#ifndef MONYA_UTILITY_NODE_HPP__
+#define MONYA_UTILITY_NODE_HPP__
 
-// Represent a binary node
-
-#include "../BinaryTreeProgram.hpp"
-#include "../ComputeEngine.hpp"
-#include "../structures/RBNode.hpp"
-#include "types.hpp"
-
+#include <limits>
 #include <algorithm>
-#include <parallel/numeric>
-#include <parallel/algorithm>
 
+namespace monya { namespace utils {
+
+template<class T=data_t>
+typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
+    approx_equal(T x, T y, T ulp =0.1) {
+    return std::abs(x-y) <= std::numeric_limits<T>::epsilon() * std::abs(x+y)
+        * ulp || std::abs(x-y) < std::numeric_limits<T>::min();
+}
+
+} } // End namespace monya::utils
 #endif

@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-#ifndef EXECUTOR_THREAD_HPP__
-#define EXECUTOR_THREAD_HPP__
+#ifndef MONYA_EXECUTOR_THREAD_HPP__
+#define MONYA_EXECUTOR_THREAD_HPP__
 
 namespace monya { namespace structures {
     class ExecutorThread {

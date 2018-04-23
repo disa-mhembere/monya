@@ -15,12 +15,12 @@
 
 include ../Makefile.common
 
-all: libstructures utils libmonya common examples iotag
+all: libstructures utils libmonya commontag examples iotag
 
 libstructures:
 	$(MAKE) -C structures
 
-libmonya: libstructures utils common io $(OBJS)
+libmonya: libstructures utils commontag io $(OBJS)
 	rm -f libmonya
 	ar -cvq libmonya.a $(OBJS)
 
@@ -30,7 +30,7 @@ utils: io libstructures
 examples: libmonya
 	$(MAKE) -C examples
 
-common:
+commontag:
 	$(MAKE) -C common
 
 iotag: common

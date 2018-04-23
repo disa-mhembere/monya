@@ -23,25 +23,31 @@ namespace mc = monya::container;
 
 int main(int argc, char* argv[]) {
 
-    mc::BinaryNode<double>* root = new mc::BinaryNode<double>(10);
+    mc::BinaryNode* root = new mc::BinaryNode(10);
+#if 0
     std::cout << "Print test: " << *root << std::endl;
+#endif
     root->print();
 
-    mc::BinaryNode<double>* left = new mc::BinaryNode<double>(4);
+    mc::BinaryNode* left = new mc::BinaryNode(4);
+#if 0
     std::cout << *left << std::endl;
+#endif
     root->left = left;
 
-    mc::BinaryNode<double>* right = new mc::BinaryNode<double>(14);
+    mc::BinaryNode* right = new mc::BinaryNode(14);
+#if 0
     std::cout << *right << std::endl;
+#endif
     root->right = right;
 
     root->left->right = right;
     root->right->left = left;
 
-    assert(*(root->right) == *right);
-    assert(*(root->left) == *left);
-    assert(*(root->left->right) == *right);
-    assert(*(root->right->left) == *left);
+    assert(*root->right == *right);
+    assert(*root->left == *left);
+    assert(*root->left->right == *right);
+    assert(*root->right->left == *left);
 
     delete(left);
     delete(right);

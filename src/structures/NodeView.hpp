@@ -20,124 +20,105 @@
 #ifndef MONYA_NODEVIEW_HPP__
 #define MONYA_NODEVIEW_HPP__
 
-#include <memory>
-#include <utility>
-#include <iostream>
-
-#include "io_interface.h"
 #include "../common/types.hpp"
+#include "../../SAFS/libsafs/io_interface.h"
 
-namespace monya { namespace container {
+namespace monya {
+    namespace io {
+        class IO;
+    }
+
+    namespace container {
+
+// Fwd decl
+class Scheduler;
 
 // Represent a node in the tree
-template <typename T>
 class NodeView: public safs::callback {
-    protected:
-        virtual void prep() = 0;
-        virtual void run() = 0;
-
     public:
+        virtual void run() = 0;
+        virtual void init(Params&) = 0;
+        virtual void distance(data_t arg1) = 0;
+
+        virtual void spawn(std::vector<sample_id_t>& idxs,
+                std::vector<offset_t>& offsets);
+
         // TODO: Visibility
         //std::vector<offset_t> data_index; // Indexes that nodes hold to data
-        IndexVector<T> data_index; // Indexes that nodes hold to data & mapping
-        char* buf; // The data read from dataset
-        T comparator; // The split comparator
-        unsigned numbytes; // The number of bytes in the read of data from disk
+        IndexVector<double> data_index; // Indexes that nodes hold to data & mapping
+
+        // FIXME: mem waster
+        std::vector<sample_id_t> req_indxs; // Indexes a vertex will req from ioer
+        data_t comparator; // The split comparator
         // When the data required is in memory run this computation
+        short depth; // Depth of the node used as an idendifier
+        Scheduler* scheduler;
+        io::IO* ioer;
+
         // TODO: End visibility
 
-        virtual int invoke(safs::io_request *reqs[], int num) override {
+        virtual int invoke(safs::io_request *reqs[], int num)
+            override {
             for (int i = 0; i < num; i++) {
-                this->buf = reqs[i]->get_buf();
-                this->numbytes = reqs[i]->get_size();
-                free(this->buf); // TODO: Verify OK
+                char* buf = reqs[i]->get_buf();
+                size_t numbytes = reqs[i]->get_size();
+
+                // TODO: Do something with buf and numbytes
+                assert(numbytes);
+                free(buf);
             }
             return EXIT_SUCCESS;
         }
 
-        NodeView() {}
+        NodeView();
+        NodeView(data_t val);
+        NodeView(IndexVector<data_t>& data_index);
 
-        NodeView(T val) {
-            comparator = val;
-        }
+        void schedule();
 
-        NodeView(IndexVector<T>& data_index) {
-            this->data_index = data_index;
-        }
+        // Range index
+        virtual void set_index_range(sample_id_t start_idx,
+                const sample_id_t nsamples);
 
-        //NodeView(offset_t* data_index, const size_t nelem) {
-            //add_elem(data_index, nelem);
-        //}
+        // Defaults to grabbing index data
+        virtual void prep();
 
-        //void add_elem(offset_t* members, const size_t nelem) {
-            //if (data_index.size()) { // We have members so add to them
-                //data_index.insert(data_index.end(), members, members+nelem);
-            //} else {
-                //data_index.resize(nelem);
-                //std::copy(members, members+nelem, data_index.begin());
-            //}
-        //}
+        // Iterative index
+        void set_index(const std::vector<sample_id_t>& indexes);
+        void set_index(const sample_id_t*, const size_t);
+        void set_index(const sample_id_t index);
 
-        virtual void spawn() = 0;
-        virtual void distance(T arg1) = 0;
+        // IO
+        void set_ioer(io::IO* ioer);
+        typename io::IO* get_ioer();
 
-        virtual const IndexVector<T>& get_data_index() const {
-            return data_index;
-        }
-
-        //void set_data_index(const std::vector<offset_t>& data_index) {
-            //this->data_index = data_index;
-        //}
-
-        //void set_data_index(const offset_t* data_index, const size_t nelem) {
-            //add_elem(data_index, nelem);
-        //}
-
-        const void print() const {
-            std::cout << comparator << std::endl;
-        }
-
-        const T get_comparator() const {
-            return comparator;
-        }
-
-        void set_comparator(const T comparator) {
-            this->comparator = comparator;
-        }
-
-        virtual bool operator==(const NodeView<T>& other) {
-            return comparator == other.get_comparator();
-        }
-
-        virtual bool operator!=(const NodeView<T>& other) {
-            return !(*this == other);
-        }
-
-        virtual bool operator<(const NodeView<T>& other) {
-            return comparator < other.get_comparator();
-        }
-
-        virtual bool operator>(const NodeView<T>& other) {
-            return this->get_comparator() > other.get_comparator();
-        }
-
-        virtual bool operator<=(const NodeView<T>& other) {
-            return !(*this > other);
-        }
-
-        virtual bool operator>=(const NodeView<T>& other) {
-            return !(*this < other);
-        }
-
-        virtual ~NodeView() {
-        };
+        void set_depth(short depth);
+        const short get_depth() const;
+        void get_data();
+        void set_scheduler(Scheduler* scheduler);
+        Scheduler* get_scheduler();
+        void sort_data_index(bool par=false);
+        const IndexVector<data_t>& get_data_index() const;
+        virtual const void print() const;
+        const data_t get_comparator() const;
+        void set_comparator(const data_t comparator);
+        virtual bool operator==(const NodeView& other);
+        virtual bool operator!=(const NodeView& other);
+        virtual bool operator<(const NodeView& other);
+        virtual bool operator>(const NodeView& other);
+        virtual bool operator<=(const NodeView& other);
+        virtual bool operator>=(const NodeView& other);
+        bool is_root();
+        virtual ~NodeView();
 };
 
-template <typename T> std::ostream& operator<<
-    (std::ostream& stream, const NodeView<T>& node) {
+#if 0
+std::ostream& operator<<
+    (std::ostream& stream, const NodeView& node) {
     stream << node.comparator;
-    return  stream;
+    return stream;
 }
+#endif
 
 } } // End monya::container
 #endif

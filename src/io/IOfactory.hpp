@@ -37,13 +37,13 @@ class IOfactory {
                     return new io::MemoryIO();
                     break;
                 case SEM:
-                    throw not_implemented_exception();
+                    throw not_implemented_exception(__FILE__, __LINE__);
                     break;
                 case SYNC:
                     return new io::SyncIO();
                     break;
                 default:
-                    throw not_implemented_exception();
+                    throw not_implemented_exception(__FILE__, __LINE__);
             }
         }
 };

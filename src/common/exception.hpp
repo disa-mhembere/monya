@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-#ifndef EXCEPTIONS_HPP__
-#define EXCEPTIONS_HPP__
+#ifndef MONYA_EXCEPTION_HPP__
+#define MONYA_EXCEPTION_HPP__
 
 #include <exception>
 #include <stdexcept>
@@ -30,6 +30,11 @@ class not_implemented_exception : public std::runtime_error {
 public:
     not_implemented_exception() :
         runtime_error("Method not Implemented!\n") {
+        }
+
+    not_implemented_exception(const std::string file, const int line) :
+        runtime_error(std::string("[ERROR]: '") + file + std::string(":") +
+            std::to_string(line) + std::string("' not implemented!\n")) {
         }
 };
 
@@ -91,4 +96,4 @@ public:
     }
 };
 }
-#endif // EXCEPTIONS_HPP__
+#endif // MONYA_EXCEPTION_HPP__

@@ -24,57 +24,38 @@
 
 #include "NodeView.hpp"
 #include <iostream>
-#include "io_interface.h"
 #include "../common/exception.hpp"
 
 namespace monya { namespace container {
 
-template <typename T>
-class BinaryNode: public NodeView<T> {
-    protected:
-        virtual void prep() {
-            throw abstract_exception("BinaryNode::prep");
+class BinaryNode: public NodeView {
+    public:
+        // TODO: Visibility
+        BinaryNode* parent;
+        BinaryNode* left;
+        BinaryNode* right;
+
+        // Inherit constructors
+        using NodeView::NodeView;
+
+        BinaryNode* get_parent() {
+            return parent;
         }
 
-        virtual void run() {
+        virtual void run() override {
             throw abstract_exception("BinaryNode::run");
         }
 
-    public:
-        // TODO: Visibility
-        BinaryNode<T>* parent;
-        BinaryNode<T>* left;
-        BinaryNode<T>* right;
-
-        // Inherit constructors
-        using NodeView<T>::NodeView;
-        BinaryNode<T>* get_parent() {
-        }
-
-        // Given a new node add children to this node
-        virtual void spawn() override {
-            throw abstract_exception("BinaryNode::spawn");
-#if 0
-            if (node->get_data() < this->data) {
-                if (!l)  // No left child
-                    left(node);  // Make node my left child
-                else
-                    l->spawn(node);
-            } else if (node->get_data() > this->data) {
-                if (!r)  // No right child
-                    right(node);
-                else
-                    r->spawn(node);
-            }
-#endif
-        }
-
-        virtual void distance(T arg1) {
+        virtual void distance(data_t arg1) override {
             throw abstract_exception("BinaryNode::distance");
         }
 
-        static BinaryNode<T>* cast2(NodeView<T>* nv) {
-            return static_cast<BinaryNode<T>* >(nv);
+        virtual void init(Params&) override {
+            throw abstract_exception("BinaryNode::init");
+        }
+
+        static BinaryNode* cast2(NodeView* nv) {
+            return static_cast<BinaryNode*>(nv);
         }
 
         void read_svm() {

@@ -21,8 +21,9 @@
 #define MONYA_BINARY_TREE_PROGRAM_HPP__
 
 #include "common/types.hpp"
-#include "structures/RBTree.hpp"
-#include "io/IO.hpp"
+#include "structures/BinaryTree.hpp"
+#include "io/IOfactory.hpp"
+#include "structures/Scheduler.hpp"
 
 // NOTE: We initally assume all the Trees are the same
 namespace monya {
@@ -30,26 +31,65 @@ namespace monya {
     unsigned READ_SZ_BYTES = 4096; // TODO: Alter
 
     template <typename NodeType>
-    class BinaryTreeProgram: container::RBTree<NodeType> {
+    class BinaryTreeProgram: public container::BinaryTree {
+        private:
+            typedef typename container::Scheduler sched_t;
+
         protected:
             short nnode_id; // NUMA node
             tree_t tree_id; // The ID of this tree
             std::string exmem_fn;
             io::IO::raw_ptr ioer;
-            short max_depth; // Maximum depth the tree can reach
-            short depth; // The current depth of this tree
             size_t nsamples; // Max # of samples from which the tree is built
             size_t nfeatures; // Number of features
+            sched_t* scheduler;
 
         public:
             typedef std::shared_ptr<BinaryTreeProgram<NodeType> > ptr;
 
-            BinaryTreeProgram(size_t nsamples, size_t nfeatures,
-                    short max_depth=-1, typename io::IO::raw_ptr ioer=NULL) {
-                this->nsamples = nsamples;
-                this->nfeatures = nfeatures;
-                this->ioer = ioer;
-                this->max_depth = max_depth;
+            void set_nnode_id(const short nnode_id) {
+                this->nnode_id = nnode_id;
+            }
+
+            const short get_nnode_id() const {
+                return nnode_id;
+            }
+
+            BinaryTreeProgram(Params& params, const tree_t tree_id) {
+                this->tree_id = tree_id;
+                this->exmem_fn = params.fn;
+                ioer = IOfactory::create(params.iotype);
+                ioer->set_fn(this->exmem_fn);
+                ioer->set_dtype_size(8); // FIXME now!
+                ioer->set_orientation(params.orientation);
+
+                this->max_depth = params.max_depth;
+                this->depth = 0;
+                this->nsamples = params.nsamples;
+                this->nfeatures = params.nfeatures;
+
+                assert(params.fanout == 2);
+                this->scheduler = new sched_t(params.fanout, params.ntree);
+            }
+
+            void set_root(NodeType* node) {
+                assert(NULL != node);
+                assert(NULL != ioer);
+
+                node->set_ioer(ioer);
+                BinaryTree::set_root(node);
+            }
+
+            NodeType* create_node() {
+                return new NodeType;
+            }
+
+            sched_t* get_scheduler() {
+                return scheduler;
+            }
+
+            void set_scheduler(sched_t* scheduler) {
+                this->scheduler = scheduler;
             }
 
             static BinaryTreeProgram<NodeType>* create_raw() {
@@ -60,12 +100,17 @@ namespace monya {
                 return ptr(new BinaryTreeProgram<NodeType>());
             }
 
-            static ptr cast2(typename container::RBTree<NodeType>::ptr rbptr) {
-                return std::static_pointer_cast<ptr>(rbptr);
-            }
+            //static ptr cast2(typename container::BinaryTree::ptr rbptr) {
+                //return std::static_pointer_cast<ptr>(rbptr);
+            //}
 
             void set_ioer(io::IO::raw_ptr ioer) {
                 this->ioer = ioer;
+            }
+
+            io::IO::raw_ptr get_ioer() {
+                assert(NULL != this->ioer);
+                return ioer;
             }
 
             void set_tree_id(const tree_t tid) {
@@ -94,7 +139,14 @@ namespace monya {
             }
 
             // User implemented for training phase
-            virtual void build() = 0;
+            virtual void build() {
+                assert(NULL != this->get_root());
+                scheduler->schedule(this->get_root());
+            }
+
+            ~BinaryTreeProgram() {
+                delete scheduler;
+            }
     };
 } // End monya
 

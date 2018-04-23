@@ -23,25 +23,21 @@
 #include <memory>
 #include <vector>
 #include "common/types.hpp"
+#include "common/exception.hpp"
 
 namespace monya {
-    class Params;
-
     template <typename TreeProgramType>
     class ComputeEngine {
 
         private:
             std::vector<TreeProgramType*> forest; // For when there are more
-            tree_t ntree;
             Params params;
 
-            ComputeEngine(const tree_t ntree=1) {
-                this->ntree = ntree;
-            }
-
-            ComputeEngine(Params& params, const tree_t ntree):
-                ComputeEngine(ntree) {
+            ComputeEngine(Params& params) {
                 this->params = params;
+
+                for (tree_t tree_id = 0; tree_id < params.ntree; tree_id++)
+                    forest.push_back(new TreeProgramType(params, tree_id));
             }
 
             ComputeEngine(std::vector<TreeProgramType*>& forest) {
@@ -56,6 +52,7 @@ namespace monya {
 
         public:
             typedef std::shared_ptr<ComputeEngine<TreeProgramType> > ptr;
+            typedef typename std::vector<TreeProgramType*>::iterator forest_iterator;
 
             static ptr create() {
                 return ptr(new ComputeEngine<TreeProgramType>());
@@ -65,8 +62,8 @@ namespace monya {
                 return ptr(new ComputeEngine(forest));
             }
 
-            static ptr create(Params& params, const tree_t ntree) {
-                return ptr(new ComputeEngine<TreeProgramType>(params, ntree));
+            static ptr create(Params& params) {
+                return ptr(new ComputeEngine<TreeProgramType>(params));
             }
 
             static ptr create(Params& params,
@@ -82,18 +79,31 @@ namespace monya {
                 return this->params;
             }
 
+            std::vector<TreeProgramType*>& get_forest() {
+                return this->forest;
+            }
+
+            forest_iterator forest_begin() {
+                return this->forest.begin();
+            }
+
+            forest_iterator forest_end() {
+                return this->forest.end();
+            }
+
             void add_tree(TreeProgramType* tree) {
                 this->forest.push_back(tree);
             }
 
             void train() {
-                for (size_t tree_id = 0; tree_id < ntree; tree_id++) {
-                    forest[tree_id]->build();
-                }
+                assert(forest.size() == params.ntree);
+
+                for (auto it = forest.begin(); it != forest.end(); ++it)
+                    (*it)->build();
             }
 
             void predict() {
-
+                throw not_implemented_exception();
             }
 
             TreeProgramType* get_tree(const tree_t id) {
@@ -101,9 +111,9 @@ namespace monya {
             }
 
             ~ComputeEngine() {
-                for (size_t tree_id = 0; tree_id < ntree; tree_id++) {
-                    forest[tree_id]->destroy();
-                }
+                assert(forest.size() == params.ntree);
+                for (auto it = forest.begin(); it != forest.end(); ++it)
+                    (*it)->destroy();
             }
     };
 } // End monya
