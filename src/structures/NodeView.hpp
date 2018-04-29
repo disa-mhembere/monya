@@ -44,7 +44,7 @@ class NodeView: public safs::callback {
                 std::vector<offset_t>& offsets);
 
         // TODO: Visibility
-        IndexVector<data_t> data_index; // Indexes that nodes hold to data & mapping
+        IndexVector data_index; // Indexes that nodes hold to data & mapping
 
         // FIXME: mem waster
         std::vector<sample_id_t> req_indxs; // Indexes a vertex will req from ioer
@@ -71,7 +71,7 @@ class NodeView: public safs::callback {
 
         NodeView();
         NodeView(data_t val);
-        NodeView(IndexVector<data_t>& data_index);
+        NodeView(IndexVector& data_index);
 
         void schedule();
 
@@ -82,12 +82,16 @@ class NodeView: public safs::callback {
         // Defaults to grabbing index data
         virtual void prep();
 
-        // Iterative index
+        // Request/Get Iterative index
         void set_index(const std::vector<sample_id_t>& indexes);
-        void set_index(const sample_id_t*, const size_t);
+        void set_index(const sample_id_t*, const size_t nelem);
         void set_index(const sample_id_t index);
 
-        // TODO: Differentiate between data_index and request_index
+        // Data_index i.e. samples index
+        void set_ph_data_index(const std::vector<sample_id_t>& indexes);
+        void set_ph_data_index(const sample_id_t*, const size_t nelem);
+        void data_index_append(const sample_id_t idx);
+        void data_index_append(const sample_id_t idx, const data_t val=0);
 
         // IO
         void set_ioer(io::IO* ioer);
@@ -100,7 +104,7 @@ class NodeView: public safs::callback {
         void set_scheduler(Scheduler* scheduler);
         Scheduler* get_scheduler();
         void sort_data_index(bool par=false);
-        const IndexVector<data_t>& get_data_index() const;
+        const IndexVector& get_data_index() const;
         virtual const void print() const;
         const data_t get_comparator() const;
         void set_comparator(const data_t comparator);

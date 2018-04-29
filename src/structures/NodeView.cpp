@@ -37,7 +37,7 @@ namespace monya { namespace container {
         comparator = val;
     }
 
-    NodeView::NodeView(IndexVector<data_t>& data_index): NodeView() {
+    NodeView::NodeView(IndexVector& data_index): NodeView() {
         this->data_index = data_index;
     }
 
@@ -50,12 +50,12 @@ namespace monya { namespace container {
     }
 
     // Iterative index
-    void NodeView::set_index(const std::vector<sample_id_t>& indexes) {
-        req_indxs = indexes; // TODO: Verify copy
+    void NodeView::set_index(const std::vector<sample_id_t>& indxs) {
+        req_indxs = indxs; // TODO: Verify copy
     }
 
-    void NodeView::set_index(const sample_id_t* indexes, const size_t nelem) {
-        req_indxs.insert(req_indxs.begin(), indexes, indexes+nelem);
+    void NodeView::set_index(const sample_id_t* indxs, const size_t nelem) {
+        req_indxs.insert(req_indxs.begin(), indxs, indxs+nelem);
     }
 
     void NodeView::set_index(const sample_id_t index) {
@@ -64,6 +64,22 @@ namespace monya { namespace container {
 
         req_indxs.push_back(index);
     }
+
+    // For data index
+    void NodeView::set_ph_data_index(const std::vector<sample_id_t>& indxs) {
+        data_index.set_indexes(&indxs[0], indxs.size());
+    }
+
+    void NodeView::set_ph_data_index(const sample_id_t* indxs,
+            const size_t nelem) {
+        data_index.set_indexes(indxs, nelem);
+    }
+
+    void NodeView::data_index_append(const sample_id_t idx,
+            const data_t val) {
+        data_index.append(idx, val);
+    }
+    // End for data index
 
     void NodeView::set_ioer(io::IO* ioer) {
         this->ioer = ioer;
@@ -92,7 +108,16 @@ namespace monya { namespace container {
         // FIXME
         assert(req_indxs.size() == 1); // TODO: Impl
         data_t* ret = ioer->get_col(req_indxs[0]);
-        data_index.set_indexes(ret, ioer->shape().first);
+
+        // Check state of data_index to see if placeholder indexes are there
+        if (data_index.empty()) {
+            data_index.set_indexes(ret, ioer->shape().first);
+        } else {
+            // FIXME works with 1 column only
+            for (auto iv : data_index) {
+                iv.set_val(ret[iv.get_index()]);
+            }
+        }
     }
 
     void NodeView::set_scheduler(Scheduler* scheduler) {
@@ -111,7 +136,7 @@ namespace monya { namespace container {
             std::sort(data_index.begin(), data_index.end());
     }
 
-    const IndexVector<data_t>& NodeView::get_data_index() const {
+    const IndexVector& NodeView::get_data_index() const {
         return data_index;
     }
 
