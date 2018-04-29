@@ -58,11 +58,14 @@ namespace monya {
             BinaryTreeProgram(Params& params, const tree_t tree_id) {
                 this->tree_id = tree_id;
                 this->exmem_fn = params.fn;
+
+                // Configure ioer
                 ioer = IOfactory::create(params.iotype);
                 ioer->set_fn(this->exmem_fn);
-                ioer->set_dtype_size(8); // FIXME now!
                 ioer->set_orientation(params.orientation);
+                ioer->shape(dimpair(params.nsamples, params.nfeatures));
 
+                // Configure Tree
                 this->max_depth = params.max_depth;
                 this->depth = 0;
                 this->nsamples = params.nsamples;
