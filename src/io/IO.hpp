@@ -40,7 +40,7 @@ class IO {
     protected:
         std::string fn;
         size_t dtype_size;
-        char* data; // To avoid templating
+        data_t* data;
         MAT_ORIENT orientation;
         dimpair dim;
 
@@ -51,17 +51,16 @@ class IO {
             data = NULL;
             fn = "";
             orientation = MAT_ORIENT::INVALID;
+            dtype_size = sizeof(data_t);
         }
 
-        IO(const std::string fn, const size_t dtype_size): IO() {
+        IO(const std::string fn): IO() {
             this->fn = fn;
-            this->dtype_size = dtype_size;
         }
 
-        IO(const dimpair dim, MAT_ORIENT orient, const size_t dtype_size): IO() {
+        IO(const dimpair dim, MAT_ORIENT orient): IO() {
             this->dim = dim;
             this->orientation = orient;
-            this->dtype_size = dtype_size;
         }
 
         void set_orientation(const MAT_ORIENT orient) {
@@ -72,11 +71,7 @@ class IO {
             return this->orientation;
         }
 
-        void set_dtype_size(size_t dtype_size) {
-            this->dtype_size = dtype_size;
-        }
-
-        void set_fn(const std::string fn) {
+        virtual void set_fn(const std::string fn) {
             this->fn = fn;
         }
 
@@ -85,17 +80,17 @@ class IO {
         }
 
         // Read everything in the file
-        virtual void read(void* buf) {
+        virtual void read(data_t* buf) {
             throw not_implemented_exception(__FILE__, __LINE__);
         }
 
         // Write everything in the buffer out
-        virtual void write(const void* buf, const size_t nbytes) {
+        virtual void write(const data_t* buf, const size_t nbytes) {
             throw not_implemented_exception(__FILE__, __LINE__);
         };
 
         // Read `nbytes` at `offset` location in the file to `buf`
-        virtual void read(void* buf, const size_t offset,
+        virtual void read(data_t* buf, const size_t offset,
                 const size_t nbytes) {
             throw not_implemented_exception(__FILE__, __LINE__);
         }
@@ -105,12 +100,12 @@ class IO {
         }
 
         // Write `nbytes` at `offset` location in the file to `buf`
-        virtual void write(const void* buf, const size_t offset,
+        virtual void write(const data_t* buf, const size_t offset,
                 const size_t nbytes) {
             throw not_implemented_exception(__FILE__, __LINE__);
         }
 
-        virtual void append(const void* buf, const size_t nbytes) {
+        virtual void append(const data_t* buf, const size_t nbytes) {
             throw not_implemented_exception(__FILE__, __LINE__);
         }
 
@@ -122,11 +117,11 @@ class IO {
             return this->dim;
         }
 
-        virtual void* get_row(const offset_t offset) {
+        virtual data_t* get_row(const offset_t offset) {
             throw not_implemented_exception(__FILE__, __LINE__);
         }
 
-        virtual void* get_col(const offset_t offset) {
+        virtual data_t* get_col(const offset_t offset) {
             throw not_implemented_exception(__FILE__, __LINE__);
         }
 
@@ -141,24 +136,22 @@ class MemoryIO: public IO {
         MemoryIO(): IO() {
         }
 
-        MemoryIO(void* data, dimpair dim,
-                MAT_ORIENT orient, size_t dtype_size):
-            IO (dim, orient, dtype_size) {
-            this->data = reinterpret_cast<char*>(data);
+        MemoryIO(data_t* data, dimpair dim,
+                MAT_ORIENT orient):
+            IO (dim, orient) {
+            this->data = data;
         }
 
-        // Avoid template by using void and specifying datatype size
-        //  for reads.
-        void read(void* buf, const offset_t offset,
+        void read(data_t* buf, const offset_t offset,
                 const size_t nbytes=0) override {
-            buf = data + (dtype_size*offset);
+            buf = &data[offset];
         }
 
-        void set_data(void* data) {
-            this->data = reinterpret_cast<char*>(data);
+        void set_data(data_t* data) {
+            this->data = data;
         }
 
-        void* get_data() {
+        data_t* get_data() {
             return this->data;
         }
 
@@ -166,14 +159,15 @@ class MemoryIO: public IO {
             if (this->fn.empty())
                 assert(0);
             std::ofstream ofs(this->fn, std::ofstream::out);
-            ofs.write(data, (dim.first*dim.second*dtype_size));
+            ofs.write(reinterpret_cast<char*>(data),
+                    (dim.first*dim.second*dtype_size));
             ofs.close();
         }
 
         // No copying
-        void* get_col(const offset_t offset) override {
+        data_t* get_col(const offset_t offset) override {
             if (this->orientation == MAT_ORIENT::COL) {
-                return &data[(dtype_size*offset*this->dim.first)];
+                return &data[offset*this->dim.first];
             }
             else if (this->orientation == MAT_ORIENT::ROW)
                 throw not_implemented_exception(__FILE__, __LINE__);
@@ -182,9 +176,9 @@ class MemoryIO: public IO {
         }
 
         // No copying
-        void* get_row(const offset_t offset) override {
+        data_t* get_row(const offset_t offset) override {
             if (this->orientation == MAT_ORIENT::ROW)
-                return &data[(dtype_size*offset*this->dim.second)];
+                return &data[offset*this->dim.second];
             else if (this->orientation == MAT_ORIENT::COL)
                 throw not_implemented_exception(__FILE__, __LINE__);
             else
@@ -207,15 +201,19 @@ class SyncIO: public IO {
         SyncIO(): IO() {
         }
 
-        SyncIO(const std::string fn, const size_t dtype_size):
-            IO(fn, dtype_size) {
+        SyncIO(const std::string fn):
+            IO(fn) {
+            this->fn = fn;
         }
 
         SyncIO(const std::string fn, dimpair dim,
-                MAT_ORIENT orient, size_t dtype_size) :
-            IO (dim, orient, dtype_size) {
+                MAT_ORIENT orient) : IO (dim, orient) {
+            set_fn(fn);
+        }
+
+        void set_fn(const std::string fn) override {
             this->fn = fn;
-            this->data = NULL;
+            open();
         }
 
         void open(const std::ios_base::openmode mode
@@ -224,7 +222,7 @@ class SyncIO: public IO {
             assert(fs.is_open());
         }
 
-        void read(void* buf) override {
+        void read(data_t* buf) override {
             if (!fs.is_open()) {
                 open();
             }
@@ -233,19 +231,19 @@ class SyncIO: public IO {
             fs.read(reinterpret_cast<char*>(buf), size);
         }
 
-        void write(const void* buf, const size_t nbytes) override {
+        void write(const data_t* buf, const size_t nbytes) override {
             fs.write(reinterpret_cast<const char*>(buf), nbytes);
         }
 
         // TODO: Verify NO accidental overrite due to block size
-        void write(const void* buf, const size_t offset,
+        void write(const data_t* buf, const size_t offset,
                 const size_t nbytes) override {
             fs.seekp(offset);
             write(buf, nbytes);
         }
 
-        void append(const void* buf, const size_t nbytes) {
-            fs.write(reinterpret_cast<const char*>(buf), nbytes);
+        void append(const data_t* buf, const size_t nelem) {
+            fs.write(reinterpret_cast<const char*>(buf),dtype_size*nelem);
         }
 
         static SyncIO* cast2(IO::raw_ptr iop) {
@@ -253,13 +251,15 @@ class SyncIO: public IO {
         }
 
         // No copying
-        void* get_col(const offset_t offset) override {
+        data_t* get_col(const offset_t offset) override {
+            assert(fs.is_open());
             if (this->orientation == MAT_ORIENT::COL) {
                 fs.seekp(offset*dim.first*dtype_size);
                 if (NULL == data)
-                    data = new char[dtype_size*dim.first];
+                    data = new data_t[dim.first];
 
-                fs.read(&data[0], dtype_size*dim.first);
+                fs.read(reinterpret_cast<char*>(&data[0]),
+                        dtype_size*dim.first);
                 return data;
             } else if (this->orientation == MAT_ORIENT::ROW)
                 throw not_implemented_exception(__FILE__, __LINE__);
@@ -268,7 +268,9 @@ class SyncIO: public IO {
         }
 
         // No copying
-        void* get_row(const offset_t offset) override {
+        data_t* get_row(const offset_t offset) override {
+            assert(fs.is_open());
+
             if (this->orientation == MAT_ORIENT::ROW)
                 throw not_implemented_exception(__FILE__, __LINE__);
             else if (this->orientation == MAT_ORIENT::COL)
@@ -286,5 +288,4 @@ class SyncIO: public IO {
 };
 
 } } // End namespace monya::io
-
 #endif

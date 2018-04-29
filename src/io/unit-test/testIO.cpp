@@ -25,18 +25,16 @@
 using namespace monya;
 
 int main(int argc, char* argv[]) {
-
     constexpr offset_t NROW = 8;
     constexpr offset_t NCOL = 4;
 
-    std::vector<offset_t> v;
+    std::vector<data_t> v;
     for(offset_t i = 0; i < NROW*NCOL; i++)
         v.push_back(i);
 
     std::cout << "Creating MemoryIO unit ...\n";
     io::IO::raw_ptr memioer = new io::MemoryIO(&v[0],
-            dimpair(NROW, NCOL), MAT_ORIENT::COL,
-            sizeof(offset_t));
+            dimpair(NROW, NCOL), MAT_ORIENT::COL);
 
     std::string fn = std::string("inmem_n") + std::to_string(NROW) +
         std::string("_m") + std::to_string(NCOL) + std::string(".bin");
@@ -49,18 +47,18 @@ int main(int argc, char* argv[]) {
     assert(NCOL == memioer->shape().second);
 
     std::cout << "Reading back through SyncIO unit...\n";
-    std::vector<offset_t> v2(NROW*NCOL);
+    std::vector<data_t> v2(NROW*NCOL);
     io::IO::raw_ptr syncioer = new io::SyncIO(fn, dimpair(NROW, NCOL),
-            MAT_ORIENT::COL, sizeof(offset_t));
+            MAT_ORIENT::COL);
 
     syncioer->read(&v2[0]);
 
-    offset_t* buf = NULL;
-    offset_t* buf2 = NULL;
+    data_t* buf = NULL;
+    data_t* buf2 = NULL;
 
     for (size_t col = 0; col < NCOL; col++) {
-        buf = static_cast<offset_t*>(memioer->get_col(col));
-        buf2 = static_cast<offset_t*>(syncioer->get_col(col));
+        buf = memioer->get_col(col);
+        buf2 = syncioer->get_col(col);
 
         for (size_t row = 0; row < NROW; row++) {
             assert(buf[row] == v[NROW*col + row]);
