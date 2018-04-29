@@ -26,7 +26,7 @@
 #include "../io/IO.hpp"
 
 using namespace monya;
-constexpr short MAX_DEPTH = 3;
+constexpr short MAX_DEPTH = 4;
 
 class kdnode: public container::RBNode {
     private:
@@ -49,6 +49,15 @@ class kdnode: public container::RBNode {
 
             left->parent = this;
             right->parent = this;
+
+            left->set_depth(depth+1);
+            right->set_depth(depth+1);
+
+            left->set_scheduler(scheduler);
+            right->set_scheduler(scheduler);
+
+            left->set_ioer(ioer);
+            right->set_ioer(ioer);
             // End TODO: Boilerplate
 
             auto next_split = split_dim+1 == ioer->shape().second ?
@@ -57,13 +66,6 @@ class kdnode: public container::RBNode {
             left->set_index(next_split);
             right->set_split_dim(next_split);
             right->set_index(next_split);
-
-            // TODO: Boilerplate
-            left->set_scheduler(scheduler);
-            right->set_scheduler(scheduler);
-            left->set_ioer(ioer);
-            right->set_ioer(ioer);
-            // End TODO: Boilerplate
 
 #if 1
             std::cout << "Node at depth: " << this->depth << "\n";
@@ -74,10 +76,11 @@ class kdnode: public container::RBNode {
             io::print_arr<sample_id_t>(&idxs[offsets[1]],
                     (offsets[1]-offsets.size()));
 #endif
-            exit(-1);
-#if 0
-            left->set_data_idx(&idxs[offsets[0]], (offsets[1]-offsets[0]));
-            right->set_data_idx(&idxs[offsets[1]], (offsets[1]-offsets.size()));
+
+#if 1
+            left->set_ph_data_index(&idxs[offsets[0]], offsets[1]-offsets[0]);
+            right->set_ph_data_index(&idxs[offsets[1]],
+                    offsets[1]-offsets.size());
 #endif
 
             // Call Schedule
@@ -104,22 +107,14 @@ class kdnode: public container::RBNode {
             std::vector<sample_id_t> idxs;
             data_index.get_indexes(idxs);
 
-#if 0
-            std::cout << "Printing idxs";
-            io::print_arr<sample_id_t>(&idxs[0], idxs.size());
-#endif
-
             std::vector<offset_t> offsets = { 0, data_index.size() / 2 };
+
             assert(idxs.size() == data_index.size());
 
             // TODO: How to handle max depth handled elsewhere ??
             if (depth < MAX_DEPTH) {
                 spawn(idxs, offsets);
             }
-        }
-
-        const void print() const override {
-            std::cout << "\n\nHA!\n\n";
         }
 };
 
