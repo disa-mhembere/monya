@@ -22,19 +22,21 @@
 
 #include <cassert>
 
+using namespace monya;
+
 int main(int argv, char* argc[]) {
-    monya::IndexVector<double> t = monya::IndexVector<double>();
+    IndexVector t = IndexVector();
 
     constexpr unsigned NELEM = 1000000;
-    std::vector<double> v;
+    std::vector<data_t> v;
 
     std::default_random_engine generator;
-    std::uniform_real_distribution<double> distribution(0.0, 1.0);
+    std::uniform_real_distribution<data_t> distribution(0.0, 1.0);
 
     for (unsigned i = 0; i < NELEM; i++)
         v.push_back(distribution(generator));
 
-    monya::IndexVector<double> c = monya::IndexVector<double>(v);
+    IndexVector c = IndexVector(v);
     for (unsigned i = 0; i < NELEM; i++)
         assert(c[i].get_val() == v[i] && c[i].get_index() == i);
 

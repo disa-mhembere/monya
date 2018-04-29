@@ -163,6 +163,7 @@ namespace monya {
                 return val;
             }
 
+
             bool operator< (const IndexVal& other) const {
                 return val < other.get_val();
             }
@@ -181,20 +182,24 @@ namespace monya {
             return stream;
         }
 
-    template <typename T>
     class IndexVector {
-        std::vector<IndexVal<T> >_;
+        std::vector<IndexVal<data_t> >_;
 
         public:
-        typedef typename std::vector<IndexVal<T> >::iterator iterator;
+        typedef typename std::vector<IndexVal<data_t> >::iterator iterator;
         IndexVector() { } // Default ctor
 
-        IndexVector(const std::vector<T>& vals) {
+        IndexVector(const std::vector<data_t>& vals) {
             for (size_t i = 0; i < vals.size(); i++)
-                _.push_back(IndexVal<T>(i, vals[i]));
+                _.push_back(IndexVal<data_t>(i, vals[i]));
         }
 
-        IndexVal<T>& operator[](const int index) {
+        IndexVector(const std::vector<sample_id_t>& v) {
+            for (auto idx : v)
+                _.push_back(IndexVal<data_t>(idx, 0)); // 0 is a place holder
+        }
+
+        IndexVal<data_t>& operator[](const int index) {
             return this->_[index];
         }
 
@@ -204,12 +209,22 @@ namespace monya {
             }
         }
 
-        void set_indexes(T* vals, const size_t nelem) {
+        // Insert indexes with placeholder values
+        void set_indexes(const sample_id_t* idxs, const size_t nelem) {
             if (_.size())
                 _.clear();
 
             for (size_t i = 0; i < nelem; i++)
-                _.push_back(IndexVal<T>(i, vals[i]));
+                _.push_back(IndexVal<data_t>(idxs[i], 0));
+        }
+
+        // Insert values with contiguous indexes
+        void set_indexes(const data_t* vals, const size_t nelem) {
+            if (_.size())
+                _.clear();
+
+            for (size_t i = 0; i < nelem; i++)
+                _.push_back(IndexVal<data_t>(i, vals[i]));
         }
 
         void get_indexes(std::vector<sample_id_t>& v) {
@@ -220,10 +235,15 @@ namespace monya {
             }
         }
 
+        void append(const sample_id_t id, const data_t val) {
+            _.push_back(IndexVal<data_t>(id, val));
+        }
+
         const size_t size() const {
             return _.size();
         }
 
+        bool empty() const { return _.empty(); }
         iterator begin() { return _.begin(); }
         iterator end() { return _.end(); }
     };
