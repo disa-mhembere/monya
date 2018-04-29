@@ -42,15 +42,43 @@ class kdnode: public container::RBNode {
                 std::vector<offset_t>& offsets) override {
 
             assert(offsets.size() == 2);
+
+            // TODO: Boilerplate
             left = new kdnode;
             right = new kdnode;
 
             left->parent = this;
             right->parent = this;
+            // End TODO: Boilerplate
 
-            left->set_index(&idxs[offsets[0]], (offsets[1]-offsets[0]));
-            // TODO: Make sure indexing is ok
-            right->set_index(&idxs[offsets[1]], (offsets[1]-offsets.size()));
+            auto next_split = split_dim+1 == ioer->shape().second ?
+                    0 : split_dim+1;
+            left->set_split_dim(next_split);
+            left->set_index(next_split);
+            right->set_split_dim(next_split);
+            right->set_index(next_split);
+
+            // TODO: Boilerplate
+            left->set_scheduler(scheduler);
+            right->set_scheduler(scheduler);
+            left->set_ioer(ioer);
+            right->set_ioer(ioer);
+            // End TODO: Boilerplate
+
+#if 1
+            std::cout << "Node at depth: " << this->depth << "\n";
+            std::cout << "left indexes: ";
+            io::print_arr<sample_id_t>(&idxs[offsets[0]], (offsets[1]-offsets[0]));
+
+            std::cout << "\nright indexes: ";
+            io::print_arr<sample_id_t>(&idxs[offsets[1]],
+                    (offsets[1]-offsets.size()));
+#endif
+            exit(-1);
+#if 0
+            left->set_data_idx(&idxs[offsets[0]], (offsets[1]-offsets[0]));
+            right->set_data_idx(&idxs[offsets[1]], (offsets[1]-offsets.size()));
+#endif
 
             // Call Schedule
             scheduler->schedule(left);
@@ -76,11 +104,10 @@ class kdnode: public container::RBNode {
             std::vector<sample_id_t> idxs;
             data_index.get_indexes(idxs);
 
-            std::cout << "Printing data_index\n";
-            data_index.print();
+#if 0
             std::cout << "Printing idxs";
             io::print_arr<sample_id_t>(&idxs[0], idxs.size());
-            exit(-1);
+#endif
 
             std::vector<offset_t> offsets = { 0, data_index.size() / 2 };
             assert(idxs.size() == data_index.size());
@@ -131,7 +158,7 @@ int main(int argc, char* argv[]) {
     MAT_ORIENT mo = MAT_ORIENT::COL;
 
     Params params(nsamples, nfeatures,
-            "/Research/monya/src/data/rand_32_16.bin",
+            "/Research/monya/src/test-data/rand_32_16.bin",
             IOTYPE::SYNC, ntree, nthread, mo);
 
     params.print();
