@@ -29,6 +29,11 @@ static size_t get_file_size(std::string filename) {
         return rc == 0 ? stat_buf.st_size : -1;
 }
 
+inline bool file_exists(const std::string& fn) {
+    std::ifstream file(fn);
+    return static_cast<bool>(file);
+}
+
 #if 0
 static size_t get_file_size(const int fd) {
     struct stat stat_buf;
