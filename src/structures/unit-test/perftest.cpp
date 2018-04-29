@@ -26,17 +26,18 @@
 #include <gperftools/profiler.h>
 #endif
 
+using namespace monya;
 namespace mc = monya::container;
 namespace mi = monya::io;
 
 void insert_test(mc::RBTree::ptr tree,
-        std::vector<long>& data) {
+        std::vector<data_t>& data) {
     clock_t t = clock();
 
     if (data.size() < 1)
         return;
 
-    for (std::vector<long>::iterator it = data.begin(); it != data.end(); ++it) {
+    for (std::vector<data_t>::iterator it = data.begin(); it != data.end(); ++it) {
         tree->insert(new mc::RBNode(*it));
     }
 
@@ -46,14 +47,14 @@ void insert_test(mc::RBTree::ptr tree,
 }
 
 void query_test(mc::RBTree::ptr tree,
-        std::vector<long> data) {
+        std::vector<data_t> data) {
     std::cout << "Doing random shuffle ..... ";
     std::srand(1234);
     std::random_shuffle (data.begin(), data.end());
     std::cout << "Done!\n";
     clock_t t = clock();
 
-    for (std::vector<long>::iterator it = data.begin();
+    for (std::vector<data_t>::iterator it = data.begin();
             it != data.end(); ++it) {
         mc::RBNode* node = new mc::RBNode(*it);
         tree->find(node);
@@ -99,8 +100,8 @@ int main(int argc, char* argv[]) {
 #endif
 
     std::cout << "Reading " << DATALEN << " dataset in '" << fn << "' ...\n";
-    std::vector<long> data(DATALEN);
-    mi::SyncIO br(fn, sizeof(long));
+    std::vector<data_t> data(DATALEN);
+    mi::SyncIO br(fn);
 
     clock_t t = clock();
     br.read(&data[0]);

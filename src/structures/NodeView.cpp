@@ -91,7 +91,7 @@ namespace monya { namespace container {
         assert(ioer->get_orientation() == MAT_ORIENT::COL); // TODO: Impl
         // FIXME
         assert(req_indxs.size() == 1); // TODO: Impl
-        data_t* ret = static_cast<data_t*>(ioer->get_col(req_indxs[0]));
+        data_t* ret = ioer->get_col(req_indxs[0]);
         data_index.set_indexes(ret, ioer->shape().first);
     }
 

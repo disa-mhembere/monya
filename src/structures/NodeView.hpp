@@ -44,8 +44,7 @@ class NodeView: public safs::callback {
                 std::vector<offset_t>& offsets);
 
         // TODO: Visibility
-        //std::vector<offset_t> data_index; // Indexes that nodes hold to data
-        IndexVector<double> data_index; // Indexes that nodes hold to data & mapping
+        IndexVector<data_t> data_index; // Indexes that nodes hold to data & mapping
 
         // FIXME: mem waster
         std::vector<sample_id_t> req_indxs; // Indexes a vertex will req from ioer
@@ -88,10 +87,13 @@ class NodeView: public safs::callback {
         void set_index(const sample_id_t*, const size_t);
         void set_index(const sample_id_t index);
 
+        // TODO: Differentiate between data_index and request_index
+
         // IO
         void set_ioer(io::IO* ioer);
         typename io::IO* get_ioer();
 
+        // Params
         void set_depth(short depth);
         const short get_depth() const;
         void get_data();

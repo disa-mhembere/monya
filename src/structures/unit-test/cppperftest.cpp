@@ -26,6 +26,7 @@
 #include "../NodeView.hpp"
 #include "../io/IO.hpp"
 
+using namespace monya;
 namespace mc = monya::container;
 namespace mi = monya::io;
 
@@ -40,13 +41,13 @@ class ConcreteNode : public mc::NodeView {
     void distance(monya::data_t val) override {}
 };
 
-void insert_test(std::map<ConcreteNode*, long>& tree,
-        std::vector<long>& data) {
+void insert_test(std::map<ConcreteNode*, data_t>& tree,
+        std::vector<data_t>& data) {
     clock_t t = clock();
 
-    for (std::vector<long>::iterator it = data.begin();
+    for (std::vector<data_t>::iterator it = data.begin();
             it != data.end(); ++it) {
-        tree.insert(std::pair<ConcreteNode*, long>(
+        tree.insert(std::pair<ConcreteNode*, data_t>(
                     new ConcreteNode(*it), *it));
     }
 
@@ -55,15 +56,15 @@ void insert_test(std::map<ConcreteNode*, long>& tree,
             ((float)t)/CLOCKS_PER_SEC, data.size());
 }
 
-void query_test(std::map<ConcreteNode*, long>& tree,
-        std::vector<long> data) {
+void query_test(std::map<ConcreteNode*, data_t>& tree,
+        std::vector<data_t> data) {
     std::cout << "Doing random shuffle ..... ";
     std::srand(1234);
     std::random_shuffle (data.begin(), data.end());
     std::cout << "Done!\n\n";
     clock_t t = clock();
 
-    for (std::vector<long>::iterator it = data.begin();
+    for (std::vector<data_t>::iterator it = data.begin();
             it != data.end(); ++it) {
         ConcreteNode* node = new ConcreteNode(*it);
         tree.find(node);
@@ -75,7 +76,7 @@ void query_test(std::map<ConcreteNode*, long>& tree,
             ((float)t)/CLOCKS_PER_SEC);
 
     // Delete them now
-    for (std::map<ConcreteNode*, long>::iterator it = tree.begin();
+    for (std::map<ConcreteNode*, data_t>::iterator it = tree.begin();
             it != tree.end(); ++it) {
         delete(it->first);
     }
@@ -111,8 +112,8 @@ int main(int argc, char* argv[]) {
 #endif
 
     std::cout << "Reading " << DATALEN << " dataset in '" << fn << "' ...\n";
-    std::vector<long> data(DATALEN);
-    mi::SyncIO br(fn, sizeof(long));
+    std::vector<data_t> data(DATALEN);
+    mi::SyncIO br(fn);
 
     clock_t t = clock();
     br.read(&data[0]);
@@ -120,7 +121,7 @@ int main(int argc, char* argv[]) {
     printf ("It took %f sec to read the data.\n",((float)t)/CLOCKS_PER_SEC);
     t = clock();
 
-    std::map<ConcreteNode*, long> tree;
+    std::map<ConcreteNode*, data_t> tree;
 
     // Test insert speed
     insert_test(tree, data);
