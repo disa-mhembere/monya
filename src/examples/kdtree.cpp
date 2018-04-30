@@ -26,7 +26,6 @@
 #include "../io/IO.hpp"
 
 using namespace monya;
-constexpr short MAX_DEPTH = 4;
 
 class kdnode: public container::RBNode {
     private:
@@ -72,16 +71,15 @@ class kdnode: public container::RBNode {
             std::cout << "left indexes: ";
             io::print_arr<sample_id_t>(&idxs[offsets[0]], (offsets[1]-offsets[0]));
 
-            std::cout << "\nright indexes: ";
+            std::cout << "right indexes: ";
             io::print_arr<sample_id_t>(&idxs[offsets[1]],
-                    (offsets[1]-offsets.size()));
+                    (idxs.size()-offsets[1]));
+            std::cout << "\n";
 #endif
 
-#if 1
             left->set_ph_data_index(&idxs[offsets[0]], offsets[1]-offsets[0]);
             right->set_ph_data_index(&idxs[offsets[1]],
-                    offsets[1]-offsets.size());
-#endif
+                    idxs.size()-offsets[1]);
 
             // Call Schedule
             scheduler->schedule(left);
@@ -98,6 +96,10 @@ class kdnode: public container::RBNode {
 
         // This is run next
         void run() override {
+            // Short circuiting for recursion -- No I/O is done prior to this
+            if (is_leaf())
+                return;
+
             std::cout << "kdnode at depth: " << depth << " run()\n";
             if (depth < 3)
                 sort_data_index(true); // Paralleize the sort
@@ -108,13 +110,9 @@ class kdnode: public container::RBNode {
             data_index.get_indexes(idxs);
 
             std::vector<offset_t> offsets = { 0, data_index.size() / 2 };
-
             assert(idxs.size() == data_index.size());
 
-            // TODO: How to handle max depth handled elsewhere ??
-            if (depth < MAX_DEPTH) {
-                spawn(idxs, offsets);
-            }
+            spawn(idxs, offsets);
         }
 };
 
@@ -155,6 +153,9 @@ int main(int argc, char* argv[]) {
     Params params(nsamples, nfeatures,
             "/Research/monya/src/test-data/rand_32_16.bin",
             IOTYPE::SYNC, ntree, nthread, mo);
+
+    //const depth_t max_depth = 4;
+    //params.max_depth = max_depth;
 
     params.print();
 

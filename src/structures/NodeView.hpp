@@ -50,7 +50,7 @@ class NodeView: public safs::callback {
         std::vector<sample_id_t> req_indxs; // Indexes a vertex will req from ioer
         data_t comparator; // The split comparator
         // When the data required is in memory run this computation
-        short depth; // Depth of the node used as an idendifier
+        depth_t depth; // Depth of the node used as an idendifier
         Scheduler* scheduler;
         io::IO* ioer;
 
@@ -73,6 +73,7 @@ class NodeView: public safs::callback {
         NodeView(data_t val);
         NodeView(IndexVector& data_index);
 
+        virtual const bool is_leaf() const;
         void schedule();
 
         // Range index
@@ -98,8 +99,9 @@ class NodeView: public safs::callback {
         typename io::IO* get_ioer();
 
         // Params
-        void set_depth(short depth);
-        const short get_depth() const;
+        void set_depth(depth_t depth);
+        const depth_t get_depth() const;
+        const depth_t get_max_depth() const;
         void get_data();
         void set_scheduler(Scheduler* scheduler);
         Scheduler* get_scheduler();

@@ -22,8 +22,8 @@
 
 namespace monya { namespace container {
 
-    Scheduler::Scheduler(unsigned fanout, tree_t ntree) {
-        completed_levels.assign(ntree, 0);
+    Scheduler::Scheduler(unsigned fanout, tree_t ntree, depth_t max_depth) {
+        max_levels = max_depth;
         current_level.assign(ntree, 0);
         this->fanout = fanout; // Single fanout for all trees in forest
 
@@ -65,8 +65,6 @@ namespace monya { namespace container {
 
     // Handoff nodes to threads
     void Scheduler::run_level(const depth_t level, const tree_t tree_id) {
-        // TODO: We don't need this either & can go async
-        // TODO: Async
         std::cout << "\nRunning level: " << level << "\n";
 
         // TODO: Will include others when more than 1 tree
@@ -74,14 +72,12 @@ namespace monya { namespace container {
 
         // Encodes dependency on levels below
         // Accounts underflow for level = 0
-        if (level == 0 || completed_levels[tree_id] >= (level-1)) {
-            for (auto it = level_nodes.begin();
-                    it != level_nodes.end(); it++) {
-                (*it)->prep();
-                (*it)->run();
-            }
-            // TODO: Remove completed nodes
-            completed_levels[tree_id]++;
+        for (auto node : level_nodes) {
+            assert(node->get_depth() <= get_max_depth());
+
+            node->prep();
+            node->run();
+            //node->spawn();
         }
     }
 

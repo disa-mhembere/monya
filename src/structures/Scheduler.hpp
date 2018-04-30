@@ -36,8 +36,8 @@ namespace monya { namespace container {
     class Scheduler {
 
         private:
-            // Depth of tree that's complete
-            std::vector<depth_t> completed_levels;
+            // Maximum depth of trees permitted
+            depth_t max_levels;
             // Depth of the tree being scheduled
             // FIXME: Modification lock reading ..
             std::vector<depth_t> current_level;
@@ -49,7 +49,8 @@ namespace monya { namespace container {
             pthread_mutexattr_t mutex_attr;
 
         public:
-            Scheduler(unsigned fanout=2, tree_t ntree=1);
+            Scheduler(unsigned fanout=2, tree_t ntree=1,
+                    depth_t max_depth=MAX_DEPTH);
             // TODO: Remove default value for tree_id
             // Have all the nodes in this level been placed in the queue
             bool is_full(unsigned level, tree_t tree_id=0) {
@@ -69,6 +70,8 @@ namespace monya { namespace container {
               \brief Handoff nodes to threads
               */
             void run_level(const depth_t level, const tree_t tree_id);
+
+            const depth_t get_max_depth() const { return max_levels; }
 
             ~Scheduler();
     };

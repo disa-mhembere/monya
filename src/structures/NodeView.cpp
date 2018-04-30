@@ -33,6 +33,10 @@ namespace monya { namespace container {
         req_indxs.resize(0);
     }
 
+    const bool NodeView::is_leaf() const {
+        return (depth == get_max_depth() || get_data_index().size() == 1);
+    }
+
     NodeView::NodeView(data_t val): NodeView() {
         comparator = val;
     }
@@ -90,17 +94,22 @@ namespace monya { namespace container {
         return ioer;
     }
 
-    void NodeView::set_depth(short depth) {
+    void NodeView::set_depth(depth_t depth) {
         this->depth = depth;
     }
 
-    const short NodeView::get_depth() const {
+    const depth_t NodeView::get_depth() const {
         return depth;
+    }
+
+    const depth_t NodeView::get_max_depth() const {
+        return scheduler->get_max_depth();
     }
 
     // This is run first
     void NodeView::prep() {
-        get_data(); // Put data into mem
+        if (get_depth() <= get_max_depth())
+            get_data(); // Put data into mem
     }
 
     void NodeView::get_data() {

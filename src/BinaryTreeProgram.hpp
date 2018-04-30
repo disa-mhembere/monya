@@ -72,7 +72,8 @@ namespace monya {
                 this->nfeatures = params.nfeatures;
 
                 assert(params.fanout == 2);
-                this->scheduler = new sched_t(params.fanout, params.ntree);
+                this->scheduler = new sched_t(params.fanout, params.ntree,
+                        params.max_depth);
             }
 
             void set_root(NodeType* node) {

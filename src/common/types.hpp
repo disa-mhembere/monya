@@ -40,6 +40,9 @@ namespace monya {
     typedef size_t depth_t; // The number of trees in the forrest
     typedef double data_t; // The type of the data
 
+    // Constants
+    const static depth_t MAX_DEPTH = std::numeric_limits<depth_t>::max();
+
     // Used to express the dimensions of a matrix
     typedef std::pair<offset_t, offset_t> dimpair;
 
@@ -60,9 +63,6 @@ namespace monya {
       Whether we are running in memory, semi-external memory or in memory
       with synchronous I/O
       */
-    //std::map<std::string, short> IOTYPE_t =
-        //{{"mem", 0}, {"sem", 1}, {"sync", 2}};
-
     enum IOTYPE {
         MEM = 0,
         SEM = 1, // Always async
@@ -92,12 +92,12 @@ namespace monya {
             unsigned nthread;
             MAT_ORIENT orientation;
             unsigned fanout; // The number of children a node a can have
-            size_t max_depth; // Maximum depth the tree can reach
+            depth_t max_depth; // Maximum depth the tree can reach
 
         Params(size_t nsamples=0, size_t nfeatures=0, std::string fn="",
                 IOTYPE iotype=IOTYPE::MEM, tree_t ntree=1, unsigned nthread=1,
                 MAT_ORIENT orientation=MAT_ORIENT::COL, unsigned fanout=2,
-                size_t max_depth=std::numeric_limits<size_t>::max()) {
+                depth_t max_depth=std::numeric_limits<depth_t>::max()) {
 
             this->nsamples = nsamples;
             this->nfeatures = nfeatures;
