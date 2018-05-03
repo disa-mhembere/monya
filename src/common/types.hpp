@@ -82,7 +82,7 @@ namespace monya {
         INVALID
     };
 
-    class Params {
+    struct Params {
         public:
             size_t nsamples; // Max # of samples from which the tree is built
             size_t nfeatures; // Number of features
@@ -126,6 +126,11 @@ namespace monya {
                 "fanout: " << fanout << std::endl <<
                 "max depth: " << max_depth << std::endl;
         }
+    };
+
+    struct QueryParams {
+
+
     };
 
     template <typename T>

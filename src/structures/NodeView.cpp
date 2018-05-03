@@ -19,6 +19,7 @@
 
 #include "NodeView.hpp"
 #include "Scheduler.hpp"
+#include "Query.hpp"
 
 #include <utility>
 #include <iostream>
@@ -26,7 +27,8 @@
 #include <parallel/algorithm>
 #include "../io/IO.hpp"
 
-namespace monya { namespace container {
+namespace monya {
+    namespace container {
 
     NodeView::NodeView() {
         depth = 0;
@@ -43,6 +45,11 @@ namespace monya { namespace container {
 
     NodeView::NodeView(IndexVector& data_index): NodeView() {
         this->data_index = data_index;
+    }
+
+    // Querying
+    void NodeView::query(const QueryParams& params, Query* nq) {
+        throw not_implemented_exception(__FILE__, __LINE__);
     }
 
     // Range index

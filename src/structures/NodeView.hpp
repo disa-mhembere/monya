@@ -32,6 +32,7 @@ namespace monya {
 
 // Fwd decl
 class Scheduler;
+class Query;
 
 // Represent a node in the tree
 class NodeView: public safs::callback {
@@ -39,6 +40,7 @@ class NodeView: public safs::callback {
         virtual void run() = 0;
         virtual void init(Params&) = 0;
         virtual void distance(data_t arg1) = 0;
+        virtual void query(const QueryParams&, Query*); // TODO: make more of these
 
         virtual void spawn(std::vector<sample_id_t>& idxs,
                 std::vector<offset_t>& offsets);
