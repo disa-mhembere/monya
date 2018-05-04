@@ -27,7 +27,7 @@
 
 using namespace monya;
 
-class kdnode: public container::RBNode {
+class kdnode: public container::BinaryNode {
     private:
         size_t split_dim;
 
@@ -187,10 +187,24 @@ int main(int argc, char* argv[]) {
         }
     }
     std::cout << "Roots initialized ...\n";
-
-    //t.tic();
     engine->train();
+
+    // Query the Tree to make sure we don't have garbage!
     std::cout << "I'm well trained!\n";
+
+    container::BinaryNode* bn;
+    for (unsigned i = 0; i < nsamples*nfeatures; i++) {
+        bn = new kdnode;
+        bn->set_comparator((data_t) i);
+
+        container::ProximityQuery::ptr pq = container::ProximityQuery::create();
+        engine->query(pq);
+        std::vector<container::BinaryNode*> res = pq->get_query_result();
+
+        res[0]->print();
+
+        delete bn;
+    }
 
     //std::cout << "Engine trained in " << t.toc() << " seconds\n";
     return EXIT_SUCCESS;

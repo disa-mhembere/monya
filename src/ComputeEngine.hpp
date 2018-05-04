@@ -24,6 +24,7 @@
 #include <vector>
 #include "common/types.hpp"
 #include "common/exception.hpp"
+#include "structures/Query.hpp"
 
 namespace monya {
     template <typename TreeProgramType>
@@ -100,6 +101,11 @@ namespace monya {
 
                 for (auto it = forest.begin(); it != forest.end(); ++it)
                     (*it)->build();
+            }
+
+            void query(container::ProximityQuery::ptr pq) {
+                for (auto tree : forest)
+                    pq->query(tree);
             }
 
             void predict() {

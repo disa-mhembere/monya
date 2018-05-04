@@ -27,8 +27,7 @@
 
 // NOTE: We initally assume all the Trees are the same
 namespace monya {
-
-    unsigned READ_SZ_BYTES = 4096; // TODO: Alter
+    static constexpr unsigned READ_SZ_BYTES = 4096; // TODO: Alter
 
     template <typename NodeType>
     class BinaryTreeProgram: public container::BinaryTree {
@@ -153,5 +152,4 @@ namespace monya {
             }
     };
 } // End monya
-
 #endif
