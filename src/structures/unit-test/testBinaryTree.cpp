@@ -22,10 +22,52 @@
 #include <random>
 
 #include "sucommon.hpp"
+
 namespace mc = monya::container;
 namespace mt = monya::test;
 
+void test_manual_construction() {
+    mc::BinaryTree::ptr tree = mc::BinaryTree::create();
+
+    mc::BinaryNode* root = new mc::BinaryNode(5.0);
+    tree->set_root(root);
+
+    mc::BinaryNode* l = new mc::BinaryNode(2.0);
+    l->parent = root;
+    root->left = l;
+    mc::BinaryNode* r = new mc::BinaryNode(8.0);
+    r->parent = root;
+    root->right = r;
+
+    l->left = l->right = r->left = r->right = NULL;
+
+    mc::BinaryNode* ll = new mc::BinaryNode(1.0);
+    ll->parent = l;
+    l->left = ll;
+
+    mc::BinaryNode* lr = new mc::BinaryNode(4.0);
+    lr->parent = l;
+    l->right = lr;
+
+    mc::BinaryNode* rl = new mc::BinaryNode(6.0);
+    rl->parent = r;
+    r->left = rl;
+
+    mc::BinaryNode* rr = new mc::BinaryNode(10.0);
+    rr->parent = r;
+    r->right = rr;
+
+    ll->left = ll->right = lr->left = lr->right
+        = rl->left = rl->right = rr->right = rr->left = NULL;
+
+    tree->echo();
+}
+
 int main(int argc, char* argv[]) {
+    test_manual_construction();
+
+    ////////////////////////////////////////////////////////////////////////////
+
     std::vector<double> members {0.10, 0.8, 0.14, 0.6};
 
     mc::BinaryTree::ptr tree = mc::BinaryTree::create();

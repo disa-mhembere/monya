@@ -36,6 +36,8 @@ namespace mc = monya::container;
 
 namespace monya {
 
+    // A class to allow author to build a specific tree with specific
+    //  structure
     namespace test {
     class NodeMapper {
         public:
