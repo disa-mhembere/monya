@@ -54,6 +54,13 @@ class IO {
             dtype_size = sizeof(data_t);
         }
 
+        virtual void print() {
+            printf("fn: %s\n dypte size: %lu, orientation: %s, shape:"
+                " (%lu, %lu)\n", fn.c_str(), dtype_size,
+                (orientation == MAT_ORIENT::COL ? "COL" : "ROW"),
+                 dim.first, dim.second);
+        }
+
         IO(const std::string fn): IO() {
             this->fn = fn;
         }
