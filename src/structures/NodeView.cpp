@@ -130,10 +130,18 @@ namespace monya {
             data_index.set_indexes(ret, ioer->shape().first);
         } else {
             // FIXME works with 1 column only
-            for (auto iv : data_index) {
-                iv.set_val(ret[iv.get_index()]);
+            // TODO: Bad access pattern for ret vector..
+            for (size_t i = 0; i < data_index.size(); i++) {
+                auto idx = data_index[i].get_index();
+                data_index[i].set_val(ret[idx]);
             }
         }
+
+#if 0
+        std::cout << "Printing full index after set:\n";
+        data_index.print();
+#endif
+
     }
 
     void NodeView::set_scheduler(Scheduler* scheduler) {
@@ -160,6 +168,10 @@ namespace monya {
         std::cout << comparator << std::endl;
     }
 
+    const std::string NodeView::to_string() {
+        return std::to_string(this->comparator);
+    }
+
     const data_t NodeView::get_comparator() const {
         return comparator;
     }
@@ -181,7 +193,7 @@ namespace monya {
     }
 
     bool NodeView::operator>(const NodeView& other) {
-        return this->get_comparator() > other.get_comparator();
+        return get_comparator() > other.get_comparator();
     }
 
     bool NodeView::operator<=(const NodeView& other) {
@@ -204,8 +216,26 @@ namespace monya {
         scheduler->schedule(this);
     }
 
+    // @param node: inherits properties from the object
+     void NodeView::bestow(NodeView* node) {
+         node->parent = this; // TODO This doesn't work :-/
+         node->set_ioer(ioer);
+         node->set_scheduler(scheduler);
+         node->set_depth(depth+1);
+
+#if 1
+         std::cout << "Bestowing with node: " <<
+             node->parent->get_comparator() << "\n";
+#endif
+         assert(node->parent->get_comparator() == get_comparator());
+         assert(NULL != node->parent);
+         assert(NULL != node->get_ioer());
+         assert(node->get_depth() > 0); // Root cannot be bestowed
+     }
+
     NodeView::~NodeView() {
     }
+
 #if 0
     std::ostream& operator<<
         (std::ostream& stream, const NodeView& node) {
