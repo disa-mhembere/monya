@@ -88,6 +88,8 @@ class ProximityQuery: public Query {
             return result;
         }
 
+        void print();
+
         // TODO: Actually find what we're looking for
         template <typename TreeProgramType>
             void query(TreeProgramType tpt) {

@@ -7,8 +7,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -55,6 +54,7 @@ class NodeView: public safs::callback {
         depth_t depth; // Depth of the node used as an idendifier
         Scheduler* scheduler;
         io::IO* ioer;
+        NodeView* parent;
 
         // TODO: End visibility
 
@@ -110,6 +110,7 @@ class NodeView: public safs::callback {
         void sort_data_index(bool par=false);
         const IndexVector& get_data_index() const;
         virtual const void print() const;
+        virtual const std::string to_string();
         const data_t get_comparator() const;
         void set_comparator(const data_t comparator);
         virtual bool operator==(const NodeView& other);
@@ -118,6 +119,8 @@ class NodeView: public safs::callback {
         virtual bool operator>(const NodeView& other);
         virtual bool operator<=(const NodeView& other);
         virtual bool operator>=(const NodeView& other);
+
+        virtual void bestow(NodeView* node);
         bool is_root();
         virtual ~NodeView();
 };
