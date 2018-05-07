@@ -43,20 +43,27 @@ class kdnode: public container::BinaryNode {
             assert(offsets.size() == 2);
 
             // TODO: Boilerplate
-            left = new kdnode;
-            right = new kdnode;
+            this->left = new kdnode;
+            this->right = new kdnode;
+
+            // Pass down metadata
+            bestow(left);
+            bestow(right);
 
             left->parent = this;
             right->parent = this;
 
-            left->set_depth(depth+1);
-            right->set_depth(depth+1);
+#if 1
+            std::cout << "Echoing LHS parent: ";
+            assert(left->parent != NULL);
+            left->parent->print();
 
-            left->set_scheduler(scheduler);
-            right->set_scheduler(scheduler);
+            std::cout << "Echoing RHS parent: ";
 
-            left->set_ioer(ioer);
-            right->set_ioer(ioer);
+            //right->parent = this;
+            assert(right->parent != NULL);
+            right->parent->print();
+#endif
             // End TODO: Boilerplate
 
             auto next_split = split_dim+1 == ioer->shape().second ?
@@ -67,7 +74,7 @@ class kdnode: public container::BinaryNode {
             right->set_index(next_split);
 
 #if 1
-            std::cout << "Node at depth: " << this->depth << "\n";
+            std::cout << "Node at depth: " << this->depth << " Spawning!\n";
             std::cout << "left indexes: ";
             io::print_arr<sample_id_t>(&idxs[offsets[0]], (offsets[1]-offsets[0]));
 
@@ -100,17 +107,30 @@ class kdnode: public container::BinaryNode {
             if (is_leaf())
                 return;
 
-            std::cout << "kdnode at depth: " << depth << " run()\n";
-            if (depth < 3)
+            std::cout << "\n\nkdnode at depth: " << depth << " run()\n";
+            if (depth < 3) {
                 sort_data_index(true); // Paralleize the sort
-            else
+            } else {
                 sort_data_index(false);
+            }
 
             std::vector<sample_id_t> idxs;
             data_index.get_indexes(idxs);
 
             std::vector<offset_t> offsets = { 0, data_index.size() / 2 };
             assert(idxs.size() == data_index.size());
+
+            // NOTE: Always <= go left and > right
+            // TODO: Better way to set split value
+            this->set_comparator(data_index[offsets[1]].get_val());
+
+#if 1
+            std::cout << "Printing data from node at depth: " << depth <<
+                std::endl;
+            data_index.print();
+
+            std::cout << "Comparator = " << get_comparator() << std::endl;
+#endif
 
             spawn(idxs, offsets);
         }
@@ -154,8 +174,8 @@ int main(int argc, char* argv[]) {
             "/Research/monya/src/test-data/rand_32_16.bin",
             IOTYPE::SYNC, ntree, nthread, mo);
 
-    //const depth_t max_depth = 4;
-    //params.max_depth = max_depth;
+    constexpr depth_t max_depth = 4;
+    params.max_depth = max_depth;
 
     params.print();
 
@@ -189,22 +209,28 @@ int main(int argc, char* argv[]) {
     std::cout << "Roots initialized ...\n";
     engine->train();
 
-    // Query the Tree to make sure we don't have garbage!
-    std::cout << "I'm well trained!\n";
+    // What does the tree look like?
+    std::cout << "Echoing the tree:\n";
+    engine->get_tree(0)->echo();
 
-    container::BinaryNode* bn;
-    for (unsigned i = 0; i < nsamples*nfeatures; i++) {
-        bn = new kdnode;
-        bn->set_comparator((data_t) i);
+/*    // Query the Tree to make sure we don't have garbage!*/
+    //std::cout << "I'm well trained!\n";
 
-        container::ProximityQuery::ptr pq = container::ProximityQuery::create();
-        engine->query(pq);
-        std::vector<container::BinaryNode*> res = pq->get_query_result();
+    //container::BinaryNode* bn;
+    //for (unsigned i = 0; i < nsamples*nfeatures; i++) {
+        //bn = new kdnode;
+        //bn->set_comparator((data_t) i);
 
-        res[0]->print();
+        //container::ProximityQuery::ptr pq =
+            //container::ProximityQuery::create(bn, 3); // 3-NN
+        //pq->print();
 
-        delete bn;
-    }
+        //engine->query(pq);
+        //std::vector<container::BinaryNode*> res = pq->get_query_result();
+
+        //res[0]->print();
+        //delete bn;
+    //}
 
     //std::cout << "Engine trained in " << t.toc() << " seconds\n";
     return EXIT_SUCCESS;
