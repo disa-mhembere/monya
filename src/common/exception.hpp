@@ -73,6 +73,12 @@ public:
     parameter_exception(const std::string msg, const std::string error_val):
         parameter_exception(msg + std::string(". Error value: ") + error_val) {
     }
+
+    parameter_exception(const std::string msg, const std::string file,
+            const int line) :
+        runtime_error(std::string("[ERROR]: '") + msg + file + std::string(":") +
+            std::to_string(line)) {
+        }
 };
 
 class thread_exception: public std::exception {
