@@ -74,10 +74,12 @@ namespace monya { namespace container {
         // Accounts underflow for level = 0
         for (auto node : level_nodes) {
             assert(node->get_depth() <= get_max_depth());
-
             node->prep();
             node->run();
-            //node->spawn();
+
+            // Only spawn if you're not a leaf
+            if (!node->is_leaf())
+                node->spawn();
         }
     }
 

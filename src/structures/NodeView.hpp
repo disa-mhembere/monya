@@ -41,8 +41,7 @@ class NodeView: public safs::callback {
         virtual void distance(data_t arg1) = 0;
         virtual void query(const QueryParams&, Query*); // TODO: make more of these
 
-        virtual void spawn(std::vector<sample_id_t>& idxs,
-                std::vector<offset_t>& offsets);
+        virtual void spawn();
 
         // TODO: Visibility
         IndexVector data_index; // Indexes that nodes hold to data & mapping

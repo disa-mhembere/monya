@@ -208,8 +208,7 @@ namespace monya {
         return depth == 0;
     }
 
-    void NodeView::spawn(std::vector<sample_id_t>& idxs,
-            std::vector<offset_t>& offsets) {
+    void NodeView::spawn() {
     }
 
     void NodeView::schedule() {
@@ -218,7 +217,7 @@ namespace monya {
 
     // @param node: inherits properties from the object
      void NodeView::bestow(NodeView* node) {
-         node->parent = this; // TODO This doesn't work :-/
+         node->parent = this; // FIXME This doesn't work :-/
          node->set_ioer(ioer);
          node->set_scheduler(scheduler);
          node->set_depth(depth+1);
