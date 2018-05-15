@@ -98,7 +98,7 @@ namespace monya { namespace container {
 
     // TODO: Check if we can avoid copy here
     void VecBinaryTree::insert_at(BinaryNode new_node,
-            const size_t parent_idx, bchild_t pos) {
+            const size_t parent_idx, const bchild_t pos) {
         // Compute position
         size_t child_pos = get_child_idx(parent_idx, pos);
         new_node.vecpos = child_pos;

@@ -31,9 +31,17 @@ namespace monya { namespace container {
 class BinaryNode: public NodeView {
     public:
         // TODO: Visibility
+        // TODO: rm
+#if 1
         BinaryNode* parent;
         BinaryNode* left;
         BinaryNode* right;
+#endif
+
+        // TODO: rm
+#if 1
+        size_t vecpos;
+#endif
 
         // Inherit constructors
         using NodeView::NodeView;

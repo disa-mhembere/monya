@@ -89,6 +89,8 @@ class VecBinaryTree {
         virtual size_t get_nnodes();
         virtual void insert_at(BinaryNode new_node,
                 BinaryNode* node, bchild_t pos);
+        void insert_at(BinaryNode new_node,
+                const size_t parent_idx, const bchild_t pos);
         virtual void insert(BinaryNode* node);
         BinaryNode* find(const BinaryNode* shell);
         void echo();

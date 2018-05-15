@@ -27,6 +27,7 @@
 
 using namespace monya;
 
+static void* root = NULL;
 class kdnode: public container::BinaryNode {
     private:
         size_t split_dim;
@@ -37,23 +38,34 @@ class kdnode: public container::BinaryNode {
         kdnode* left;
         kdnode* right;
 
-        void spawn(std::vector<sample_id_t>& idxs,
-                std::vector<offset_t>& offsets) override {
+        // Inherit constructors
+        using container::BinaryNode::BinaryNode;
 
-            assert(offsets.size() == 2);
+        kdnode() {
+            parent = left = right = NULL;
+        }
+
+        void spawn() override {
+
+            if (depth == 0) {
+                std::cout << "Root address is: " << root << std::endl;
+                std::cout << "this address is: " << this << std::endl;
+                assert(this == root);
+            }
 
             // TODO: Boilerplate
-            this->left = new kdnode;
-            this->right = new kdnode;
+            left = new kdnode;
+            right = new kdnode;
 
-            // Pass down metadata
+            if (depth == 0) {
+                assert(left == (reinterpret_cast<kdnode*>(root))->left);
+                assert(right == (reinterpret_cast<kdnode*>(root))->right);
+            }
+
             bestow(left);
             bestow(right);
 
-            left->parent = this;
-            right->parent = this;
-
-#if 1
+#if 0
             std::cout << "Echoing LHS parent: ";
             assert(left->parent != NULL);
             left->parent->print();
@@ -73,7 +85,19 @@ class kdnode: public container::BinaryNode {
             right->set_split_dim(next_split);
             right->set_index(next_split);
 
-#if 1
+
+            std::vector<sample_id_t> idxs;
+            data_index.get_indexes(idxs);
+
+            std::vector<offset_t> offsets = { 0, data_index.size() / 2 };
+            assert(idxs.size() == data_index.size());
+
+            // NOTE: Always <= go left and > right
+            // TODO: Better way to set split value
+
+            assert(offsets.size() == 2);
+
+#if 0
             std::cout << "Node at depth: " << this->depth << " Spawning!\n";
             std::cout << "left indexes: ";
             io::print_arr<sample_id_t>(&idxs[offsets[0]], (offsets[1]-offsets[0]));
@@ -103,10 +127,6 @@ class kdnode: public container::BinaryNode {
 
         // This is run next
         void run() override {
-            // Short circuiting for recursion -- No I/O is done prior to this
-            if (is_leaf())
-                return;
-
             std::cout << "\n\nkdnode at depth: " << depth << " run()\n";
             if (depth < 3) {
                 sort_data_index(true); // Paralleize the sort
@@ -114,15 +134,7 @@ class kdnode: public container::BinaryNode {
                 sort_data_index(false);
             }
 
-            std::vector<sample_id_t> idxs;
-            data_index.get_indexes(idxs);
-
-            std::vector<offset_t> offsets = { 0, data_index.size() / 2 };
-            assert(idxs.size() == data_index.size());
-
-            // NOTE: Always <= go left and > right
-            // TODO: Better way to set split value
-            this->set_comparator(data_index[offsets[1]].get_val());
+            this->set_comparator(data_index[data_index.size() / 2 ].get_val());
 
 #if 1
             std::cout << "Printing data from node at depth: " << depth <<
@@ -131,8 +143,6 @@ class kdnode: public container::BinaryNode {
 
             std::cout << "Comparator = " << get_comparator() << std::endl;
 #endif
-
-            spawn(idxs, offsets);
         }
 };
 
@@ -188,6 +198,9 @@ int main(int argc, char* argv[]) {
     // TODO: Create root/node initializer that is passed to node
     RandomSplit rs(params.nfeatures);
     std::set<size_t> splits;
+
+    kdnode* _root = NULL;
+
     for (auto tree : engine->get_forest()) {
         while (true) {
             size_t split_dim = rs.generate();
@@ -195,12 +208,13 @@ int main(int argc, char* argv[]) {
             if (sp == splits.end()) {
                 std::cout << "Choosing split: " << split_dim << std::endl;
 
-                kdnode* root = new kdnode;
-                root->set_split_dim(split_dim); // Which dim to split on
-                root->set_index(split_dim); // Which samples it owns
-                root->set_scheduler(tree->get_scheduler());
+                root = new kdnode;
+                _root = reinterpret_cast<kdnode*>(root);
+                _root->set_split_dim(split_dim); // Which dim to split on
+                _root->set_index(split_dim); // Which samples it owns
+                _root->set_scheduler(tree->get_scheduler());
 
-                tree->set_root(root);
+                tree->set_root(_root);
                 splits.insert(split_dim); // Keep track of used split dims
                 break;
             }
@@ -209,9 +223,42 @@ int main(int argc, char* argv[]) {
     std::cout << "Roots initialized ...\n";
     engine->train();
 
+    assert(_root == engine->get_tree(0)->get_root());
+    std::cout << "_root addr: " << _root << std::endl;
+    std::cout << "engine->get_tree(0)->get_root() addr: "
+        << engine->get_tree(0)->get_root() << std::endl;
+
+    std::cout << "\n\n_root->left addr: " << _root->left << std::endl;
+    std::cout << "engine->get_tree(0)->get_root()->left addr: " <<
+        engine->get_tree(0)->get_root()->left  << std::endl;
+
+    std::cout << "\n\n_root->right addr: " <<  _root->right << std::endl;
+    std::cout << "engine->get_tree(0)->get_root()->right addr: " <<
+        engine->get_tree(0)->get_root()->right  << std::endl;
+
+    //assert(_root->left == engine->get_tree(0)->get_root()->left);
+    //assert(_root->right == engine->get_tree(0)->get_root()->right);
+
+#if 0
     // What does the tree look like?
-    std::cout << "Echoing the tree:\n";
-    engine->get_tree(0)->echo();
+    //std::cout << "Echoing the tree:\n";
+    //engine->get_tree(0)->echo();
+
+    std::cout << "Echoing the tree contents:\n";
+    auto t = engine->get_tree(0);
+
+    std::cout << "Testing the first 2 levels of the tree\n ...";
+    std::cout << "Root is: \n";
+    t->get_root()->print();
+
+    std::cout << "\nRoot->left is: \n";
+    assert(NULL != t->get_root()->left);
+    t->get_root()->left->print();
+
+    std::cout << "\nRoot->right is: \n";
+    assert(NULL != t->get_root()->right);
+    t->get_root()->right->print();
+#endif
 
 /*    // Query the Tree to make sure we don't have garbage!*/
     //std::cout << "I'm well trained!\n";
