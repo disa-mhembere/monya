@@ -22,6 +22,7 @@
 
 #include "common/types.hpp"
 #include "structures/BinaryTree.hpp"
+#include "structures/BinaryNode.hpp"
 #include "io/IOfactory.hpp"
 #include "structures/Scheduler.hpp"
 
@@ -29,7 +30,6 @@
 namespace monya {
     static constexpr unsigned READ_SZ_BYTES = 4096; // TODO: Alter
 
-    template <typename NodeType>
     class BinaryTreeProgram: public container::BinaryTree {
         private:
             typedef typename container::Scheduler sched_t;
@@ -44,7 +44,11 @@ namespace monya {
             sched_t* scheduler;
 
         public:
-            typedef std::shared_ptr<BinaryTreeProgram<NodeType> > ptr;
+            typedef std::shared_ptr<BinaryTreeProgram> ptr;
+
+            // Use BinaryTree ctor
+            BinaryTreeProgram() : container::BinaryTree() {
+            }
 
             void set_nnode_id(const short nnode_id) {
                 this->nnode_id = nnode_id;
@@ -75,16 +79,12 @@ namespace monya {
                         params.max_depth);
             }
 
-            void set_root(NodeType* node) {
+            void set_root(container::BinaryNode*& node) {
                 assert(NULL != node);
                 assert(NULL != ioer);
 
                 node->set_ioer(ioer);
                 BinaryTree::set_root(node);
-            }
-
-            NodeType* create_node() {
-                return new NodeType;
             }
 
             sched_t* get_scheduler() {
@@ -95,17 +95,13 @@ namespace monya {
                 this->scheduler = scheduler;
             }
 
-            static BinaryTreeProgram<NodeType>* create_raw() {
-                return new BinaryTreeProgram<NodeType>();
+            static BinaryTreeProgram* create_raw() {
+                return new BinaryTreeProgram();
             }
 
             static ptr create() {
-                return ptr(new BinaryTreeProgram<NodeType>());
+                return ptr(new BinaryTreeProgram);
             }
-
-            //static ptr cast2(typename container::BinaryTree::ptr rbptr) {
-                //return std::static_pointer_cast<ptr>(rbptr);
-            //}
 
             void set_ioer(io::IO::raw_ptr ioer) {
                 this->ioer = ioer;
