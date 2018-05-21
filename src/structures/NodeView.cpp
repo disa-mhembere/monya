@@ -217,15 +217,11 @@ namespace monya {
 
     // @param node: inherits properties from the object
      void NodeView::bestow(NodeView* node) {
-         node->parent = this; // FIXME This doesn't work :-/
+         node->parent = this;
          node->set_ioer(ioer);
          node->set_scheduler(scheduler);
          node->set_depth(depth+1);
 
-#if 1
-         std::cout << "Bestowing with node: " <<
-             node->parent->get_comparator() << "\n";
-#endif
          assert(node->parent->get_comparator() == get_comparator());
          assert(NULL != node->parent);
          assert(NULL != node->get_ioer());

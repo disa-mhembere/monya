@@ -54,7 +54,7 @@ namespace monya { namespace container {
         delete node;
     }
 
-    void BinaryTree::set_root(BinaryNode* node) {
+    void BinaryTree::set_root(BinaryNode*& node) {
         assert(NULL != node);
         insert(node);
     }
@@ -70,7 +70,7 @@ namespace monya { namespace container {
         return nnodes;
     }
 
-    void BinaryTree::insert_at(BinaryNode* new_node,
+    void BinaryTree::insert_at(BinaryNode*& new_node,
             BinaryNode* node, bchild_t pos) {
         if (pos == bchild_t::LEFT && NULL != node->left) {
             throw std::runtime_error("BinaryTree::insert_at: "
@@ -98,7 +98,7 @@ namespace monya { namespace container {
         }
     }
 
-    void BinaryTree::insert(BinaryNode* node) {
+    void BinaryTree::insert(BinaryNode*& node) {
         BinaryNode* tmp; // A tmp node used to find the parent
         BinaryNode* parent; // Will hold the parent of node being inserted
         BinaryNode* new_node = NULL; // The new node being inserted

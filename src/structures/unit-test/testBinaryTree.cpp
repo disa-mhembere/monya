@@ -74,7 +74,8 @@ int main(int argc, char* argv[]) {
 
     for (std::vector<double>::iterator it = members.begin();
             it != members.end(); ++it) {
-        tree->insert(new mc::BinaryNode((double)*it));
+        mc::BinaryNode* node = new mc::BinaryNode((double)*it);
+        tree->insert(node);
     }
 
 #ifdef MONYA_VERBOSE

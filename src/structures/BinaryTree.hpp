@@ -63,11 +63,11 @@ class BinaryTree {
             return NULL == root;
         }
 
-        void set_root(BinaryNode* node);
+        virtual void set_root(BinaryNode*& node);
         virtual size_t get_nnodes(BinaryNode* node, size_t& nnodes);
-        virtual void insert_at(BinaryNode* new_node,
+        virtual void insert_at(BinaryNode*& new_node,
                 BinaryNode* node, bchild_t pos);
-        virtual void insert(BinaryNode* node);
+        virtual void insert(BinaryNode*& node);
         BinaryNode* find(const BinaryNode* shell);
         void echo();
         ~BinaryTree();
