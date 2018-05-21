@@ -27,17 +27,11 @@
 
 using namespace monya;
 
-static void* root = NULL;
 class kdnode: public container::BinaryNode {
     private:
         size_t split_dim;
 
     public:
-        // Define lineage
-        kdnode* parent;
-        kdnode* left;
-        kdnode* right;
-
         // Inherit constructors
         using container::BinaryNode::BinaryNode;
 
@@ -45,45 +39,26 @@ class kdnode: public container::BinaryNode {
             parent = left = right = NULL;
         }
 
-        void spawn() override {
+        static kdnode* cast2(container::BinaryNode* node) {
+            return static_cast<kdnode*>(node);
+        }
 
-            if (depth == 0) {
-                std::cout << "Root address is: " << root << std::endl;
-                std::cout << "this address is: " << this << std::endl;
-                assert(this == root);
-            }
+        void spawn() override {
 
             // TODO: Boilerplate
             left = new kdnode;
             right = new kdnode;
 
-            if (depth == 0) {
-                assert(left == (reinterpret_cast<kdnode*>(root))->left);
-                assert(right == (reinterpret_cast<kdnode*>(root))->right);
-            }
-
             bestow(left);
             bestow(right);
-
-#if 0
-            std::cout << "Echoing LHS parent: ";
-            assert(left->parent != NULL);
-            left->parent->print();
-
-            std::cout << "Echoing RHS parent: ";
-
-            //right->parent = this;
-            assert(right->parent != NULL);
-            right->parent->print();
-#endif
             // End TODO: Boilerplate
 
             auto next_split = split_dim+1 == ioer->shape().second ?
                     0 : split_dim+1;
-            left->set_split_dim(next_split);
-            left->set_index(next_split);
-            right->set_split_dim(next_split);
-            right->set_index(next_split);
+            cast2(left)->set_split_dim(next_split);
+            cast2(left)->set_index(next_split);
+            cast2(right)->set_split_dim(next_split);
+            cast2(right)->set_index(next_split);
 
 
             std::vector<sample_id_t> idxs;
@@ -146,15 +121,16 @@ class kdnode: public container::BinaryNode {
         }
 };
 
+
 // How the program runs
-class kdTreeProgram: public BinaryTreeProgram<kdnode> {
+class kdTreeProgram: public BinaryTreeProgram {
     private:
         // All the trees in the forest (including this one!)
         std::vector<kdTreeProgram*> copse;
 
     public:
         // Can be used if we need no more constructors
-        using BinaryTreeProgram<kdnode>::BinaryTreeProgram;
+        using BinaryTreeProgram::BinaryTreeProgram;
 };
 
 class RandomSplit {
@@ -199,7 +175,7 @@ int main(int argc, char* argv[]) {
     RandomSplit rs(params.nfeatures);
     std::set<size_t> splits;
 
-    kdnode* _root = NULL;
+    container::BinaryNode* root = new kdnode;
 
     for (auto tree : engine->get_forest()) {
         while (true) {
@@ -208,77 +184,45 @@ int main(int argc, char* argv[]) {
             if (sp == splits.end()) {
                 std::cout << "Choosing split: " << split_dim << std::endl;
 
-                root = new kdnode;
-                _root = reinterpret_cast<kdnode*>(root);
-                _root->set_split_dim(split_dim); // Which dim to split on
-                _root->set_index(split_dim); // Which samples it owns
-                _root->set_scheduler(tree->get_scheduler());
+                // Which dim to split on
+                kdnode::cast2(root)->set_split_dim(split_dim);
+                kdnode::cast2(root)->set_index(split_dim); // Which samples it owns
+                kdnode::cast2(root)->set_scheduler(tree->get_scheduler());
 
-                tree->set_root(_root);
+                tree->set_root(root);
                 splits.insert(split_dim); // Keep track of used split dims
                 break;
             }
         }
     }
-    std::cout << "Roots initialized ...\n";
+    std::cout << "Roots initialized ... Training trees\n";
     engine->train();
 
-    assert(_root == engine->get_tree(0)->get_root());
-    std::cout << "_root addr: " << _root << std::endl;
-    std::cout << "engine->get_tree(0)->get_root() addr: "
-        << engine->get_tree(0)->get_root() << std::endl;
-
-    std::cout << "\n\n_root->left addr: " << _root->left << std::endl;
-    std::cout << "engine->get_tree(0)->get_root()->left addr: " <<
-        engine->get_tree(0)->get_root()->left  << std::endl;
-
-    std::cout << "\n\n_root->right addr: " <<  _root->right << std::endl;
-    std::cout << "engine->get_tree(0)->get_root()->right addr: " <<
-        engine->get_tree(0)->get_root()->right  << std::endl;
-
-    //assert(_root->left == engine->get_tree(0)->get_root()->left);
-    //assert(_root->right == engine->get_tree(0)->get_root()->right);
-
-#if 0
-    // What does the tree look like?
-    //std::cout << "Echoing the tree:\n";
-    //engine->get_tree(0)->echo();
-
+#if 1
     std::cout << "Echoing the tree contents:\n";
-    auto t = engine->get_tree(0);
-
-    std::cout << "Testing the first 2 levels of the tree\n ...";
-    std::cout << "Root is: \n";
-    t->get_root()->print();
-
-    std::cout << "\nRoot->left is: \n";
-    assert(NULL != t->get_root()->left);
-    t->get_root()->left->print();
-
-    std::cout << "\nRoot->right is: \n";
-    assert(NULL != t->get_root()->right);
-    t->get_root()->right->print();
+    engine->get_tree(0)->echo();
+    std::cout << "I'm well trained!\n";
 #endif
 
-/*    // Query the Tree to make sure we don't have garbage!*/
-    //std::cout << "I'm well trained!\n";
+    // Query the Tree to make sure we don't have garbage!
 
-    //container::BinaryNode* bn;
-    //for (unsigned i = 0; i < nsamples*nfeatures; i++) {
-        //bn = new kdnode;
-        //bn->set_comparator((data_t) i);
+#if 0
+    container::BinaryNode* bn;
+    for (unsigned i = 0; i < nsamples*nfeatures; i++) {
+        bn = new kdnode;
+        bn->set_comparator((data_t) i);
 
-        //container::ProximityQuery::ptr pq =
-            //container::ProximityQuery::create(bn, 3); // 3-NN
-        //pq->print();
+        container::ProximityQuery::ptr pq =
+            container::ProximityQuery::create(bn, 3); // 3-NN
+        pq->print();
 
-        //engine->query(pq);
-        //std::vector<container::BinaryNode*> res = pq->get_query_result();
+        engine->query(pq);
+        std::vector<container::BinaryNode*> res = pq->get_query_result();
 
-        //res[0]->print();
-        //delete bn;
-    //}
+        res[0]->print();
+        delete bn;
+    }
+#endif
 
-    //std::cout << "Engine trained in " << t.toc() << " seconds\n";
     return EXIT_SUCCESS;
 }
