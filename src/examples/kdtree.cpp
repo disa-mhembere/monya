@@ -24,6 +24,7 @@
 #include "../common/monya.hpp"
 #include "../utils/time.hpp"
 #include "../io/IO.hpp"
+#include "../structures/SampleVector.hpp"
 
 using namespace monya;
 
@@ -131,6 +132,10 @@ class kdTreeProgram: public BinaryTreeProgram {
     public:
         // Can be used if we need no more constructors
         using BinaryTreeProgram::BinaryTreeProgram;
+
+        //std::vector<BinaryNode*> find_neighbors(Query* q) {
+            //return std::vector<BinaryNode*>;
+        //}
 };
 
 class RandomSplit {
@@ -201,26 +206,31 @@ int main(int argc, char* argv[]) {
 #if 1
     std::cout << "Echoing the tree contents:\n";
     engine->get_tree(0)->echo();
-    std::cout << "I'm well trained!\n";
 #endif
 
+#if 1
     // Query the Tree to make sure we don't have garbage!
 
-#if 0
-    container::BinaryNode* bn;
-    for (unsigned i = 0; i < nsamples*nfeatures; i++) {
-        bn = new kdnode;
-        bn->set_comparator((data_t) i);
+    // Essentially replicate the data
+    std::vector<data_t> tmp;
+    for (size_t i = 0; i < nsamples; i++) {
+        tmp.clear();
+        for (size_t j  = 0; j < nfeatures; j++) {
+            auto val = (data_t) ((i*nfeatures) + j);
+            tmp.push_back(val);
+        }
 
+        auto qsample = container::DenseVector::create(&tmp[0], tmp.size());
         container::ProximityQuery::ptr pq =
-            container::ProximityQuery::create(bn, 3); // 3-NN
+            container::ProximityQuery::create(qsample, 3); // 3-NN
         pq->print();
 
         engine->query(pq);
-        std::vector<container::BinaryNode*> res = pq->get_query_result();
 
-        res[0]->print();
-        delete bn;
+        //std::vector<container::BinaryNode*> res = pq->get_query_result();
+
+        //res[0]->print();
+        break;
     }
 #endif
 
