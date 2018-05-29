@@ -22,10 +22,12 @@
 
 #include <memory>
 #include "../common/types.hpp"
+#include "../common/exception.hpp"
 
 namespace monya { namespace container {
 
 class BinaryNode;
+class Query;
 
 // NOTE: No deletion!
 class BinaryTree {
@@ -46,6 +48,15 @@ class BinaryTree {
         static ptr create() {
             return ptr(new BinaryTree());
         }
+
+        virtual NNvector find_neighbors(Query* q) {
+            throw not_implemented_exception();
+        }
+
+        virtual std::vector<BinaryNode*> find_neighbor_nodes(Query* q) {
+            throw not_implemented_exception();
+        }
+
 
         virtual BinaryNode* get_root() {
             return root;

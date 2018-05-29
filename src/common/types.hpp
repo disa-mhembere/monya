@@ -46,6 +46,13 @@ namespace monya {
     // Used to express the dimensions of a matrix
     typedef std::pair<offset_t, offset_t> dimpair;
 
+    // Used for nearest neighbor (NN) queries
+    //  Returned results contain the ID of the NN and distance
+    typedef std::pair<sample_id_t, data_t> NNpair;
+
+    // An ordered vector by distance of the nearest neighbors
+    typedef std::vector<NNpair> NNvector;
+
     // Traversal order of the tree
     enum order_t {
         PREORDER,

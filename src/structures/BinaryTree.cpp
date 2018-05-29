@@ -20,6 +20,7 @@
 #include "BinaryTree.hpp"
 #include "../common/exception.hpp"
 #include "BinaryNode.hpp"
+#include "Query.hpp"
 
 namespace monya { namespace container {
 
