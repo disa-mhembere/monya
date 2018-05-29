@@ -21,22 +21,28 @@
 #define MONYA_QUERY_HPP__
 
 #include "../common/types.hpp"
-#include "../BinaryTreeProgram.hpp"
+#include "SampleVector.hpp"
 #include <memory>
 
-namespace monya { namespace container {
+namespace monya {
+    class BinaryTreeProgram;
+    namespace container {
 
 class BinaryNode;
 
 // Inherit from this class to query
 class Query {
 
+    public:
+        typedef std::shared_ptr<Query> ptr;
+        virtual void print() = 0;
+        virtual void run(BinaryTreeProgram* tpt) = 0;
 };
 
 class ProximityQuery: public Query {
     private:
         short k; // k nearest
-        BinaryNode* qnode;
+        SampleVector::ptr qsample;
         std::vector<BinaryNode*> result;
 
         void append_response_node(BinaryNode* node) {
@@ -46,18 +52,17 @@ class ProximityQuery: public Query {
         void append_response_node_lineage(BinaryNode* node);
 
     public:
-        typedef std::shared_ptr<ProximityQuery> ptr;
 
         static ptr create() {
-            return ptr(new ProximityQuery());
+            return Query::ptr(new ProximityQuery());
         }
 
         static ptr create(const short k) {
             return ptr(new ProximityQuery(k));
         }
 
-        static ptr create(BinaryNode* nodeshell, const short k) {
-            return ptr(new ProximityQuery(nodeshell, k));
+        static ptr create(SampleVector::ptr qs, const short k) {
+            return ptr(new ProximityQuery(qs, k));
         }
 
         ProximityQuery() {
@@ -67,13 +72,13 @@ class ProximityQuery: public Query {
             this->k = k;
         }
 
-        ProximityQuery(BinaryNode* nodeshell, const short k) :
+        ProximityQuery(SampleVector::ptr qsample, const short k) :
             ProximityQuery(k) {
-                this->qnode = nodeshell;
+                this->qsample = qsample;
             }
 
-        void set_qnode(BinaryNode* qnode) {
-            this->qnode = qnode;
+        void set_qsample(SampleVector::ptr qs) {
+            qsample = qs;
         }
 
         void set_k(const short k) {
@@ -88,15 +93,11 @@ class ProximityQuery: public Query {
             return result;
         }
 
-        void print();
+        void print() override;
 
-        // TODO: Actually find what we're looking for
-        template <typename TreeProgramType>
-            void query(TreeProgramType tpt) {
-                assert(NULL != this->qnode);
-                BinaryNode* ret = tpt->find(this->qnode);
-                result.push_back(ret);
-            }
+        // Actually find what we're looking for
+        void run(BinaryTreeProgram* tp) override;
 };
+
 } }
 #endif

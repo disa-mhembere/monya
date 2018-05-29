@@ -19,6 +19,7 @@
 
 #include "Query.hpp"
 #include "BinaryNode.hpp"
+#include "../BinaryTreeProgram.hpp"
 
 namespace monya { namespace container {
 
@@ -31,7 +32,16 @@ namespace monya { namespace container {
 
     void ProximityQuery::print() {
         std::cout << "ProximityQuery:\n";
-        std::cout << "k: " << this->k << std::endl <<
-            "qnode: " << this->qnode->to_string() << std::endl;
+        std::cout << "k: " << k << "\n" <<
+            "query: "; qsample->print(); std::cout << "\n";
     }
-}}
+
+    // Actually find what we're looking for
+    void ProximityQuery::run(BinaryTreeProgram* tp) {
+        assert(!qsample->empty());
+        tp->find_neighbors(this);
+
+        //std::vector<BinaryNode> ret = tpt->(this->qnode);
+        //result.push_back(ret);
+    }
+}} // End namespace monya::container

@@ -103,9 +103,10 @@ namespace monya {
                     (*it)->build();
             }
 
-            void query(container::ProximityQuery::ptr pq) {
-                for (auto tree : forest)
-                    pq->query(tree);
+            void query(container::Query::ptr pq) {
+                for (auto tree : forest) {
+                    pq->run(tree);
+                }
             }
 
             void predict() {
