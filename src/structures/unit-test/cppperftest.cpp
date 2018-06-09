@@ -38,7 +38,6 @@ class ConcreteNode : public mc::NodeView {
 
     public:
     using mc::NodeView::NodeView;
-    void distance(monya::data_t val) override {}
 };
 
 void insert_test(std::map<ConcreteNode*, data_t>& tree,

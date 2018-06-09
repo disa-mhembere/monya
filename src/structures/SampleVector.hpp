@@ -29,7 +29,7 @@ namespace monya { namespace container {
     // An abstraction over a vector OR sparse vector
     class SampleVector {
         public:
-            typedef std::shared_ptr<SampleVector> ptr;
+            typedef SampleVector* raw_ptr;
 
             SampleVector() { }
 
@@ -47,16 +47,16 @@ namespace monya { namespace container {
 
         public:
 
-            static ptr create() {
-                return SampleVector::ptr(new DenseVector);
+            static raw_ptr create_raw() {
+                return new DenseVector;
             }
 
-            static ptr create(data_t* data, size_t nelem) {
-                return SampleVector::ptr(new DenseVector(data, nelem));
+            static raw_ptr create_raw(data_t* data, size_t nelem) {
+                return new DenseVector(data, nelem);
             }
 
-            static std::shared_ptr<DenseVector> cast2(ptr o) {
-                return std::static_pointer_cast<DenseVector>(o);
+            static raw_ptr cast2(raw_ptr o) {
+                return static_cast<DenseVector*>(o);
             }
 
             DenseVector() {

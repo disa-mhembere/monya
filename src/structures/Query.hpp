@@ -21,7 +21,6 @@
 #define MONYA_QUERY_HPP__
 
 #include "../common/types.hpp"
-#include "SampleVector.hpp"
 #include <memory>
 
 namespace monya {
@@ -29,6 +28,7 @@ namespace monya {
     namespace container {
 
 class BinaryNode;
+class SampleVector;
 
 // Inherit from this class to query
 class Query {
@@ -37,12 +37,13 @@ class Query {
         typedef std::shared_ptr<Query> ptr;
         virtual void print() = 0;
         virtual void run(BinaryTreeProgram* tpt) = 0;
+        virtual data_t& operator[](const size_t idx) = 0;
 };
 
 class ProximityQuery: public Query {
     private:
         short k; // k nearest
-        SampleVector::ptr qsample;
+        SampleVector* qsample;
         std::vector<BinaryNode*> result;
 
         void append_response_node(BinaryNode* node) {
@@ -61,24 +62,32 @@ class ProximityQuery: public Query {
             return ptr(new ProximityQuery(k));
         }
 
-        static ptr create(SampleVector::ptr qs, const short k) {
+        static ptr create(SampleVector* qs, const short k) {
             return ptr(new ProximityQuery(qs, k));
+        }
+
+        static ProximityQuery* raw_cast(Query* q) {
+            return static_cast<ProximityQuery*>(q);
         }
 
         ProximityQuery() {
         }
 
-        ProximityQuery(const short k) {
-            this->k = k;
+        ProximityQuery(const short k) : k(k) {
+            //this->k = k;
         }
 
-        ProximityQuery(SampleVector::ptr qsample, const short k) :
+        ProximityQuery(SampleVector* qsample, const short k) :
             ProximityQuery(k) {
                 this->qsample = qsample;
             }
 
-        void set_qsample(SampleVector::ptr qs) {
+        void set_qsample(SampleVector* qs) {
             qsample = qs;
+        }
+
+        SampleVector* get_qsample() {
+            return qsample;
         }
 
         void set_k(const short k) {
@@ -89,6 +98,8 @@ class ProximityQuery: public Query {
             return k;
         }
 
+        data_t& operator[](const size_t idx) override;
+
         const std::vector<BinaryNode*>& get_query_result() const {
             return result;
         }
@@ -98,6 +109,5 @@ class ProximityQuery: public Query {
         // Actually find what we're looking for
         void run(BinaryTreeProgram* tp) override;
 };
-
 } }
 #endif

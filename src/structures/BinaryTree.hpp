@@ -50,13 +50,12 @@ class BinaryTree {
         }
 
         virtual NNvector find_neighbors(Query* q) {
-            throw not_implemented_exception();
+            throw not_implemented_exception(__FILE__, __LINE__);
         }
 
         virtual std::vector<BinaryNode*> find_neighbor_nodes(Query* q) {
-            throw not_implemented_exception();
+            throw not_implemented_exception(__FILE__, __LINE__);
         }
-
 
         virtual BinaryNode* get_root() {
             return root;

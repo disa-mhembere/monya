@@ -20,6 +20,7 @@
 #include "Query.hpp"
 #include "BinaryNode.hpp"
 #include "../BinaryTreeProgram.hpp"
+#include "SampleVector.hpp"
 
 namespace monya { namespace container {
 
@@ -43,5 +44,9 @@ namespace monya { namespace container {
 
         //std::vector<BinaryNode> ret = tpt->(this->qnode);
         //result.push_back(ret);
+    }
+
+    data_t& ProximityQuery::operator[](const size_t idx) {
+        return (*qsample)[idx];
     }
 }} // End namespace monya::container

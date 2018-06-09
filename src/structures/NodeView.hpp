@@ -20,6 +20,7 @@
 #define MONYA_NODEVIEW_HPP__
 
 #include "../common/types.hpp"
+#include "../common/exception.hpp"
 #include "../../SAFS/libsafs/io_interface.h"
 
 namespace monya {
@@ -32,14 +33,20 @@ namespace monya {
 // Fwd decl
 class Scheduler;
 class Query;
+class SampleVector;
 
 // Represent a node in the tree
 class NodeView: public safs::callback {
     public:
         virtual void run() = 0;
         virtual void init(Params&) = 0;
-        virtual void distance(data_t arg1) = 0;
-        virtual void query(const QueryParams&, Query*); // TODO: make more of these
+
+        virtual data_t distance(SampleVector*) {
+            throw abstract_exception("NodeView::distance");
+        }
+
+        // TODO: make more of these
+        virtual void query(const QueryParams&, Query*);
 
         virtual void spawn();
 

@@ -24,7 +24,6 @@
 
 #include "NodeView.hpp"
 #include <iostream>
-#include "../common/exception.hpp"
 #include "../common/types.hpp"
 
 namespace monya { namespace container {
@@ -53,10 +52,6 @@ class BinaryNode: public NodeView {
 
         virtual void run() override {
             throw abstract_exception("BinaryNode::run");
-        }
-
-        virtual void distance(data_t arg1) override {
-            throw abstract_exception("BinaryNode::distance");
         }
 
         virtual void init(Params&) override {
