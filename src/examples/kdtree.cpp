@@ -44,6 +44,17 @@ class kdnode: public container::BinaryNode {
             return static_cast<kdnode*>(node);
         }
 
+        data_t distance(container::SampleVector* qsample) override {
+
+            // Euclidean distance
+            //data_t dist = 0;
+            //for (size_t i = 0; qsample->size(); i++) {
+                //(*qsample)[i] -
+            //}
+            //return sqrt(dist);
+            return 0;
+        }
+
         void spawn() override {
 
             // TODO: Boilerplate
@@ -70,19 +81,7 @@ class kdnode: public container::BinaryNode {
 
             // NOTE: Always <= go left and > right
             // TODO: Better way to set split value
-
             assert(offsets.size() == 2);
-
-#if 0
-            std::cout << "Node at depth: " << this->depth << " Spawning!\n";
-            std::cout << "left indexes: ";
-            io::print_arr<sample_id_t>(&idxs[offsets[0]], (offsets[1]-offsets[0]));
-
-            std::cout << "right indexes: ";
-            io::print_arr<sample_id_t>(&idxs[offsets[1]],
-                    (idxs.size()-offsets[1]));
-            std::cout << "\n";
-#endif
 
             left->set_ph_data_index(&idxs[offsets[0]], offsets[1]-offsets[0]);
             right->set_ph_data_index(&idxs[offsets[1]],
@@ -133,9 +132,21 @@ class kdTreeProgram: public BinaryTreeProgram {
         // Can be used if we need no more constructors
         using BinaryTreeProgram::BinaryTreeProgram;
 
-        //std::vector<BinaryNode*> find_neighbors(Query* q) {
-            //return std::vector<BinaryNode*>;
-        //}
+        NNvector find_neighbors(container::Query* q) override {
+            kdnode* node = kdnode::cast2(get_root());
+            container::ProximityQuery* query =
+                container::ProximityQuery::raw_cast(q);
+
+            // K nearest neighbors
+            NNvector neighs (query->get_k());
+
+            while (node) {
+                auto split_dim = node->get_split_dim();
+                auto dist = node->distance(query->get_qsample());
+            }
+
+            return neighs;
+        }
 };
 
 class RandomSplit {
@@ -220,7 +231,7 @@ int main(int argc, char* argv[]) {
             tmp.push_back(val);
         }
 
-        auto qsample = container::DenseVector::create(&tmp[0], tmp.size());
+        auto qsample = container::DenseVector::create_raw(&tmp[0], tmp.size());
         container::ProximityQuery::ptr pq =
             container::ProximityQuery::create(qsample, 3); // 3-NN
         pq->print();

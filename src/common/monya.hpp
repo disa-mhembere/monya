@@ -25,6 +25,7 @@
 #include "../BinaryTreeProgram.hpp"
 #include "../ComputeEngine.hpp"
 #include "../structures/RBNode.hpp"
+#include "../structures/Query.hpp"
 #include "types.hpp"
 
 #include <algorithm>
