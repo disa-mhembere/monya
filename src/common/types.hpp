@@ -201,6 +201,10 @@ namespace monya {
         typedef typename std::vector<IndexVal<data_t> >::iterator iterator;
         IndexVector() { } // Default ctor
 
+        IndexVector(const size_t nelem) {
+            resize(nelem);
+        }
+
         IndexVector(const std::vector<data_t>& vals) {
             for (size_t i = 0; i < vals.size(); i++)
                 _.push_back(IndexVal<data_t>(i, vals[i]));
@@ -253,6 +257,22 @@ namespace monya {
 
         const size_t size() const {
             return _.size();
+        }
+
+        void resize(const size_t nelem) {
+            assert(nelem >= size());
+
+            for (size_t i = 0; i < nelem-size(); i++) {
+                _.push_back(IndexVal<data_t>(0, 0));
+            }
+        }
+
+        void insert(IndexVal<data_t> item, const size_t offset) {
+            _.insert(begin()+offset, item);
+        }
+
+        void trim(const size_t nelem) {
+            _.resize(nelem);
         }
 
         bool empty() const { return _.empty(); }

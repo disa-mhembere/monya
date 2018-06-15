@@ -13,42 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include ../Makefile.common
+include ../../Makefile.common
 
-all: libstructures utils libmonya commontag examples iotag validate
+CXXFLAGS +=-I../../SAFS/libsafs -I../common -I../structures -I..
+LDFLAGS :=-L../../SAFS/libsafs -L../common -L../structures -L..\
+	-lsafs -lstructures -lmonya $(LDFLAGS)
 
-libstructures:
-	$(MAKE) -C structures
+all: brute-test
 
-libmonya: libstructures utils commontag io $(OBJS)
-	rm -f libmonya
-	ar -cvq libmonya.a $(OBJS)
-
-utils: io libstructures
-	$(MAKE) -C utils
-
-examples: libmonya
-	$(MAKE) -C examples
-
-validate: libmonya
-	$(MAKE) -C validate
-
-commontag:
-	$(MAKE) -C common
-
-iotag: common
-	$(MAKE) -C io
+brute-test: brute-test.o
+	$(CXX) -o brute-test brute-test.o $(LDFLAGS)
 
 clean:
 	rm -f *.d
 	rm -f *.o
 	rm -f *~
+	rm -f brute-test
 	rm -f *.a
-	$(MAKE) --ignore-errors -C structures clean
-	$(MAKE) --ignore-errors -C utils clean
-	$(MAKE) --ignore-errors -C examples clean
-	$(MAKE) --ignore-errors -C common clean
-	$(MAKE) --ignore-errors -C validate clean
-	$(MAKE) --ignore-errors -C io clean
 
 -include $(DEPS)
