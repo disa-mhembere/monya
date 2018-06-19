@@ -28,6 +28,7 @@
 #include <vector>
 #include <limits>
 #include <cassert>
+#include <algorithm>
 
 #define INVALID_ID -1
 
@@ -196,21 +197,22 @@ namespace monya {
 
     class IndexVector {
         std::vector<IndexVal<data_t> >_;
+        bool sorted;
 
         public:
         typedef typename std::vector<IndexVal<data_t> >::iterator iterator;
-        IndexVector() { } // Default ctor
+        IndexVector() : sorted(false) { } // Default ctor
 
-        IndexVector(const size_t nelem) {
+        IndexVector(const size_t nelem) : IndexVector() {
             resize(nelem);
         }
 
-        IndexVector(const std::vector<data_t>& vals) {
+        IndexVector(const std::vector<data_t>& vals) : IndexVector() {
             for (size_t i = 0; i < vals.size(); i++)
                 _.push_back(IndexVal<data_t>(i, vals[i]));
         }
 
-        IndexVector(const std::vector<sample_id_t>& v) {
+        IndexVector(const std::vector<sample_id_t>& v) : IndexVector() {
             for (auto idx : v)
                 _.push_back(IndexVal<data_t>(idx, 0)); // 0 is a place holder
         }
@@ -278,6 +280,25 @@ namespace monya {
         bool empty() const { return _.empty(); }
         iterator begin() { return _.begin(); }
         iterator end() { return _.end(); }
+
+        bool find(IndexVal<data_t>& iv) {
+            if (!is_sorted())
+                sort();
+            return std::binary_search(begin(), end(), iv);
+        }
+
+        void sort() {
+            std::sort(begin(), end());
+            sorted = true;
+        }
+
+        void set_sorted(const bool sorted) {
+            this->sorted = sorted;
+        }
+
+        const bool is_sorted() const {
+            return sorted;
+        }
     };
 } // End monya
 
