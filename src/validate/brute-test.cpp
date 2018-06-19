@@ -23,7 +23,7 @@
 using namespace monya;
 using namespace monya::test;
 
-int main (int argc, char** argv) {
+int main(int argc, char** argv) {
 
     size_t nsamples = 32;
     size_t nfeatures = 16;

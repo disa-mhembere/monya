@@ -20,7 +20,6 @@
 #include <vector>
 #include <cassert>
 #include <cmath>
-#include <algorithm>
 
 #include "../common/monya.hpp"
 #include "../common/types.hpp"
@@ -53,7 +52,7 @@ class BruteForcekNN {
                     NN.append(i, dist);
                 } else {
                     if (i == (unsigned) k)
-                        std::sort(NN.begin(), NN.end());
+                        NN.sort();
 
                     long repl_indx = -1;
                     for (long j = k - 1; j >= 0; j--) {

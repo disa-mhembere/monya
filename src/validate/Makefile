@@ -19,16 +19,24 @@ CXXFLAGS +=-I../../SAFS/libsafs -I../common -I../structures -I..
 LDFLAGS :=-L../../SAFS/libsafs -L../common -L../structures -L..\
 	-lsafs -lstructures -lmonya $(LDFLAGS)
 
-all: brute-test
+TESTFILES = brute-test metric-test
+all: $(TESTFILES)
+
+test: all
+	./brute-test
+	./metric-test
 
 brute-test: brute-test.o
 	$(CXX) -o brute-test brute-test.o $(LDFLAGS)
+
+metric-test: metric-test.o
+	$(CXX) -o metric-test metric-test.o $(LDFLAGS)
 
 clean:
 	rm -f *.d
 	rm -f *.o
 	rm -f *~
-	rm -f brute-test
+	rm -f $(TESTFILES)
 	rm -f *.a
 
 -include $(DEPS)
