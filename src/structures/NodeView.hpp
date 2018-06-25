@@ -54,7 +54,7 @@ class NodeView: public safs::callback {
         IndexVector data_index; // Indexes that nodes hold to data & mapping
 
         // FIXME: mem waster
-        std::vector<sample_id_t> req_indxs; // Indexes a vertex will req from ioer
+        std::vector<sample_id_t> req_indxs; // Indexes a node will req from ioer
         data_t comparator; // The split comparator
         // When the data required is in memory run this computation
         depth_t depth; // Depth of the node used as an idendifier
