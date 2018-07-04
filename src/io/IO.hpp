@@ -5,6 +5,7 @@
 #include <fstream>
 #include <memory>
 #include <cassert>
+#include <utility>
 
 #include "../common/exception.hpp"
 #include "../common/types.hpp"
@@ -52,6 +53,10 @@ class IO {
             fn = "";
             orientation = MAT_ORIENT::INVALID;
             dtype_size = sizeof(data_t);
+        }
+
+        virtual void transpose() {
+            throw not_implemented_exception(__FILE__, __LINE__);
         }
 
         virtual void print() {
@@ -171,15 +176,42 @@ class MemoryIO: public IO {
             ofs.close();
         }
 
+        // TODO: Slow
+        void transpose() override {
+            data_t* tmp = new data_t[dim.first*dim.second];
+
+            if (orientation == MAT_ORIENT::ROW) {
+                for (size_t row = 0; row < dim.first; row++) {
+                    for (size_t col = 0; col < dim.second; col++)
+                        tmp[col*dim.first+row] = data[row*dim.second+col];
+                }
+                orientation = MAT_ORIENT::COL;
+            } else {
+                for (size_t row = 0; row < dim.first; row++) {
+                    for (size_t col = 0; col < dim.second; col++)
+                        tmp[col*dim.first+row] = data[row*dim.second+col];
+                }
+                orientation = MAT_ORIENT::ROW;
+            }
+
+            data = std::move(tmp);
+            std::swap(dim.first, dim.second);
+        }
+
         // No copying
         data_t* get_col(const offset_t offset) override {
+
             if (this->orientation == MAT_ORIENT::COL) {
                 return &data[offset*this->dim.first];
+            } else if (this->orientation == MAT_ORIENT::ROW) {
+                // FIXME: Memory leak if not freed
+                data_t* tmp = new data_t[dim.first];
+                for (size_t row = 0; row < dim.first; row++)
+                    tmp[row] = data[row*dim.second+offset];
+                return tmp;
+            } else {
+                throw not_implemented_exception(__FILE__, __LINE__);
             }
-            else if (this->orientation == MAT_ORIENT::ROW)
-                throw not_implemented_exception(__FILE__, __LINE__);
-            else
-                throw not_implemented_exception(__FILE__, __LINE__);
         }
 
         // No copying
@@ -268,19 +300,33 @@ class SyncIO: public IO {
                 fs.read(reinterpret_cast<char*>(&data[0]),
                         dtype_size*dim.first);
                 return data;
-            } else if (this->orientation == MAT_ORIENT::ROW)
+            } else if (this->orientation == MAT_ORIENT::ROW) {
+
+                data_t* tmp = new data_t[dim.first];
+
+                for (size_t row = 0; row < dim.first; row++) {
+                    fs.seekp((row*dim.second+offset)*dtype_size);
+                    fs.read(reinterpret_cast<char*>(&tmp[row]),
+                            dtype_size);
+                }
+
+                // FIXME: Memory leak if not freed
+                return tmp;
+            } else {
                 throw not_implemented_exception(__FILE__, __LINE__);
-            else
-                throw not_implemented_exception(__FILE__, __LINE__);
+            }
         }
 
         // No copying
         data_t* get_row(const offset_t offset) override {
             assert(fs.is_open());
 
-            if (this->orientation == MAT_ORIENT::ROW)
-                throw not_implemented_exception(__FILE__, __LINE__);
-            else if (this->orientation == MAT_ORIENT::COL)
+            if (this->orientation == MAT_ORIENT::ROW) {
+                data_t* tmp = new data_t[dim.second];
+                fs.seekp((offset*dim.second)*dtype_size);
+                fs.read(reinterpret_cast<char*>(tmp), dtype_size*dim.second);
+                return tmp;
+            } else if (this->orientation == MAT_ORIENT::COL)
                 throw not_implemented_exception(__FILE__, __LINE__);
             else
                 throw not_implemented_exception(__FILE__, __LINE__);

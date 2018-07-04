@@ -34,11 +34,33 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Creating MemoryIO unit ...\n";
     io::IO::raw_ptr memioer = new io::MemoryIO(&v[0],
-            dimpair(NROW, NCOL), MAT_ORIENT::COL);
+            dimpair(NROW, NCOL), MAT_ORIENT::ROW);
 
     std::string fn = std::string("inmem_n") + std::to_string(NROW) +
         std::string("_m") + std::to_string(NCOL) + std::string(".bin");
     memioer->set_fn(fn);
+
+    std::cout << "\nROW wise print:\n";
+    assert(memioer->get_orientation() == MAT_ORIENT::ROW);
+    assert(memioer->shape().first == NROW
+            && memioer->shape().second == NCOL);
+    io::print_mat<data_t>(io::MemoryIO::cast2(memioer)->get_data(),
+            memioer->shape().first, memioer->shape().second);
+
+    memioer->transpose();
+    std::cout << "\nCOL wise print:\n";
+    assert(memioer->get_orientation() == MAT_ORIENT::COL);
+    assert(memioer->shape().first == NCOL
+            && memioer->shape().second == NROW);
+    io::print_mat<data_t>(io::MemoryIO::cast2(memioer)->get_data(),
+            memioer->shape().first, memioer->shape().second);
+
+    memioer->transpose();
+    std::cout << "\nBack to ROW wise print:\n";
+    assert(memioer->shape().first == NROW
+            && memioer->shape().second == NCOL);
+    io::print_mat<data_t>(io::MemoryIO::cast2(memioer)->get_data(),
+            memioer->shape().first, memioer->shape().second);
 
     std::cout << "Writing to file ...\n";
     memioer->write();
@@ -46,31 +68,60 @@ int main(int argc, char* argv[]) {
     assert(NROW == memioer->shape().first);
     assert(NCOL == memioer->shape().second);
 
-    std::cout << "Reading back through SyncIO unit...\n";
+    std::cout << "\nReading back through SyncIO unit...\n";
     std::vector<data_t> v2(NROW*NCOL);
     io::IO::raw_ptr syncioer = new io::SyncIO(fn, dimpair(NROW, NCOL),
-            MAT_ORIENT::COL);
+            MAT_ORIENT::ROW);
 
     syncioer->read(&v2[0]);
 
-    data_t* buf = NULL;
-    data_t* buf2 = NULL;
+    std::cout << "SyncIO echo: \n";
+    io::print_mat<data_t>(&v2[0], syncioer->shape().first,
+            syncioer->shape().second);
 
+    data_t* membuf = NULL;
+    data_t* syncbuf = NULL;
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Test get_col
+    ////////////////////////////////////////////////////////////////////////////
     for (size_t col = 0; col < NCOL; col++) {
-        buf = memioer->get_col(col);
-        buf2 = syncioer->get_col(col);
+        membuf = memioer->get_col(col);
+        syncbuf = syncioer->get_col(col);
 
         for (size_t row = 0; row < NROW; row++) {
-            assert(buf[row] == v[NROW*col + row]);
-            assert(buf[row] == v2[NROW*col + row]);
-            assert(buf2[row] == v[NROW*col + row]);
+            assert(membuf[row] == v[row*NCOL+col]);
+            assert(membuf[row] == v2[row*NCOL+col]);
+            assert(membuf[row] == syncbuf[row]);
         }
+
+        if (memioer->get_orientation() == MAT_ORIENT::ROW)
+            delete [] membuf;
+        delete [] syncbuf; // Always
     }
 
+    ////////////////////////////////////////////////////////////////////////////
+    // Test get_row
+    ////////////////////////////////////////////////////////////////////////////
+
+#if 1
+    for (size_t row = 0; row < NROW; row++) {
+        membuf = memioer->get_row(row);
+        syncbuf = syncioer->get_row(row);
+
+        for (size_t col = 0; col < NCOL; col++) {
+            assert(membuf[col] == v[row*NCOL+col]);
+            assert(membuf[col] == v2[row*NCOL+col]);
+            assert(membuf[col] == syncbuf[col]);
+        }
+        delete [] syncbuf; // Always
+    }
+#endif
+
     std::cout << "Cleaning up\n";
-    memioer->destroy();
     syncioer->destroy();
     assert(!std::remove(fn.c_str()));
+    memioer->destroy();
 
     std::cout << "Test successful" << std::endl;
     return EXIT_SUCCESS;
