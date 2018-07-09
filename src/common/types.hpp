@@ -164,7 +164,7 @@ namespace monya {
                 this->index = index;
             }
 
-            const sample_id_t get_index() const {
+            const sample_id_t& get_index() const {
                 return this->index;
             }
 
@@ -175,7 +175,6 @@ namespace monya {
             const T& get_val() const {
                 return val;
             }
-
 
             bool operator< (const IndexVal& other) const {
                 return val < other.get_val();

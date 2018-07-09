@@ -31,6 +31,7 @@ using namespace monya;
 class kdnode: public container::BinaryNode {
     private:
         size_t split_dim;
+        std::vector<data_t> upper_bounds, lower_bounds;
 
     public:
         // Inherit constructors
@@ -100,6 +101,30 @@ class kdnode: public container::BinaryNode {
             return split_dim;
         }
 
+        // TODO: ||ize
+        void compute_bounds() {
+            // Upper and lower bounds at this node
+            //lower_bounds.resize(ioer->shape().second);
+            lower_bounds.assign(ioer->shape().second,
+                    std::numeric_limits<data_t>::max());
+            //upper_bounds.resize(ioer->shape().second);
+            upper_bounds.assign(ioer->shape().second,
+                    std::numeric_limits<data_t>::min());
+
+            for (auto iv : data_index) {
+                data_t* sample = ioer->get_row(iv.get_index());
+
+                for (size_t feat_id = 0; feat_id < ioer->shape().second;
+                        feat_id++) {
+                    if (sample[feat_id] < lower_bounds[feat_id])
+                        lower_bounds[feat_id] = sample[feat_id];
+                    if (sample[feat_id] > upper_bounds[feat_id])
+                        upper_bounds[feat_id] = sample[feat_id];
+                }
+                delete [] sample; // TODO: Coz wrong access pattern
+            }
+        }
+
         // This is run next
         void run() override {
             std::cout << "\n\nkdnode at depth: " << depth << " run()\n";
@@ -110,7 +135,6 @@ class kdnode: public container::BinaryNode {
             }
 
             this->set_comparator(data_index[data_index.size() / 2 ].get_val());
-
 #if 1
             std::cout << "Printing data from node at depth: " << depth <<
                 std::endl;
@@ -118,6 +142,20 @@ class kdnode: public container::BinaryNode {
 
             std::cout << "Comparator = " << get_comparator() << std::endl;
 #endif
+
+#if 1
+            // What makes pruning possible
+            compute_bounds();
+#endif
+        }
+
+        const void print() const override {
+            std::cout << "Comparator: " << get_comparator() << "\n";
+            std::cout << "Membership: \n"; data_index.print();
+            std::cout << "Upper bounds:\n";
+            io::print_arr<data_t>(&upper_bounds[0], upper_bounds.size());
+            std::cout << "Lower bounds:\n";
+            io::print_arr<data_t>(&lower_bounds[0], lower_bounds.size());
         }
 };
 
@@ -132,21 +170,59 @@ class kdTreeProgram: public BinaryTreeProgram {
         // Can be used if we need no more constructors
         using BinaryTreeProgram::BinaryTreeProgram;
 
+#if 1
         NNvector find_neighbors(container::Query* q) override {
             kdnode* node = kdnode::cast2(get_root());
             container::ProximityQuery* query =
                 container::ProximityQuery::raw_cast(q);
 
             // K nearest neighbors
-            NNvector neighs (query->get_k());
+            NNvector neighs;
+            if (empty())
+                return neighs;
+            else
+                neighs.resize(query->get_k());
 
-            while (node) {
+            // Keep track of visited nodes
+            container::Stack<kdnode*> visited;
+
+            do {
+                visited.push(node);
+                // compare
                 auto split_dim = node->get_split_dim();
-                auto dist = node->distance(query->get_qsample());
+                if ((*query)[split_dim] > node->get_comparator()) {
+                    node = kdnode::cast2(node->right);
+                } else {
+                    node = kdnode::cast2(node->left);
+                }
+            } while (node);
+
+#if 0
+            // TEST: Print the path the sample took
+            printf("Printing the nodes in the path:\n");
+            for (kdnode* node : visited) {
+                node->print();
             }
+#endif
+            // Found query's closest node in tree, now compute dist from samples
+            while (!visited.empty()) {
+                kdnode* node = visited.pop(); // Now complete
+                // Compute distance from a sample to the nodes stored here
+                //  if it's a leaf
+
+                if (node->is_leaf()) {
+                    for (IndexVal<data_t> iv : node->get_data_index()) {
+                        // TODO: Compute dist
+                        std::cout << "\n\nComputing dist to: " << iv.get_index()
+                            << std::endl;
+                    }
+                }
+            }
+
 
             return neighs;
         }
+#endif
 };
 
 class RandomSplit {
@@ -173,7 +249,7 @@ int main(int argc, char* argv[]) {
     MAT_ORIENT mo = MAT_ORIENT::COL;
 
     Params params(nsamples, nfeatures,
-            "/Research/monya/src/test-data/rand_32_16.bin",
+            "/Research/monya/src/test-data/rand_32_16_cw.bin",
             IOTYPE::SYNC, ntree, nthread, mo);
 
     constexpr depth_t max_depth = 4;
@@ -222,16 +298,19 @@ int main(int argc, char* argv[]) {
 #if 1
     // Query the Tree to make sure we don't have garbage!
 
+    io::IO::raw_ptr syncioer = new io::SyncIO(
+            "/Research/monya/src/test-data/rand_32_16_rw.bin",
+            dimpair(nsamples, nfeatures), MAT_ORIENT::ROW);
+
     // Essentially replicate the data
     std::vector<data_t> tmp;
     for (size_t i = 0; i < nsamples; i++) {
-        tmp.clear();
-        for (size_t j  = 0; j < nfeatures; j++) {
-            auto val = (data_t) ((i*nfeatures) + j);
-            tmp.push_back(val);
-        }
+        data_t* tmp = syncioer->get_row(i);
+        std::cout << "Sample v" << i << ":\n";
+        io::print_arr<data_t>(tmp, nfeatures);
 
-        auto qsample = container::DenseVector::create_raw(&tmp[0], tmp.size());
+#if 1
+        auto qsample = container::DenseVector::create_raw(tmp, nfeatures);
         container::ProximityQuery::ptr pq =
             container::ProximityQuery::create(qsample, 3); // 3-NN
         pq->print();
@@ -241,8 +320,11 @@ int main(int argc, char* argv[]) {
         //std::vector<container::BinaryNode*> res = pq->get_query_result();
 
         //res[0]->print();
+#endif
+        delete [] tmp;
         break;
     }
+    syncioer->destroy();
 #endif
 
     return EXIT_SUCCESS;
