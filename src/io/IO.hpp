@@ -302,15 +302,14 @@ class SyncIO: public IO {
                 return data;
             } else if (this->orientation == MAT_ORIENT::ROW) {
 
+                // FIXME: Memory leak if not freed
+                printf("WARNING: Inefficent method `get_col` for rowwise\n");
                 data_t* tmp = new data_t[dim.first];
-
                 for (size_t row = 0; row < dim.first; row++) {
                     fs.seekp((row*dim.second+offset)*dtype_size);
                     fs.read(reinterpret_cast<char*>(&tmp[row]),
                             dtype_size);
                 }
-
-                // FIXME: Memory leak if not freed
                 return tmp;
             } else {
                 throw not_implemented_exception(__FILE__, __LINE__);
@@ -326,10 +325,23 @@ class SyncIO: public IO {
                 fs.seekp((offset*dim.second)*dtype_size);
                 fs.read(reinterpret_cast<char*>(tmp), dtype_size*dim.second);
                 return tmp;
-            } else if (this->orientation == MAT_ORIENT::COL)
+            } else if (this->orientation == MAT_ORIENT::COL) {
+#if 1
+                // FIXME: Memory leak if not freed
+                printf("WARNING: Inefficent method `get_row` for colwise\n");
+                data_t* tmp = new data_t[dim.second];
+                for (size_t col = 0; col < dim.second; col++) {
+
+                    fs.seekp(((col*dim.first)+offset)*dtype_size);
+                    fs.read(reinterpret_cast<char*>(&tmp[col]),
+                            dtype_size);
+                }
+                return tmp;
+#endif
                 throw not_implemented_exception(__FILE__, __LINE__);
-            else
+            } else {
                 throw not_implemented_exception(__FILE__, __LINE__);
+            }
         }
 
         void destroy() override {
