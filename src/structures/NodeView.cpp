@@ -20,6 +20,7 @@
 #include "NodeView.hpp"
 #include "Scheduler.hpp"
 #include "Query.hpp"
+#include "SampleVector.hpp"
 
 #include <utility>
 #include <iostream>

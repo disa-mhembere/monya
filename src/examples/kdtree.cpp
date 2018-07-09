@@ -45,15 +45,14 @@ class kdnode: public container::BinaryNode {
             return static_cast<kdnode*>(node);
         }
 
-        data_t distance(container::SampleVector* qsample) override {
-
-            // Euclidean distance
-            //data_t dist = 0;
-            //for (size_t i = 0; qsample->size(); i++) {
-                //(*qsample)[i] -
-            //}
-            //return sqrt(dist);
-            return 0;
+        data_t distance(container::SampleVector* s1,
+                const sample_id_t idx) override {
+            data_t* member = ioer->get_row(idx);
+            assert(NULL != member);
+            data_t dist = distance::euclidean(s1->raw_data(),
+                    member, s1->size());
+            delete [] member;
+            return dist;
         }
 
         void spawn() override {
@@ -210,15 +209,17 @@ class kdTreeProgram: public BinaryTreeProgram {
                 // Compute distance from a sample to the nodes stored here
                 //  if it's a leaf
 
-                if (node->is_leaf()) {
+                if (!node->has_child()) {
                     for (IndexVal<data_t> iv : node->get_data_index()) {
-                        // TODO: Compute dist
-                        std::cout << "\n\nComputing dist to: " << iv.get_index()
-                            << std::endl;
+                        auto dist = node->distance(&(query->get_qsample()[0]),
+                                iv.get_index());
+                        std::cout << "\n\nDist to: " << iv.get_index()
+                            " = " << dist << std::endl;
+
+                        // TODO: DS that does work to place nearest neighbors in
                     }
                 }
             }
-
 
             return neighs;
         }

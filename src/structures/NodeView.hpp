@@ -48,7 +48,11 @@ class NodeView {
         virtual void run() = 0;
         virtual void init(Params&) = 0;
 
-        virtual data_t distance(SampleVector*) {
+        virtual data_t distance(SampleVector*, const sample_id_t) {
+            throw abstract_exception("NodeView::distance");
+        }
+
+        virtual data_t distance(data_t*, const sample_id_t) {
             throw abstract_exception("NodeView::distance");
         }
 

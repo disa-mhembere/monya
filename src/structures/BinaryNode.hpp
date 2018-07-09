@@ -46,8 +46,7 @@ class BinaryNode: public NodeView {
         // Inherit constructors
         using NodeView::NodeView;
 
-        BinaryNode* get_parent() {
-            return parent;
+        BinaryNode* get_parent() { return parent;
         }
 
         virtual void run() override {
@@ -62,9 +61,9 @@ class BinaryNode: public NodeView {
             return static_cast<BinaryNode*>(nv);
         }
 
-        //const bool is_leaf() override {
-            //return (!left && !right);
-        //}
+        const bool has_child() override {
+            return left|| right;
+        }
 
         void read_svm() {
             // TODO

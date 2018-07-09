@@ -39,6 +39,7 @@ namespace monya { namespace container {
             virtual bool empty() = 0;
             virtual void populate(data_t*, const size_t) { }
             virtual void print() = 0;
+            virtual data_t* raw_data() = 0;
     };
 
     class DenseVector : public SampleVector {
@@ -66,23 +67,27 @@ namespace monya { namespace container {
                 populate(data, nelem);
             }
 
-            data_t& operator[](size_t idx) {
+            data_t& operator[](size_t idx) override {
                 return data[idx];
             }
 
-            size_t size() {
+            data_t* raw_data() override {
+                return &data[0];
+            }
+
+            size_t size() override {
                 return data.size();
             }
 
-            bool empty() {
+            bool empty() override {
                 return data.empty();
             }
 
-            size_t nnz() {
+            size_t nnz() override {
                 return data.size();
             }
 
-            void populate(data_t* _data, const size_t nelem) {
+            void populate(data_t* _data, const size_t nelem) override {
                 data.resize(nelem);
                 std::copy(_data, _data+nelem, data.begin());
             }
