@@ -20,17 +20,12 @@ LDFLAGS :=-L.. -L../../../SAFS/libsafs -lsafs -lstructures $(LDFLAGS)
 
 TESTFILES = testBinaryNode testRBNode testRBTree testNAryNode \
 			 testScheduler perftest cppperftest testBinaryTree \
-			 testVecBinaryTree
+			 testVecBinaryTree testStack
 
 all: $(TESTFILES)
 
-test: all
-	./testBinaryNode
-	./testRBNode
-	./testRBTree
-	./testNAryNode
-	./testBinaryTree
-	./testVecBinaryTree
+test:
+	for f in $(TESTFILES); do ./$$f; done
 
 testBinaryNode: testBinaryNode.o
 	$(CXX) -o testBinaryNode testBinaryNode.o $(LDFLAGS)
@@ -58,6 +53,9 @@ perftest: perftest.o
 
 cppperftest: cppperftest.o
 	$(CXX) -o cppperftest cppperftest.o $(LDFLAGS)
+
+testStack: testStack.o
+	$(CXX) -o testStack testStack.o $(LDFLAGS)
 
 clean:
 	rm -f *.d
