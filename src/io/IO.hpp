@@ -258,7 +258,9 @@ class SyncIO: public IO {
         void open(const std::ios_base::openmode mode
                 =std::ios_base::in | std::ios_base::out) {
             fs.open(this->fn.c_str(), mode);
-            assert(fs.is_open());
+            if (!fs.is_open())
+                throw io_exception(std::string("Failure to open file: '")
+                        + fn + std::string("'\n"));
         }
 
         void read(data_t* buf) override {
