@@ -21,7 +21,10 @@
 
 #include "../common/types.hpp"
 #include "../common/exception.hpp"
+
+#ifdef __unix__
 #include "../../SAFS/libsafs/io_interface.h"
+#endif
 
 namespace monya {
     namespace io {
@@ -36,7 +39,11 @@ class Query;
 class SampleVector;
 
 // Represent a node in the tree
+#ifdef __unix__
 class NodeView: public safs::callback {
+#else
+class NodeView {
+#endif
     public:
         virtual void run() = 0;
         virtual void init(Params&) = 0;
@@ -64,8 +71,8 @@ class NodeView: public safs::callback {
 
         // TODO: End visibility
 
-        virtual int invoke(safs::io_request *reqs[], int num)
-            override {
+#ifdef __unix__
+        virtual int invoke(safs::io_request *reqs[], int num) override {
             for (int i = 0; i < num; i++) {
                 char* buf = reqs[i]->get_buf();
                 size_t numbytes = reqs[i]->get_size();
@@ -76,12 +83,13 @@ class NodeView: public safs::callback {
             }
             return EXIT_SUCCESS;
         }
+#endif
 
         NodeView();
         NodeView(data_t val);
         NodeView(IndexVector& data_index);
 
-        virtual const bool is_leaf() const;
+        virtual const bool is_leaf();
         void schedule();
 
         // Range index
@@ -114,7 +122,7 @@ class NodeView: public safs::callback {
         void set_scheduler(Scheduler* scheduler);
         Scheduler* get_scheduler();
         void sort_data_index(bool par=false);
-        const IndexVector& get_data_index() const;
+        IndexVector& get_data_index();
         virtual const void print() const;
         virtual const std::string to_string();
         const data_t get_comparator() const;

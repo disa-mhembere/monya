@@ -35,7 +35,7 @@ namespace monya {
         req_indxs.resize(0);
     }
 
-    const bool NodeView::is_leaf() const {
+    const bool NodeView::is_leaf() {
         return (depth == get_max_depth() || get_data_index().size() == 1);
     }
 
@@ -160,7 +160,7 @@ namespace monya {
             std::sort(data_index.begin(), data_index.end());
     }
 
-    const IndexVector& NodeView::get_data_index() const {
+    IndexVector& NodeView::get_data_index() {
         return data_index;
     }
 

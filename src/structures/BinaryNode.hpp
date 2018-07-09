@@ -62,6 +62,10 @@ class BinaryNode: public NodeView {
             return static_cast<BinaryNode*>(nv);
         }
 
+        //const bool is_leaf() override {
+            //return (!left && !right);
+        //}
+
         void read_svm() {
             // TODO
         }
