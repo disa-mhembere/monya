@@ -22,9 +22,8 @@ all: $(TESTFILES)
 CXXFLAGS +=-I..
 LDFLAGS := -L..
 
-test: all
-	./testIOFactory
-	./testIO
+test:
+	for f in $(TESTFILES); do ./$$f; done
 
 testIOFactory: testIOFactory.o
 	$(CXX) -o testIOFactory testIOFactory.o $(LDFLAGS)

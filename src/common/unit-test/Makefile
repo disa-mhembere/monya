@@ -19,8 +19,8 @@ TESTFILES = testIndexVector
 
 all: $(TESTFILES)
 
-test: all
-	./testIndexVector
+test:
+	for f in $(TESTFILES); do ./$$f; done
 
 testIndexVector: testIndexVector.o
 	$(CXX) -o testIndexVector testIndexVector.o $(LDFLAGS)
