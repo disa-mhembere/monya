@@ -22,7 +22,7 @@
 #include <cmath>
 
 #include "../common/monya.hpp"
-#include "../common/types.hpp"
+#include "../common/distance.hpp"
 
 namespace monya { namespace test {
 // The idea is to collect all the data and pass it this class
@@ -45,7 +45,7 @@ class BruteForcekNN {
             IndexVector NN;
 
             for(size_t i = 0; i < nsamples; i++) {
-                auto dist = euclidean_distance(sample, &data[i*nfeatures],
+                auto dist = distance::euclidean(sample, &data[i*nfeatures],
                         nfeatures);
 
                 if (i < (unsigned)k) {
@@ -71,16 +71,6 @@ class BruteForcekNN {
                 NN.trim(k);
             }
             return NN;
-        }
-
-        data_t euclidean_distance(data_t* arr, data_t* other,
-                const size_t nelem) {
-            data_t res = 0;
-            for (size_t i = 0; i < nelem; i++) {
-                auto tmp = arr[i] - other[i];
-                res += (tmp*tmp);
-            }
-            return sqrt(res);
         }
 };
 }}

@@ -20,13 +20,12 @@
 #ifndef MONYA_MONYA_HPP__
 #define MONYA_MONYA_HPP__
 
-// Represent a binary node
-
 #include "../BinaryTreeProgram.hpp"
 #include "../ComputeEngine.hpp"
 #include "../structures/RBNode.hpp"
 #include "../structures/Query.hpp"
 #include "../structures/Stack.hpp"
+#include "distance.hpp"
 #include "types.hpp"
 
 #include <algorithm>
