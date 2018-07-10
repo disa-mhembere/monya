@@ -195,109 +195,110 @@ namespace monya {
         }
 
     class IndexVector {
-        std::vector<IndexVal<data_t> >_;
-        bool sorted;
+        private:
+            std::vector<IndexVal<data_t> >_;
+            bool sorted;
 
         public:
-        typedef typename std::vector<IndexVal<data_t> >::iterator iterator;
-        IndexVector() : sorted(false) { } // Default ctor
+            typedef typename std::vector<IndexVal<data_t> >::iterator iterator;
+            IndexVector() : sorted(false) { } // Default ctor
 
-        IndexVector(const size_t nelem) : IndexVector() {
-            resize(nelem);
-        }
-
-        IndexVector(const std::vector<data_t>& vals) : IndexVector() {
-            for (size_t i = 0; i < vals.size(); i++)
-                _.push_back(IndexVal<data_t>(i, vals[i]));
-        }
-
-        IndexVector(const std::vector<sample_id_t>& v) : IndexVector() {
-            for (auto idx : v)
-                _.push_back(IndexVal<data_t>(idx, 0)); // 0 is a place holder
-        }
-
-        IndexVal<data_t>& operator[](const int index) {
-            return this->_[index];
-        }
-
-        const void print() const {
-            for (size_t i = 0; i < _.size(); i++) {
-                _[i].print();
+            IndexVector(const size_t nelem) : IndexVector() {
+                resize(nelem);
             }
-        }
 
-        // Insert indexes with placeholder values
-        void set_indexes(const sample_id_t* idxs, const size_t nelem) {
-            if (_.size())
-                _.clear();
-
-            for (size_t i = 0; i < nelem; i++)
-                _.push_back(IndexVal<data_t>(idxs[i], 0));
-        }
-
-        // Insert values with contiguous indexes
-        void set_indexes(const data_t* vals, const size_t nelem) {
-            if (_.size())
-                _.clear();
-
-            for (size_t i = 0; i < nelem; i++)
-                _.push_back(IndexVal<data_t>(i, vals[i]));
-        }
-
-        void get_indexes(std::vector<sample_id_t>& v) {
-            assert(v.empty());
-
-            for (auto i = begin(); i != end(); ++i) {
-                v.push_back(i->get_index());
+            IndexVector(const std::vector<data_t>& vals) : IndexVector() {
+                for (size_t i = 0; i < vals.size(); i++)
+                    _.push_back(IndexVal<data_t>(i, vals[i]));
             }
-        }
 
-        void append(const sample_id_t id, const data_t val) {
-            _.push_back(IndexVal<data_t>(id, val));
-        }
-
-        const size_t size() const {
-            return _.size();
-        }
-
-        void resize(const size_t nelem) {
-            assert(nelem >= size());
-
-            for (size_t i = 0; i < nelem-size(); i++) {
-                _.push_back(IndexVal<data_t>(0, 0));
+            IndexVector(const std::vector<sample_id_t>& v) : IndexVector() {
+                for (auto idx : v)
+                    _.push_back(IndexVal<data_t>(idx, 0)); // 0 is a place holder
             }
-        }
 
-        void insert(IndexVal<data_t> item, const size_t offset) {
-            _.insert(begin()+offset, item);
-        }
+            IndexVal<data_t>& operator[](const int index) {
+                return this->_[index];
+            }
 
-        void trim(const size_t nelem) {
-            _.resize(nelem);
-        }
+            const void print() const {
+                for (size_t i = 0; i < _.size(); i++) {
+                    _[i].print();
+                }
+            }
 
-        bool empty() const { return _.empty(); }
-        iterator begin() { return _.begin(); }
-        iterator end() { return _.end(); }
+            // Insert indexes with placeholder values
+            void set_indexes(const sample_id_t* idxs, const size_t nelem) {
+                if (_.size())
+                    _.clear();
 
-        bool find(IndexVal<data_t>& iv) {
-            if (!is_sorted())
-                sort();
-            return std::binary_search(begin(), end(), iv);
-        }
+                for (size_t i = 0; i < nelem; i++)
+                    _.push_back(IndexVal<data_t>(idxs[i], 0));
+            }
 
-        void sort() {
-            std::sort(begin(), end());
-            sorted = true;
-        }
+            // Insert values with contiguous indexes
+            void set_indexes(const data_t* vals, const size_t nelem) {
+                if (_.size())
+                    _.clear();
 
-        void set_sorted(const bool sorted) {
-            this->sorted = sorted;
-        }
+                for (size_t i = 0; i < nelem; i++)
+                    _.push_back(IndexVal<data_t>(i, vals[i]));
+            }
 
-        const bool is_sorted() const {
-            return sorted;
-        }
+            void get_indexes(std::vector<sample_id_t>& v) {
+                assert(v.empty());
+
+                for (auto i = begin(); i != end(); ++i) {
+                    v.push_back(i->get_index());
+                }
+            }
+
+            void append(const sample_id_t id, const data_t val) {
+                _.push_back(IndexVal<data_t>(id, val));
+            }
+
+            const size_t size() const {
+                return _.size();
+            }
+
+            void resize(const size_t nelem) {
+                assert(nelem >= size());
+
+                for (size_t i = 0; i < nelem-size(); i++) {
+                    _.push_back(IndexVal<data_t>(0, 0));
+                }
+            }
+
+            void insert(IndexVal<data_t> item, const size_t offset) {
+                _.insert(begin()+offset, item);
+            }
+
+            void trim(const size_t nelem) {
+                _.resize(nelem);
+            }
+
+            bool empty() const { return _.empty(); }
+            iterator begin() { return _.begin(); }
+            iterator end() { return _.end(); }
+
+            bool find(IndexVal<data_t>& iv) {
+                if (!is_sorted())
+                    sort();
+                return std::binary_search(begin(), end(), iv);
+            }
+
+            void sort() {
+                std::sort(begin(), end());
+                sorted = true;
+            }
+
+            void set_sorted(const bool sorted) {
+                this->sorted = sorted;
+            }
+
+            const bool is_sorted() const {
+                return sorted;
+            }
     };
 } // End monya
 

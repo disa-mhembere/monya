@@ -55,6 +55,7 @@ class NAryNode: public NodeView {
 
         virtual void prep() override { /*TODO*/ };
         virtual void run() override { /*TODO*/ };
+        virtual const bool has_child() override { return NULL != childs; }
 };
 } } // End monya::container
 

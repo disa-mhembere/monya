@@ -94,6 +94,7 @@ class NodeView {
         NodeView(IndexVector& data_index);
 
         virtual const bool is_leaf();
+        virtual const bool has_child() = 0;
         void schedule();
 
         // Range index

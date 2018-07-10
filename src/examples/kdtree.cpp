@@ -213,7 +213,7 @@ class kdTreeProgram: public BinaryTreeProgram {
                     for (IndexVal<data_t> iv : node->get_data_index()) {
                         auto dist = node->distance(&(query->get_qsample()[0]),
                                 iv.get_index());
-                        std::cout << "\n\nDist to: " << iv.get_index()
+                        std::cout << "\n\nDist to: " << iv.get_index() <<
                             " = " << dist << std::endl;
 
                         // TODO: DS that does work to place nearest neighbors in
