@@ -59,7 +59,9 @@ class NNVector {
         size_t _size;
 
         void push_back(Node* new_node) {
+#if 0
             printf("pushing back node: "); new_node->print();
+#endif
 
             if (!_size) {
                 new_node->next = new_node->prev = sentinel;
@@ -86,7 +88,9 @@ class NNVector {
         }
 
         void pop_back() {
+#if 0
             printf("Popping the back!\n");
+#endif
 
             if (!_size)
                 return; // do nothing
@@ -95,8 +99,8 @@ class NNVector {
             if (delnode == sentinel)
                 return; // do nothing (size 1 list)
 
-            sentinel->prev = sentinel->prev->prev;
-            sentinel->prev->prev->next = sentinel;
+            delnode->prev->next = sentinel;
+            sentinel->prev = delnode->prev;
             delete delnode;
             _size--; // Decrement the structure size
         }
@@ -107,7 +111,9 @@ class NNVector {
           */
         void eval(IndexVal<data_t>& iv) {
             if (!size()) {
+#if 0
                 printf("Adding to empty list: "); iv.print();
+#endif
                 Node* new_node = new Node(iv);
                 sentinel->next = new_node;
                 new_node->prev = sentinel;
@@ -126,10 +132,12 @@ class NNVector {
                     if (val < curr->data.get_val()) {
                         Node* new_node = new Node(iv);
 
+#if 0
                         std::cout << "Inserting new node:"
                             << iv.to_string() << " between: " <<
                             curr->prev->to_string() << " and " <<
                             curr->to_string() << "\n";
+#endif
 
                         curr->prev->next = new_node;
                         new_node->prev = curr->prev;
@@ -189,7 +197,9 @@ class NNVector {
         }
 
         ~NNVector() {
+#if 0
             printf("Destructing NNVector\n");
+#endif
             if (_size) {
 
                 Node* curr = sentinel->next;
