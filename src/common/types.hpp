@@ -184,6 +184,12 @@ namespace monya {
                 std::cout << "(" << get_index() << ", " <<
                 get_val() << ")" << "\n";
             }
+
+            std::string to_string() {
+                return std::string("(") + std::to_string(get_index()) +
+                    std::string(", ") + std::to_string(get_val()) +
+                    std::string(")");
+            }
     };
 
     template <typename T>

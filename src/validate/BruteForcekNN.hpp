@@ -56,7 +56,7 @@ class BruteForcekNN {
 
                     long repl_indx = -1;
                     for (long j = k - 1; j >= 0; j--) {
-                        if (dist < NN[j].get_val()) {
+                        if (dist < NN[j].get_val()) { // NOTE: Strictly less than
                             repl_indx = j;
                         }
                     }
