@@ -17,6 +17,8 @@
  * limitations under the License.
  */
 
+#include <random>
+#include <algorithm>
 #include "NNVector.hpp"
 #include "../../common/types.hpp"
 
@@ -26,13 +28,15 @@ using namespace monya::container;
 
 int main() {
 
-#if 0
+#if 1
     // Empty
     {
         NNVector nnv(0);
         assert(!nnv.size());
     }
+#endif
 
+#if 1
     // One
     {
         NNVector nnv(1);
@@ -60,6 +64,7 @@ int main() {
     }
 #endif
 
+#if 1
     // Test 5 without replacement (check sorting)
     {
         NNVector nnv(5);
@@ -90,6 +95,36 @@ int main() {
         for (sample_id_t i = 0; i < 5; i++)
             assert((nnv[i].get_index() == (i+4)) &&
                     (nnv[i].get_val() == (data_t)i));
+    }
+#endif
+
+    // Test with replacement (general case)
+    {
+        constexpr size_t k = 10;
+        constexpr size_t choose = 100;
+        std::vector<data_t> elems;
+
+        NNVector nnv(k);
+
+        std::default_random_engine generator;
+        std::uniform_real_distribution<data_t> distribution(0.0, 100.0);
+
+        for (size_t i = 0; i < choose; i++) {
+            elems.push_back(distribution(generator));
+            IndexVal<data_t> iv(i, elems.back());
+            nnv.eval(iv);
+        }
+
+        printf("\n\nGeneral Test\n\n");
+        nnv.print();
+        std::sort(elems.begin(), elems.end());
+
+        for (size_t i = 0; i < k; i++) {
+            std::cout << "nnv: " << nnv[i].get_val() << ", elems: " <<
+                elems[i] << std::endl;
+
+            assert(nnv[i].get_val() == elems[i]);
+        }
     }
 
     printf("NNVector test successful!\n");
