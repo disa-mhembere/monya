@@ -100,8 +100,8 @@ int main() {
 
     // Test with replacement (general case)
     {
-        constexpr size_t k = 10;
-        constexpr size_t choose = 100;
+        constexpr size_t k = 50;
+        constexpr size_t choose = 200;
         std::vector<data_t> elems;
 
         NNVector nnv(k);
@@ -124,6 +124,22 @@ int main() {
                 elems[i] << std::endl;
 
             assert(nnv[i].get_val() == elems[i]);
+        }
+
+        //  Test cache
+        std::vector<size_t> acc_patt{1, 2, 3, 0, 4, 5, 9, 9, 8, 7, 8, 2, 3};
+        for (size_t i : acc_patt) {
+            std::cout << "Index: " << i << ", nnv: " << nnv[i].get_val() <<
+                ", elems: " << elems[i] << "\n";
+            assert(nnv[i].get_val() == elems[i]);
+        }
+
+        // Random cache test
+        std::default_random_engine gen2;
+        std::uniform_int_distribution<int> dist2(0, k-1);
+        for (int i = 0; i < (int)choose; i++) {
+            int index = dist2(gen2);
+            assert(nnv[index].get_val() == elems[index]);
         }
     }
 

@@ -55,6 +55,7 @@ class NNVector {
         };
 
         Node* sentinel;
+        std::pair<size_t, Node*> cache; // consecutive access optimization
         sample_id_t k;
         size_t _size;
 
@@ -75,6 +76,17 @@ class NNVector {
                 sentinel->prev = new_node;
             }
             _size++;
+        }
+
+        void update_cache(size_t index, Node* node) {
+            // Update the cache
+            cache.first = index;
+            cache.second = node;
+        }
+
+        void invalidate_cache() {
+            if (cache.second)
+                cache.second = NULL;
         }
 
     public:
@@ -103,6 +115,8 @@ class NNVector {
             sentinel->prev = delnode->prev;
             delete delnode;
             _size--; // Decrement the structure size
+
+            invalidate_cache();
         }
 
         /**
@@ -160,6 +174,8 @@ class NNVector {
             // We've inserted in between the 1st & last nodes & have too many
             if (_size > k)
                 pop_back();
+
+            invalidate_cache();
         }
 
         IndexVal<data_t>& operator[](const size_t index) {
@@ -167,13 +183,48 @@ class NNVector {
                 throw std::runtime_error(std::string("Out of bounds index: ")
                         + std::to_string(index));
 
-            size_t pos = 0;
-            Node* curr = sentinel;
+            Node* curr = NULL;
 
-            while (pos++ <= index) {
-                curr = curr->next;
+            // Warm cache
+            if (cache.second != NULL) {
+
+                if (cache.first == index - 1) {
+                    // Cache hit
+                    curr = cache.second->next;
+
+                    // Update the cache
+                    update_cache(index, curr);
+                } else {
+                    size_t pos = 0;
+
+                    // Cache miss & update (sequential case)
+                    if (index >= cache.first) {
+                        pos = cache.first;
+                        curr = cache.second;
+                        while(pos++ < index)
+                            curr = curr->next;
+                    } else  { // non-sequential
+                        pos = 0;
+                        curr = sentinel;
+
+                        while (pos++ <= index)
+                            curr = curr->next;
+                    }
+
+                    // Update the cache
+                    update_cache(index, curr);
+                }
+            } else { // Cold cache
+                curr = sentinel;
+                size_t pos = 0;
+                while (pos++ <= index)
+                    curr = curr->next;
+
+                // Update the cache
+                update_cache(index, curr);
             }
 
+            assert(NULL != curr);
             return curr->data;
         }
 
