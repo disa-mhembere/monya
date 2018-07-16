@@ -21,14 +21,21 @@
 #include "BinaryNode.hpp"
 #include "../BinaryTreeProgram.hpp"
 #include "SampleVector.hpp"
+#include "../common/NNVector.hpp"
 
 namespace monya { namespace container {
 
-    void ProximityQuery::append_response_node_lineage(BinaryNode* node) {
-        // TODO: Traverse the node and return
+    ProximityQuery::ProximityQuery(const short k) : k(k) {
+        result = new NNVector(k);
+    }
 
-        if (NULL == node)
-            return;
+    ProximityQuery::ProximityQuery(SampleVector* qsample, const short k) :
+        ProximityQuery(k) {
+            this->qsample = qsample;
+        }
+
+    void ProximityQuery::eval(const size_t id, const data_t dist) {
+        result->eval(id, dist);
     }
 
     void ProximityQuery::print() {
@@ -37,16 +44,18 @@ namespace monya { namespace container {
             "query: "; qsample->print(); std::cout << "\n";
     }
 
-    // Actually find what we're looking for
+    // Actually find what we're looking for!
+    // Called by Compute Engine!
     void ProximityQuery::run(BinaryTreeProgram* tp) {
         assert(!qsample->empty());
         tp->find_neighbors(this);
-
-        //std::vector<BinaryNode> ret = tpt->(this->qnode);
-        //result.push_back(ret);
     }
 
     data_t& ProximityQuery::operator[](const size_t idx) {
         return (*qsample)[idx];
+    }
+
+    ProximityQuery::~ProximityQuery() {
+        delete(result);
     }
 }} // End namespace monya::container

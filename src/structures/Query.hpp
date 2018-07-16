@@ -25,6 +25,7 @@
 
 namespace monya {
     class BinaryTreeProgram;
+    class NNVector;
     namespace container {
 
 class BinaryNode;
@@ -34,53 +35,29 @@ class SampleVector;
 class Query {
 
     public:
-        typedef std::shared_ptr<Query> ptr;
         virtual void print() = 0;
         virtual void run(BinaryTreeProgram* tpt) = 0;
         virtual data_t& operator[](const size_t idx) = 0;
+        virtual ~Query() { }
 };
 
 class ProximityQuery: public Query {
     private:
+        //const short k; // k nearest
         short k; // k nearest
         SampleVector* qsample;
-        std::vector<BinaryNode*> result;
-
-        void append_response_node(BinaryNode* node) {
-            result.push_back(node);
-        }
-
-        void append_response_node_lineage(BinaryNode* node);
+        NNVector* result;
 
     public:
 
-        static ptr create() {
-            return Query::ptr(new ProximityQuery());
-        }
-
-        static ptr create(const short k) {
-            return ptr(new ProximityQuery(k));
-        }
-
-        static ptr create(SampleVector* qs, const short k) {
-            return ptr(new ProximityQuery(qs, k));
-        }
+        ProximityQuery(const short k);
+        ProximityQuery(SampleVector* qsample, const short k);
+        data_t& operator[](const size_t idx) override;
+        void eval(const size_t id, const data_t dist);
 
         static ProximityQuery* raw_cast(Query* q) {
             return static_cast<ProximityQuery*>(q);
         }
-
-        ProximityQuery() {
-        }
-
-        ProximityQuery(const short k) : k(k) {
-            //this->k = k;
-        }
-
-        ProximityQuery(SampleVector* qsample, const short k) :
-            ProximityQuery(k) {
-                this->qsample = qsample;
-            }
 
         void set_qsample(SampleVector* qs) {
             qsample = qs;
@@ -90,17 +67,11 @@ class ProximityQuery: public Query {
             return qsample;
         }
 
-        void set_k(const short k) {
-            this->k = k;
-        }
-
         const short get_k() const {
             return k;
         }
 
-        data_t& operator[](const size_t idx) override;
-
-        const std::vector<BinaryNode*>& get_query_result() const {
+        const NNVector* getNN() const {
             return result;
         }
 
@@ -108,6 +79,8 @@ class ProximityQuery: public Query {
 
         // Actually find what we're looking for
         void run(BinaryTreeProgram* tp) override;
+
+        ~ProximityQuery() override;
 };
-} }
+} } // End namespace monya::container
 #endif

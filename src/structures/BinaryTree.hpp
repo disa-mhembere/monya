@@ -49,7 +49,7 @@ class BinaryTree {
             return ptr(new BinaryTree());
         }
 
-        virtual NNvector find_neighbors(Query* q) {
+        virtual void find_neighbors(Query* q) {
             throw not_implemented_exception(__FILE__, __LINE__);
         }
 

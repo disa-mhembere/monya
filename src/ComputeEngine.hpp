@@ -103,7 +103,7 @@ namespace monya {
                     (*it)->build();
             }
 
-            void query(container::Query::ptr pq) {
+            void query(container::Query* pq) {
                 for (auto tree : forest) {
                     pq->run(tree);
                 }
