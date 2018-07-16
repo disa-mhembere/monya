@@ -25,6 +25,8 @@
 #include "../structures/RBNode.hpp"
 #include "../structures/Query.hpp"
 #include "../structures/Stack.hpp"
+
+#include "NNVector.hpp"
 #include "distance.hpp"
 #include "types.hpp"
 

@@ -51,9 +51,6 @@ namespace monya {
     //  Returned results contain the ID of the NN and distance
     typedef std::pair<sample_id_t, data_t> NNpair;
 
-    // An ordered vector by distance of the nearest neighbors
-    typedef std::vector<NNpair> NNvector;
-
     // Traversal order of the tree
     enum order_t {
         PREORDER,
@@ -180,6 +177,11 @@ namespace monya {
                 return val < other.get_val();
             }
 
+            // Equivalence is only based on the value
+            bool operator== (const IndexVal& other) const {
+                return val == other.get_val();
+            }
+
             const void print() const {
                 std::cout << "(" << get_index() << ", " <<
                 get_val() << ")" << "\n";
@@ -261,6 +263,10 @@ namespace monya {
 
             void append(const sample_id_t id, const data_t val) {
                 _.push_back(IndexVal<data_t>(id, val));
+            }
+
+            void append(IndexVal<data_t>& iv) {
+                _.push_back(iv);
             }
 
             const size_t size() const {
