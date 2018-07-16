@@ -169,18 +169,10 @@ class kdTreeProgram: public BinaryTreeProgram {
         // Can be used if we need no more constructors
         using BinaryTreeProgram::BinaryTreeProgram;
 
-#if 1
-        NNvector find_neighbors(container::Query* q) override {
+        void find_neighbors(container::Query* q) override {
             kdnode* node = kdnode::cast2(get_root());
             container::ProximityQuery* query =
                 container::ProximityQuery::raw_cast(q);
-
-            // K nearest neighbors
-            NNvector neighs;
-            if (empty())
-                return neighs;
-            else
-                neighs.resize(query->get_k());
 
             // Keep track of visited nodes
             container::Stack<kdnode*> visited;
@@ -216,14 +208,11 @@ class kdTreeProgram: public BinaryTreeProgram {
                         std::cout << "\n\nDist to: " << iv.get_index() <<
                             " = " << dist << std::endl;
 
-                        // TODO: DS that does work to place nearest neighbors in
+                        query->eval(iv.get_index(), dist);
                     }
                 }
             }
-
-            return neighs;
         }
-#endif
 };
 
 class RandomSplit {
@@ -312,15 +301,16 @@ int main(int argc, char* argv[]) {
 
 #if 1
         auto qsample = container::DenseVector::create_raw(tmp, nfeatures);
-        container::ProximityQuery::ptr pq =
-            container::ProximityQuery::create(qsample, 3); // 3-NN
+        container::Query* pq = new container::ProximityQuery(qsample, 3); // 3-NN
+
         pq->print();
 
         engine->query(pq);
+        std::cout << "3 Nearest neigbors are:\n";
+        container::ProximityQuery::raw_cast(pq)->getNN()->print();
 
-        //std::vector<container::BinaryNode*> res = pq->get_query_result();
+        delete(container::ProximityQuery::raw_cast(pq));
 
-        //res[0]->print();
 #endif
         delete [] tmp;
         break;
