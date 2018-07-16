@@ -20,10 +20,10 @@
 #ifndef MONYA_NNVECTOR_HPP__
 #define MONYA_NNVECTOR_HPP__
 
-#include "../common/types.hpp"
-#include "../common/exception.hpp"
+#include "types.hpp"
+#include "exception.hpp"
 
-namespace monya { namespace container {
+namespace monya {
 
 class NNVector {
     private:
@@ -119,11 +119,16 @@ class NNVector {
             invalidate_cache();
         }
 
+        void eval(const sample_id_t id, data_t dist) {
+            eval(IndexVal<data_t> (id, dist));
+        }
+
         /**
           * First determine if the val falls within the kNN at all.
           *     If so add in the correct position, else ignore
           */
-        void eval(IndexVal<data_t>& iv) {
+        // TODO: Copies :(
+        void eval(IndexVal<data_t> iv) {
             if (!size()) {
 #if 0
                 printf("Adding to empty list: "); iv.print();
@@ -228,6 +233,25 @@ class NNVector {
             return curr->data;
         }
 
+        IndexVector to_IndexVector() {
+            IndexVector ret;
+            Node* curr = sentinel->next;
+            while(curr != sentinel)
+                ret.append(curr->data);
+            return ret;
+        }
+
+        bool find(const IndexVal<data_t>& iv) {
+            Node* curr = sentinel->next;
+            while (curr != sentinel) {
+                if (curr->data == iv) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         const void print() const {
             printf("Printing list with size: %lu\n", _size);
             Node* curr = sentinel->next;
@@ -270,5 +294,5 @@ class NNVector {
         }
 };
 
-}} // End namespace monya::container
+} // End namespace monya:
 #endif
