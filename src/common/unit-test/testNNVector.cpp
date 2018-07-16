@@ -19,12 +19,10 @@
 
 #include <random>
 #include <algorithm>
-#include "NNVector.hpp"
-#include "../../common/types.hpp"
+#include "../NNVector.hpp"
 
 // Being lazy
 using namespace monya;
-using namespace monya::container;
 
 int main() {
 

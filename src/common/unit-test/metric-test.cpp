@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-#include "Metric.hpp"
+#include "../Metric.hpp"
 
 using namespace monya;
 
