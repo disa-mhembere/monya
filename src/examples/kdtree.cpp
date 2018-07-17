@@ -19,7 +19,7 @@
 
 #include <cstdlib>
 #include <random>
-#include <set>
+#include <unordered_set>
 
 #include "../common/monya.hpp"
 #include "../utils/time.hpp"
@@ -32,6 +32,7 @@ class kdnode: public container::BinaryNode {
     private:
         size_t split_dim;
         std::vector<data_t> upper_bounds, lower_bounds;
+        bool complete;
 
     public:
         // Inherit constructors
@@ -150,11 +151,13 @@ class kdnode: public container::BinaryNode {
 
         const void print() const override {
             std::cout << "Comparator: " << get_comparator() << "\n";
+            std::cout << "Split dim: " << get_split_dim() << "\n";
             std::cout << "Membership: \n"; data_index.print();
             std::cout << "Upper bounds:\n";
             io::print_arr<data_t>(&upper_bounds[0], upper_bounds.size());
             std::cout << "Lower bounds:\n";
             io::print_arr<data_t>(&lower_bounds[0], lower_bounds.size());
+            std::cout << "\n";
         }
 };
 
@@ -164,6 +167,7 @@ class kdTreeProgram: public BinaryTreeProgram {
     private:
         // All the trees in the forest (including this one!)
         std::vector<kdTreeProgram*> copse;
+        std::unordered_set<container::BinaryNode*> completed;
 
     public:
         // Can be used if we need no more constructors
@@ -187,8 +191,7 @@ class kdTreeProgram: public BinaryTreeProgram {
                     node = kdnode::cast2(node->left);
                 }
             } while (node);
-
-#if 0
+#if 1
             // TEST: Print the path the sample took
             printf("Printing the nodes in the path:\n");
             for (kdnode* node : visited) {
@@ -198,6 +201,10 @@ class kdTreeProgram: public BinaryTreeProgram {
             // Found query's closest node in tree, now compute dist from samples
             while (!visited.empty()) {
                 kdnode* node = visited.pop(); // Now complete
+                std::cout << "Popping node with comparator: "
+                    << node->get_comparator() << "\n";
+                // TODO: Prune step
+
                 // Compute distance from a sample to the nodes stored here
                 //  if it's a leaf
 
@@ -210,7 +217,36 @@ class kdTreeProgram: public BinaryTreeProgram {
 
                         query->eval(iv.get_index(), dist);
                     }
+                } else {
+                    auto l = completed.find(node->left);
+                    if (l == completed.end()) { // lhs hasn't been processed
+                        std::cout << "Node c: " << node->get_comparator() <<
+                            " pushing Node c: " <<
+                            node->left->get_comparator() << " ";
+
+                        if (!node->left->has_child())
+                            std::cout << "WITHOUT CHILDREN!\n";
+                        else
+                            std::cout << "WITH CHILDREN!\n";
+
+                        visited.push(kdnode::cast2(node->left));
+                    }
+
+                    auto r = completed.find(node->right);
+                    if (r == completed.end()) { // rhs hasn't been processed
+                        std::cout << "Node c: " << node->get_comparator() <<
+                            " pushing Node c: " << node->right->get_comparator()
+                            << " ";
+
+                        if (!node->right->has_child())
+                            std::cout << "WITHOUT CHILDREN!\n";
+                        else
+                            std::cout << "WITH CHILDREN!\n";
+
+                        visited.push(kdnode::cast2(node->right));
+                    }
                 }
+                completed.insert(node);
             }
         }
 };
@@ -296,24 +332,21 @@ int main(int argc, char* argv[]) {
     std::vector<data_t> tmp;
     for (size_t i = 0; i < nsamples; i++) {
         data_t* tmp = syncioer->get_row(i);
-        std::cout << "Sample v" << i << ":\n";
-        io::print_arr<data_t>(tmp, nfeatures);
 
 #if 1
         auto qsample = container::DenseVector::create_raw(tmp, nfeatures);
-        container::Query* pq = new container::ProximityQuery(qsample, 3); // 3-NN
-
-        pq->print();
+        container::Query* pq = new container::ProximityQuery(qsample, 5); // 3-NN
 
         engine->query(pq);
-        std::cout << "3 Nearest neigbors are:\n";
+        std::cout << "5 Nearest neigbors :\n";
+        pq->print();
+
         container::ProximityQuery::raw_cast(pq)->getNN()->print();
 
         delete(container::ProximityQuery::raw_cast(pq));
 
 #endif
         delete [] tmp;
-        break;
     }
     syncioer->destroy();
 #endif
