@@ -177,6 +177,7 @@ class kdTreeProgram: public BinaryTreeProgram {
             kdnode* node = kdnode::cast2(get_root());
             container::ProximityQuery* query =
                 container::ProximityQuery::raw_cast(q);
+            completed.clear();
 
             // Keep track of visited nodes
             container::Stack<kdnode*> visited;
@@ -334,11 +335,12 @@ int main(int argc, char* argv[]) {
         data_t* tmp = syncioer->get_row(i);
 
 #if 1
+        constexpr unsigned k = 5;
         auto qsample = container::DenseVector::create_raw(tmp, nfeatures);
-        container::Query* pq = new container::ProximityQuery(qsample, 5); // 3-NN
+        container::Query* pq = new container::ProximityQuery(qsample, k); // 3-NN
 
         engine->query(pq);
-        std::cout << "5 Nearest neigbors :\n";
+        std::cout << "Sample: " << i << " " << k << " Nearest neighbors :\n";
         pq->print();
 
         container::ProximityQuery::raw_cast(pq)->getNN()->print();
