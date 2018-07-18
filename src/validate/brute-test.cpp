@@ -21,7 +21,7 @@
 #include "../io/IO.hpp"
 
 using namespace monya;
-using namespace monya::test;
+using namespace monya::validate;
 
 int main(int argc, char** argv) {
 

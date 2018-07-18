@@ -182,6 +182,10 @@ namespace monya {
                 return val == other.get_val();
             }
 
+            bool operator!= (const IndexVal& other) const {
+                return val != other.get_val();
+            }
+
             const void print() const {
                 std::cout << "(" << get_index() << ", " <<
                 get_val() << ")" << "\n";

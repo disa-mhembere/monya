@@ -71,7 +71,7 @@ class ProximityQuery: public Query {
             return k;
         }
 
-        const NNVector* getNN() const {
+        NNVector* getNN() const {
             return result;
         }
 

@@ -183,6 +183,31 @@ class NNVector {
             invalidate_cache();
         }
 
+        bool operator==(IndexVector& iv) {
+            if (iv.size() != size())
+                return false;
+
+            for (size_t i = 0; i < size(); i++) {
+                if (iv[i] != (*this)[i])
+                    return false;
+            }
+
+            return true;
+        }
+
+        // TODO: Could be faster
+        bool operator==(NNVector* other) {
+            if (other->size() != size())
+                return false;
+
+            for (size_t i = 0; i < size(); i++) {
+                if ((*other)[i] != (*this)[i])
+                    return false;
+            }
+
+            return true;
+        }
+
         IndexVal<data_t>& operator[](const size_t index) {
             if ((index + 1) > _size)
                 throw std::runtime_error(std::string("Out of bounds index: ")

@@ -24,7 +24,7 @@
 #include "../common/monya.hpp"
 #include "../common/distance.hpp"
 
-namespace monya { namespace test {
+namespace monya { namespace validate {
 // The idea is to collect all the data and pass it this class
 //  then compute all pairwise distances. This is not fast or
 //  scalable!
@@ -73,4 +73,4 @@ class BruteForcekNN {
             return NN;
         }
 };
-}}
+}} // End namespace monya::validate

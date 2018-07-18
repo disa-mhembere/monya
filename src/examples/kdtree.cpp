@@ -25,6 +25,7 @@
 #include "../utils/time.hpp"
 #include "../io/IO.hpp"
 #include "../structures/SampleVector.hpp"
+#include "../validate/BruteForcekNN.hpp"
 
 using namespace monya;
 
@@ -104,10 +105,8 @@ class kdnode: public container::BinaryNode {
         // TODO: ||ize
         void compute_bounds() {
             // Upper and lower bounds at this node
-            //lower_bounds.resize(ioer->shape().second);
             lower_bounds.assign(ioer->shape().second,
                     std::numeric_limits<data_t>::max());
-            //upper_bounds.resize(ioer->shape().second);
             upper_bounds.assign(ioer->shape().second,
                     std::numeric_limits<data_t>::min());
 
@@ -224,12 +223,6 @@ class kdTreeProgram: public BinaryTreeProgram {
                         std::cout << "Node c: " << node->get_comparator() <<
                             " pushing Node c: " <<
                             node->left->get_comparator() << " ";
-
-                        if (!node->left->has_child())
-                            std::cout << "WITHOUT CHILDREN!\n";
-                        else
-                            std::cout << "WITH CHILDREN!\n";
-
                         visited.push(kdnode::cast2(node->left));
                     }
 
@@ -238,12 +231,6 @@ class kdTreeProgram: public BinaryTreeProgram {
                         std::cout << "Node c: " << node->get_comparator() <<
                             " pushing Node c: " << node->right->get_comparator()
                             << " ";
-
-                        if (!node->right->has_child())
-                            std::cout << "WITHOUT CHILDREN!\n";
-                        else
-                            std::cout << "WITH CHILDREN!\n";
-
                         visited.push(kdnode::cast2(node->right));
                     }
                 }
@@ -324,10 +311,14 @@ int main(int argc, char* argv[]) {
 
 #if 1
     // Query the Tree to make sure we don't have garbage!
+    std::string rw_fn = "/Research/monya/src/test-data/rand_32_16_rw.bin";
 
-    io::IO::raw_ptr syncioer = new io::SyncIO(
-            "/Research/monya/src/test-data/rand_32_16_rw.bin",
+    io::IO::raw_ptr syncioer = new io::SyncIO(rw_fn,
             dimpair(nsamples, nfeatures), MAT_ORIENT::ROW);
+
+    std::vector<data_t> data(nsamples*nfeatures);
+    static_cast<io::SyncIO*>(syncioer)->read(&data[0]);
+    validate::BruteForcekNN bf (&data[0], nsamples, nfeatures);
 
     // Essentially replicate the data
     std::vector<data_t> tmp;
@@ -337,13 +328,20 @@ int main(int argc, char* argv[]) {
 #if 1
         constexpr unsigned k = 5;
         auto qsample = container::DenseVector::create_raw(tmp, nfeatures);
-        container::Query* pq = new container::ProximityQuery(qsample, k); // 3-NN
+        container::Query* pq = new container::ProximityQuery(qsample, k);
 
-        engine->query(pq);
-        std::cout << "Sample: " << i << " " << k << " Nearest neighbors :\n";
+        std::cout << "Sample: " << i << " " << k << "NN:\n";
         pq->print();
 
-        container::ProximityQuery::raw_cast(pq)->getNN()->print();
+        engine->query(pq);
+        std::cout << "Monya Brute: \n";
+        NNVector* nnv = container::ProximityQuery::raw_cast(pq)->getNN();
+        nnv->print();
+
+        auto iv = bf.getNN(tmp, k);
+        std::cout << "Brute: \n";
+        iv.print();
+        assert(*nnv == iv);
 
         delete(container::ProximityQuery::raw_cast(pq));
 
