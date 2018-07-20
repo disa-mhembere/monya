@@ -25,17 +25,21 @@
 
 namespace monya { namespace container {
 
-    ProximityQuery::ProximityQuery(const short k) : k(k) {
-        result = new NNVector(k);
+    ProximityQuery::ProximityQuery(const short k, const tree_t ntree)
+        : k(k), ntree(ntree) {
+            for (size_t i = 0; i < ntree; i++)
+                result.push_back(new NNVector(k));
     }
 
-    ProximityQuery::ProximityQuery(SampleVector* qsample, const short k) :
-        ProximityQuery(k) {
-            this->qsample = qsample;
-        }
+    ProximityQuery::ProximityQuery(SampleVector* qsample, const short k,
+            const tree_t ntree): ProximityQuery(k, ntree) {
 
-    void ProximityQuery::eval(const size_t id, const data_t dist) {
-        result->eval(id, dist);
+        this->qsample = qsample;
+    }
+
+    void ProximityQuery::eval(const size_t id, const data_t dist,
+            const tree_t tree_id) {
+        result[tree_id]->eval(id, dist);
     }
 
     void ProximityQuery::print() {
@@ -56,6 +60,7 @@ namespace monya { namespace container {
     }
 
     ProximityQuery::~ProximityQuery() {
-        delete(result);
+        for (size_t i = 0; i < result.size(); i++)
+            delete(result[i]);
     }
 }} // End namespace monya::container

@@ -46,14 +46,15 @@ class ProximityQuery: public Query {
         //const short k; // k nearest
         short k; // k nearest
         SampleVector* qsample;
-        NNVector* result;
+        tree_t ntree;
+        std::vector<NNVector*> result;
 
     public:
 
-        ProximityQuery(const short k);
-        ProximityQuery(SampleVector* qsample, const short k);
+        ProximityQuery(const short k, tree_t ntree);
+        ProximityQuery(SampleVector* qsample, const short k, tree_t ntree);
         data_t& operator[](const size_t idx) override;
-        void eval(const size_t id, const data_t dist);
+        void eval(const size_t id, const data_t dist, const tree_t tree_id);
 
         static ProximityQuery* raw_cast(Query* q) {
             return static_cast<ProximityQuery*>(q);
@@ -71,7 +72,7 @@ class ProximityQuery: public Query {
             return k;
         }
 
-        NNVector* getNN() const {
+        std::vector<NNVector*>& getNN() {
             return result;
         }
 

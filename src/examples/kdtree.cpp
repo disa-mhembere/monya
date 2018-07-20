@@ -215,14 +215,14 @@ class kdTreeProgram: public BinaryTreeProgram {
                         std::cout << "\n\nDist to: " << iv.get_index() <<
                             " = " << dist << std::endl;
 
-                        query->eval(iv.get_index(), dist);
+                        query->eval(iv.get_index(), dist, tree_id);
                     }
                 } else {
                     auto l = completed.find(node->left);
                     if (l == completed.end()) { // lhs hasn't been processed
                         std::cout << "Node c: " << node->get_comparator() <<
                             " pushing Node c: " <<
-                            node->left->get_comparator() << " ";
+                            node->left->get_comparator() << "\n";
                         visited.push(kdnode::cast2(node->left));
                     }
 
@@ -313,7 +313,7 @@ int main(int argc, char* argv[]) {
     }
 #endif
 
-#if 0
+#if 1
     // Query the Tree to make sure we don't have garbage!
     std::string rw_fn = "/Research/monya/src/test-data/rand_32_16_rw.bin";
 
@@ -332,22 +332,29 @@ int main(int argc, char* argv[]) {
 #if 1
         constexpr unsigned k = 5;
         auto qsample = container::DenseVector::create_raw(tmp, nfeatures);
-        container::Query* pq = new container::ProximityQuery(qsample, k);
+        container::Query* pq = new container::ProximityQuery(qsample, k, ntree);
 
         std::cout << "Sample: " << i << " " << k << "NN:\n";
         pq->print();
 
         engine->query(pq);
         std::cout << "Monya Brute: \n";
-        NNVector* nnv = container::ProximityQuery::raw_cast(pq)->getNN();
-        nnv->print();
+        std::vector<NNVector*> nnvs =
+            container::ProximityQuery::raw_cast(pq)->getNN();
 
-        container::Query* pq = new container::ProximityQuery(qsample, k);
+        assert(nnvs.size() == ntree);
+        nnvs[0]->print();
 
         auto iv = bf.getNN(tmp, k);
         std::cout << "Brute: \n";
         iv.print();
-        assert(*nnv == iv);
+
+        if (ntree > 1)
+            for(size_t i = 1; i < ntree; i++)
+                assert(*(nnvs[0]) == (*nnvs[1]));
+
+        for (auto nnv : nnvs)
+            assert(*nnv == iv);
 
         delete(container::ProximityQuery::raw_cast(pq));
 
