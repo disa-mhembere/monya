@@ -37,8 +37,10 @@ namespace monya {
             ComputeEngine(Params& params) {
                 this->params = params;
 
-                for (tree_t tree_id = 0; tree_id < params.ntree; tree_id++)
+                for (tree_t tree_id = 0; tree_id < params.ntree; tree_id++) {
+                    std::cout << "Creating tree: " << tree_id << std::endl;
                     forest.push_back(new TreeProgramType(params, tree_id));
+                }
             }
 
             ComputeEngine(std::vector<TreeProgramType*>& forest) {
@@ -53,7 +55,7 @@ namespace monya {
 
         public:
             typedef std::shared_ptr<ComputeEngine<TreeProgramType> > ptr;
-            typedef typename std::vector<TreeProgramType*>::iterator forest_iterator;
+            typedef typename std::vector<TreeProgramType*>::iterator iterator;
 
             static ptr create() {
                 return ptr(new ComputeEngine<TreeProgramType>());
@@ -84,11 +86,11 @@ namespace monya {
                 return this->forest;
             }
 
-            forest_iterator forest_begin() {
+            iterator forest_begin() {
                 return this->forest.begin();
             }
 
-            forest_iterator forest_end() {
+            iterator forest_end() {
                 return this->forest.end();
             }
 
@@ -104,6 +106,7 @@ namespace monya {
             }
 
             void query(container::Query* pq) {
+                // TODO: Parallelize
                 for (auto tree : forest) {
                     pq->run(tree);
                 }

@@ -32,7 +32,6 @@ namespace monya {
 
     class BinaryTreeProgram: public container::BinaryTree {
         private:
-            typedef typename container::Scheduler sched_t;
 
         protected:
             short nnode_id; // NUMA node
@@ -41,7 +40,7 @@ namespace monya {
             io::IO::raw_ptr ioer;
             size_t nsamples; // Max # of samples from which the tree is built
             size_t nfeatures; // Number of features
-            sched_t* scheduler;
+            container::Scheduler* scheduler;
 
         public:
             typedef std::shared_ptr<BinaryTreeProgram> ptr;
@@ -58,25 +57,25 @@ namespace monya {
                 return nnode_id;
             }
 
-            BinaryTreeProgram(Params& params, const tree_t tree_id) {
-                this->tree_id = tree_id;
-                this->exmem_fn = params.fn;
+            BinaryTreeProgram(Params& params, const tree_t _tree_id) :
+                tree_id (_tree_id) {
+                exmem_fn = params.fn;
 
                 // Configure ioer
                 ioer = IOfactory::create(params.iotype);
-                ioer->set_fn(this->exmem_fn);
+                ioer->set_fn(exmem_fn);
                 ioer->set_orientation(params.orientation);
                 ioer->shape(dimpair(params.nsamples, params.nfeatures));
 
                 // Configure Tree
-                this->max_depth = params.max_depth;
-                this->depth = 0;
-                this->nsamples = params.nsamples;
-                this->nfeatures = params.nfeatures;
+                max_depth = params.max_depth;
+                depth = 0;
+                nsamples = params.nsamples;
+                nfeatures = params.nfeatures;
 
                 assert(params.fanout == 2);
-                this->scheduler = new sched_t(params.fanout, params.ntree,
-                        params.max_depth);
+                scheduler = new container::Scheduler(params.fanout,
+                        params.max_depth, tree_id);
             }
 
             void set_root(container::BinaryNode*& node) {
@@ -87,11 +86,11 @@ namespace monya {
                 BinaryTree::set_root(node);
             }
 
-            sched_t* get_scheduler() {
+            container::Scheduler* get_scheduler() {
                 return scheduler;
             }
 
-            void set_scheduler(sched_t* scheduler) {
+            void set_scheduler(container::Scheduler* scheduler) {
                 this->scheduler = scheduler;
             }
 
@@ -112,11 +111,11 @@ namespace monya {
                 return ioer;
             }
 
-            void set_tree_id(const tree_t tid) {
+            void set_id(const tree_t tid) {
                 this->tree_id = tid;
             }
 
-            const tree_t get_tree_id() const {
+            const tree_t get_id() const {
                 return tree_id;
             }
 

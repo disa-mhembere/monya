@@ -33,21 +33,20 @@ class MyNode: public mc::RBNode {
 };
 
 void serial_test() {
-    mc::Scheduler scheduler;
     std::vector<mc::RBNode*> v;
     constexpr unsigned LEVEL = 5;
     const unsigned NNODES = std::pow(2, LEVEL) - 1;
+    mc::Scheduler scheduler(2, LEVEL, 0);
+
     std::cout << "Running: " << NNODES << " nodes for test\n\n";
 
     for (unsigned i = 0; i < NNODES; i++)
         v.push_back(new MyNode(i));
 
     assert(v.size() == NNODES);
-
-    constexpr monya::tree_t tree_id = 0;
     std::cout << "Scheduling and running: ";
     for (unsigned i = 0; i < NNODES; i++) {
-        scheduler.schedule(v[i], tree_id);
+        scheduler.schedule(v[i]);
     }
 
     std::cout << ".\n";

@@ -244,7 +244,7 @@ class RandomSplit {
         std::default_random_engine generator;
         std::uniform_int_distribution<size_t> distribution;
     public:
-        RandomSplit(size_t nfeatures) {
+        RandomSplit(size_t nfeatures, size_t npick) {
             distribution = std::uniform_int_distribution<size_t>(0, nfeatures);
         }
 
@@ -258,7 +258,7 @@ int main(int argc, char* argv[]) {
     // TODO: Read from argv[]
     size_t nsamples = 32;
     size_t nfeatures = 16;
-    tree_t ntree = 1;
+    tree_t ntree = 2;
     unsigned nthread = 1;
     MAT_ORIENT mo = MAT_ORIENT::COL;
 
@@ -271,24 +271,24 @@ int main(int argc, char* argv[]) {
 
     params.print();
 
-    //utils::time t;
     ComputeEngine<kdTreeProgram>::ptr engine =
         ComputeEngine<kdTreeProgram>::create(params);
     std::cout << "Engine created ...\n";
 
     // Create the root with no duplicates for split dimension
     // TODO: Create root/node initializer that is passed to node
-    RandomSplit rs(params.nfeatures);
+    RandomSplit rs(params.nfeatures, ntree);
     std::set<size_t> splits;
-
-    container::BinaryNode* root = new kdnode;
 
     for (auto tree : engine->get_forest()) {
         while (true) {
             size_t split_dim = rs.generate();
             auto sp = splits.find(split_dim); // Pick the split dim
             if (sp == splits.end()) {
-                std::cout << "Choosing split: " << split_dim << std::endl;
+                std::cout << "Tree: " << tree->get_id() <<
+                    " INIT Choosing split: " << split_dim << std::endl;
+
+                container::BinaryNode* root = new kdnode;
 
                 // Which dim to split on
                 kdnode::cast2(root)->set_split_dim(split_dim);
@@ -301,15 +301,19 @@ int main(int argc, char* argv[]) {
             }
         }
     }
+
     std::cout << "Roots initialized ... Training trees\n";
     engine->train();
 
 #if 1
     std::cout << "Echoing the tree contents:\n";
-    engine->get_tree(0)->echo();
+    for (auto tree : engine->get_forest()) {
+        std::cout << "\n TREE: " << tree->get_id() << "\n";
+        tree->echo();
+    }
 #endif
 
-#if 1
+#if 0
     // Query the Tree to make sure we don't have garbage!
     std::string rw_fn = "/Research/monya/src/test-data/rand_32_16_rw.bin";
 
@@ -337,6 +341,8 @@ int main(int argc, char* argv[]) {
         std::cout << "Monya Brute: \n";
         NNVector* nnv = container::ProximityQuery::raw_cast(pq)->getNN();
         nnv->print();
+
+        container::Query* pq = new container::ProximityQuery(qsample, k);
 
         auto iv = bf.getNN(tmp, k);
         std::cout << "Brute: \n";

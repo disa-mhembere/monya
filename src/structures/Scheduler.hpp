@@ -36,12 +36,12 @@ namespace monya { namespace container {
     class Scheduler {
 
         private:
-            // Maximum depth of trees permitted
-            depth_t max_levels;
+            unsigned fanout;
+            depth_t max_levels; // Maximum depth of trees permitted
             // Depth of the tree being scheduled
             // FIXME: Modification lock reading ..
-            std::vector<depth_t> current_level;
-            unsigned fanout;
+            depth_t current_level;
+            tree_t tree_id;
             // Map is: level, nodes in level
             typedef std::unordered_map<unsigned, std::vector<NodeView*> > ln_t;
             ln_t nodes;
@@ -49,12 +49,9 @@ namespace monya { namespace container {
             pthread_mutexattr_t mutex_attr;
 
         public:
-            Scheduler(unsigned fanout=2, tree_t ntree=1,
-                    depth_t max_depth=MAX_DEPTH);
-            // TODO: Remove default value for tree_id
+            Scheduler(unsigned fanout, depth_t max_depth, tree_t tree_id);
             // Have all the nodes in this level been placed in the queue
-            bool is_full(unsigned level, tree_t tree_id=0) {
-                // FIXME: Not true for trees > 1
+            bool level_is_full(unsigned level) {
                 return std::pow(fanout, level) == nodes[level].size();
             }
 
@@ -64,12 +61,12 @@ namespace monya { namespace container {
               \brief Add a node to the schedulers list given a particular
               tree id
               */
-            void schedule(NodeView* node, const tree_t tree_id=0);
+            void schedule(NodeView* node);
 
             /**
               \brief Handoff nodes to threads
               */
-            void run_level(const depth_t level, const tree_t tree_id);
+            void run_level(const depth_t level);
 
             const depth_t get_max_depth() const { return max_levels; }
 

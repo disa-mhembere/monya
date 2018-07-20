@@ -22,12 +22,11 @@
 
 namespace monya { namespace container {
 
-    Scheduler::Scheduler(unsigned fanout, tree_t ntree, depth_t max_depth) {
-        max_levels = max_depth;
-        current_level.assign(ntree, 0);
-        this->fanout = fanout; // Single fanout for all trees in forest
+    Scheduler::Scheduler(unsigned _fanout, depth_t _max_depth,
+            tree_t _tree_id): fanout(_fanout), max_levels(_max_depth),
+            current_level(0), tree_id(_tree_id){
 
-        // TODO: One per tree?
+        // One per tree
         pthread_mutexattr_init(&mutex_attr);
         pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_ERRORCHECK);
         pthread_mutex_init(&mutex, &mutex_attr);
@@ -41,33 +40,32 @@ namespace monya { namespace container {
     }
 
     // TODO: Batch the scheduling the reduce lock contention
-    // TODO: Fix lock contention here
-    void Scheduler::schedule(NodeView* node, const tree_t tree_id) {
+    //  //
+    void Scheduler::schedule(NodeView* node) {
         pthread_mutex_lock(&mutex);
-        typename ln_t::iterator it = nodes.find(current_level[tree_id]);
+        typename ln_t::iterator it = nodes.find(current_level);
+
         if (it == nodes.end()) {
-            nodes[current_level[tree_id]] = std::vector<NodeView*>{ node };
+            nodes[current_level] = std::vector<NodeView*>{ node };
         } else {
-            nodes[current_level[tree_id]].push_back(node);
+            nodes[current_level].push_back(node);
         }
 
-        // TODO: We don't need to get all nodes before running
-        if (is_full(current_level[tree_id])) {
-            // TODO: This is true, but on a tree_id basis
-            current_level[tree_id]++;
+        if (level_is_full(current_level)) {
+            current_level++;
             pthread_mutex_unlock(&mutex);
 
-            run_level(current_level[tree_id]-1, tree_id);
+            // TODO: We don't need to get all nodes before running
+            run_level(current_level-1);
         } else {
             pthread_mutex_unlock(&mutex);
         }
     }
 
-    // Handoff nodes to threads
-    void Scheduler::run_level(const depth_t level, const tree_t tree_id) {
+    // TODO: Handoff nodes to threads
+    void Scheduler::run_level(const depth_t level) {
         std::cout << "\nRunning level: " << level << "\n";
 
-        // TODO: Will include others when more than 1 tree
         std::vector<NodeView*> level_nodes = nodes[level];
 
         // Encodes dependency on levels below
