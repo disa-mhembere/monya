@@ -15,7 +15,11 @@
 
 include ../../../Makefile.common
 
-TESTFILES = testIndexVector metric-test testNNVector
+CXXFLAGS +=-I../../../SAFS/libsafs -I../../structures -I..
+LDFLAGS :=-L../../../SAFS/libsafs -L../../structures -L..\
+	-lstructures -lsafs $(LDFLAGS)
+
+TESTFILES = testIndexVector metric-test testNNVector testWorkerThread
 
 all: $(TESTFILES)
 
@@ -30,6 +34,9 @@ metric-test: metric-test.o
 
 testNNVector: testNNVector.o
 	$(CXX) -o testNNVector testNNVector.o $(LDFLAGS)
+
+testWorkerThread: testWorkerThread.o
+	$(CXX) -o testWorkerThread testWorkerThread.o $(LDFLAGS)
 
 clean:
 	rm -f *.d
