@@ -61,7 +61,7 @@ public:
     typedef WorkerThread* raw_ptr;
 
     WorkerThread(const int node_id, const unsigned thd_id);
-    void start(const ThreadState_t state);
+    void start(const ThreadState_t state=WAIT);
     virtual void run();
     virtual void sleep();
     virtual void lock_sleep();
@@ -75,9 +75,7 @@ public:
     virtual const void print_task_queue() const;
     void bind2node_id();
 
-    void test() {
-        printf("Test method for thd: %d, NUMA node: %d\n", thd_id, node_id);
-    }
+    void test();
 
     TaskQueue* get_task_queue() const {
         return task_queue;

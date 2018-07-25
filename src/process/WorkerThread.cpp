@@ -19,11 +19,13 @@
 
 #include "WorkerThread.hpp"
 #include "TaskQueue.hpp"
-#include "ThreadState.hpp"
 
 #ifdef USE_NUMA
 #include <numa.h>
 #endif
+
+#include <thread>
+#include <chrono>
 
 namespace monya {
 
@@ -41,31 +43,32 @@ namespace monya {
         rc = pthread_mutex_lock(&mutex);
         if (rc) perror("pthread_mutex_lock");
 
-        //(*parent_pending_threads)--;
+        (*parent_pending_threads)--;
         set_thread_state(WAIT);
 
-        //if (*parent_pending_threads == 0) {
-            //rc = pthread_cond_signal(parent_cond); // Wake up parent thread
-            //if (rc) perror("pthread_cond_signal");
-        //}
+        if (*parent_pending_threads == 0) {
+            rc = pthread_cond_signal(parent_cond); // Wake up parent thread
+            if (rc) perror("pthread_cond_signal");
+        }
         rc = pthread_mutex_unlock(&mutex);
         if (rc) perror("pthread_mutex_unlock");
     }
 
     // Assumes caller has lock already ... or else ...
     void WorkerThread::sleep() {
-        //(*parent_pending_threads)--;
+        (*parent_pending_threads)--;
         set_thread_state(WAIT);
 
-        //if (*parent_pending_threads == 0) {
-            //int rc = pthread_cond_signal(parent_cond); // Wake up parent thread
-            //if (rc) perror("pthread_cond_signal");
-        //}
+        if (*parent_pending_threads == 0) {
+            int rc = pthread_cond_signal(parent_cond); // Wake up parent thread
+            if (rc) perror("pthread_cond_signal");
+        }
     }
 
     void WorkerThread::run() {
         switch(state) {
             case TEST:
+                (*parent_pending_threads)++;
                 test();
                 lock_sleep();
                 break;
@@ -87,9 +90,17 @@ namespace monya {
         }
     }
 
+    void WorkerThread::test() {
+        printf("Test method for thd: %d, NUMA node: %d\n", thd_id, node_id);
+        printf("Sleeping for: %d ms\n", thd_id);
+        std::this_thread::sleep_for(std::chrono::milliseconds(thd_id));
+        printf("Thread %d waking back up!\n", thd_id);
+    }
+
     void* callback(void* arg) {
         WorkerThread* t = static_cast<WorkerThread*>(arg);
-#ifdef USE_NUMA
+//#ifdef USE_NUMA
+#if 0
         t->bind2node_id();
 #endif
 
@@ -115,7 +126,7 @@ namespace monya {
 
 
     void WorkerThread::start(const ThreadState_t state) {
-        //printf("Thread %d started ...\n", thd_id);
+        printf("Thread %d started ...\n", thd_id);
         this->state = state;
         int rc = pthread_create(&hw_thd, NULL, callback, this);
         if (rc)
@@ -183,11 +194,13 @@ namespace monya {
     }
 
     WorkerThread::~WorkerThread() {
+        printf("\n\nDeallocating thread: %d\n", thd_id);
         pthread_cond_destroy(&cond);
         pthread_mutex_destroy(&mutex);
         pthread_mutexattr_destroy(&mutex_attr);
 
         if (thd_id != INVALID_THD_ID)
             join();
+        printf("\n\nDeallocated thread: %d\n", thd_id);
     }
 }

@@ -32,21 +32,49 @@ int main(int argv, char* argc[]) {
     constexpr int NNUMA_NODES = 1;
 
     std::vector<mc::BinaryNode*> nodes;
+
     // Make nodes Comparator -> i
     for (size_t i = 0; i < NNODES; i++)
         nodes.push_back(new mc::BinaryNode(i));
 
+    // Conditional to alert this thread to take control
+    pthread_cond_t cond;
+    pthread_cond_init(&cond, NULL);
+    std::atomic<unsigned> ppt(0);
+
     // Make threads
     std::vector<WorkerThread::raw_ptr> threads;
-    for (unsigned tid = 0; tid < NTHREADS; tid++)
+    for (unsigned tid = 0; tid < NTHREADS; tid++) {
         threads.push_back(new WorkerThread(tid % NNUMA_NODES, tid));
+        threads.back()->set_parent_cond(&cond);
+        threads.back()->set_parent_pending_threads(&ppt);
+        threads.back()->start(WAIT);
+    }
 
+    // Run test method (sleeps threads on completion)
+    printf("Coordinator thread yeilding control ...\n");
+    for (WorkerThread* thread : threads)
+        thread->test();
+
+    printf("Coordinator thread regaining control ...\n");
+#if 0
+    // Run test method AGAIN
+    for (WorkerThread* thread : threads)
+    for (WorkerThread* thread : threads)
+#endif
+
+    // Delete the threads (calls join)
+    printf("Deallocating the threads ...\n");
     for (size_t tid = 0; tid < threads.size(); tid++)
         delete(threads[tid]);
 
     // Delete nodes
+    printf("Deleting the nodes ...\n");
     for (size_t i = 0; i < nodes.size(); i++)
         delete(nodes[i]);
 
+    pthread_cond_destroy(&cond);
+
+    printf("WorkerThread test successful!\n");
     return EXIT_SUCCESS;
 }
