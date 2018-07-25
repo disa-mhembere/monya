@@ -15,21 +15,16 @@
 
 include ../../../Makefile.common
 
-TESTFILES = testIndexVector metric-test testNNVector
+CXXFLAGS +=-I../../../SAFS/libsafs -I../../structures -I..
+LDFLAGS :=-L../../../SAFS/libsafs -L../../structures -L.. -L../../process \
+	-lprocess -lstructures -lsafs $(LDFLAGS)
+
+TESTFILES = testWorkerThread
 
 all: $(TESTFILES)
 
-test:
-	for f in $(TESTFILES); do ./$$f; done
-
-testIndexVector: testIndexVector.o
-	$(CXX) -o testIndexVector testIndexVector.o $(LDFLAGS)
-
-metric-test: metric-test.o
-	$(CXX) -o metric-test metric-test.o $(LDFLAGS)
-
-testNNVector: testNNVector.o
-	$(CXX) -o testNNVector testNNVector.o $(LDFLAGS)
+testWorkerThread: testWorkerThread.o
+	$(CXX) -o testWorkerThread testWorkerThread.o $(LDFLAGS)
 
 clean:
 	rm -f *.d

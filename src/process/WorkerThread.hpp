@@ -29,7 +29,7 @@
 #include <cassert>
 
 #include "ThreadState.hpp"
-#include "exception.hpp"
+#include "../common/exception.hpp"
 
 #define INVALID_THD_ID -1
 
@@ -60,11 +60,11 @@ protected:
 public:
     typedef WorkerThread* raw_ptr;
 
-    WorkerThread() { }
     WorkerThread(const int node_id, const unsigned thd_id);
     void start(const ThreadState_t state);
     virtual void run();
     virtual void sleep();
+    virtual void lock_sleep();
     virtual void wait();
     virtual void join();
 
@@ -72,12 +72,15 @@ public:
     virtual void set_driver(void* driver);
     virtual void wake(const ThreadState_t state);
     virtual bool try_steal_task();
-    virtual TaskQueue* get_task_queue();
     virtual const void print_task_queue() const;
     void bind2node_id();
 
     void test() {
         printf("Test method for thd: %d, NUMA node: %d\n", thd_id, node_id);
+    }
+
+    TaskQueue* get_task_queue() const {
+        return task_queue;
     }
 
     const ThreadState_t get_state() const {
@@ -108,7 +111,7 @@ public:
         parent_pending_threads = ppt;
     }
 
-    ~WorkerThread();
+    virtual ~WorkerThread();
 };
 }
 #endif

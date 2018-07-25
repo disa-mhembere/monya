@@ -39,11 +39,10 @@ int main(int argv, char* argc[]) {
     // Make threads
     std::vector<WorkerThread::raw_ptr> threads;
     for (unsigned tid = 0; tid < NTHREADS; tid++)
-        //threads.push_back(new WorkerThread(tid % NNUMA_NODES, tid));
-        threads.push_back(new WorkerThread());
+        threads.push_back(new WorkerThread(tid % NNUMA_NODES, tid));
 
     for (size_t tid = 0; tid < threads.size(); tid++)
-        ; // delete(threads[tid]); // FIXME
+        delete(threads[tid]);
 
     // Delete nodes
     for (size_t i = 0; i < nodes.size(); i++)

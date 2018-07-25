@@ -13,28 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include ../../../Makefile.common
+include ../../Makefile.common
 
-TESTFILES = testIndexVector metric-test testNNVector
+CXXFLAGS +=-I../../SAFS/libsafs -I../common -I../structures -I..
+LDFLAGS :=-L../../SAFS/libsafs -L../common -L../structures -L..\
+	-lsafs -lstructures $(LDFLAGS)
 
-all: $(TESTFILES)
+all: libprocess unit_test
 
-test:
-	for f in $(TESTFILES); do ./$$f; done
+libprocess: $(OBJS)
+	rm -f libprocess.a
+	ar -cvq libprocess.a $(OBJS)
 
-testIndexVector: testIndexVector.o
-	$(CXX) -o testIndexVector testIndexVector.o $(LDFLAGS)
-
-metric-test: metric-test.o
-	$(CXX) -o metric-test metric-test.o $(LDFLAGS)
-
-testNNVector: testNNVector.o
-	$(CXX) -o testNNVector testNNVector.o $(LDFLAGS)
+unit_test:
+	$(MAKE) -C unit-test
 
 clean:
 	rm -f *.d
 	rm -f *.o
 	rm -f *~
-	rm -f $(TESTFILES)
+	rm -f *.a
+	$(MAKE) --ignore-errors -C unit-test clean
 
 -include $(DEPS)

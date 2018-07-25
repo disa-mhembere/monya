@@ -17,6 +17,14 @@
  * limitations under the License.
  */
 
+#include "WorkerThread.hpp"
+#include "TaskQueue.hpp"
+#include "ThreadState.hpp"
+
+#ifdef USE_NUMA
+#include <numa.h>
+#endif
+
 namespace monya {
 
     WorkerThread::WorkerThread(const int _node_id, const unsigned _thd_id) :
@@ -69,7 +77,7 @@ namespace monya {
                 break;
             case WAIT:
                 ; // TODO
-                request_task();
+                // request_task(); // TODO
                 break;
             case EXIT:
                 throw thread_exception(
@@ -78,6 +86,33 @@ namespace monya {
                 throw thread_exception("Unknown thread state\n");
         }
     }
+
+    void* callback(void* arg) {
+        WorkerThread* t = static_cast<WorkerThread*>(arg);
+#ifdef USE_NUMA
+        t->bind2node_id();
+#endif
+
+        while (true) { // So we can receive task after task
+            if (t->get_state() == WAIT)
+                t->wait();
+
+            if (t->get_state() == EXIT) {// No more work to do
+                //printf("Thread %d exiting ...\n", t->thd_id);
+                break;
+            }
+
+            //printf("Thread %d awake and doing a run()\n", t->thd_id);
+            t->run(); // else
+        }
+
+        // We've stopped running so exit
+        pthread_exit(NULL);
+#ifdef _WIN32
+        return NULL;
+#endif
+    }
+
 
     void WorkerThread::start(const ThreadState_t state) {
         //printf("Thread %d started ...\n", thd_id);
@@ -105,32 +140,6 @@ namespace monya {
 
         rc = pthread_cond_signal(&cond);
         if (rc) perror("pthread_cond_signal");
-    }
-
-    void* callback(void* arg) {
-        WorkerThread* t = static_cast<WorkerThread*>(arg);
-#ifdef USE_NUMA
-        t->bind2node_id();
-#endif
-
-        while (true) { // So we can receive task after task
-            if (t->get_state() == WAIT)
-                t->wait();
-
-            if (t->get_state() == EXIT) {// No more work to do
-                //printf("Thread %d exiting ...\n", t->thd_id);
-                break;
-            }
-
-            //printf("Thread %d awake and doing a run()\n", t->thd_id);
-            t->run(); // else
-        }
-
-        // We've stopped running so exit
-        pthread_exit(NULL);
-#ifdef _WIN32
-        return NULL;
-#endif
     }
 
     bool WorkerThread::try_steal_task() {

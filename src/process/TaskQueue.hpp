@@ -34,7 +34,7 @@ namespace monya {
     class TaskQueue {
         public:
             virtual const size_t size() const = 0;
-            void print() const = 0;
+            virtual void print() const = 0;
     };
 
     class BuildTaskQueue : TaskQueue {
@@ -57,7 +57,7 @@ namespace monya {
             std::vector<container::Query*> tasks;
 
         public:
-            QueryTaskQueue {
+            QueryTaskQueue() {
             }
 
             const size_t size() const override {

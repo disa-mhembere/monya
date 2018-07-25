@@ -19,17 +19,18 @@
 
 #include "../structures/NodeView.hpp"
 #include "../structures/Query.hpp"
+#include "TaskQueue.hpp"
 
 namespace monya {
 
     void BuildTaskQueue::print() const {
-        for (NodeView* node : tasks) {
+        for (container::NodeView* node : tasks) {
             node->print();
         }
     }
 
     void QueryTaskQueue::print() const {
-        for (Query* node : tasks) {
+        for (container::Query* node : tasks) {
             node->print();
         }
     }
