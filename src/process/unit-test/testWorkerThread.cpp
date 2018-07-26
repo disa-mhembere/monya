@@ -18,26 +18,30 @@
  */
 
 #include "../WorkerThread.hpp"
-#include "../../structures/BinaryNode.hpp"
 #include "../../utils/utility.hpp"
 #include <random>
 
 #include <cassert>
 
-namespace mc = monya::container;
-namespace mu = monya::utils;
 using namespace monya;
 
+namespace {
+void init_threads(std::vector<WorkerThread::raw_ptr>& threads,
+        const int NTHREADS, pthread_cond_t& cond, std::atomic<unsigned>& ppt ) {
+
+    const int NNUMA_NODES = utils::get_num_nodes();
+
+    for (int tid = 0; tid < NTHREADS; tid++) {
+        threads.push_back(new WorkerThread(tid % NNUMA_NODES, tid));
+        threads.back()->set_parent_cond(&cond);
+        threads.back()->set_parent_pending_threads(&ppt);
+        threads.back()->start();
+    }
+}
+}
+
 int main(int argv, char* argc[]) {
-    constexpr size_t NNODES = 10;
     constexpr unsigned NTHREADS = 10;
-    const int NNUMA_NODES = mu::get_num_nodes();
-
-    std::vector<mc::BinaryNode*> nodes;
-
-    // Make nodes Comparator -> i
-    for (size_t i = 0; i < NNODES; i++)
-        nodes.push_back(new mc::BinaryNode(i));
 
     // Conditional to alert this thread to take control
     pthread_cond_t cond;
@@ -46,12 +50,7 @@ int main(int argv, char* argc[]) {
 
     // Make threads
     std::vector<WorkerThread::raw_ptr> threads;
-    for (unsigned tid = 0; tid < NTHREADS; tid++) {
-        threads.push_back(new WorkerThread(tid % NNUMA_NODES, tid));
-        threads.back()->set_parent_cond(&cond);
-        threads.back()->set_parent_pending_threads(&ppt);
-        threads.back()->start(WAIT);
-    }
+    init_threads(threads, NTHREADS, cond, ppt);
 
     // Run test method (sleeps threads on completion)
     printf("Coordinator thread yeilding control ...\n");
@@ -70,11 +69,6 @@ int main(int argv, char* argc[]) {
     printf("Deallocating the threads ...\n");
     for (size_t tid = 0; tid < threads.size(); tid++)
         delete(threads[tid]);
-
-    // Delete nodes
-    printf("Deleting the nodes ...\n");
-    for (size_t i = 0; i < nodes.size(); i++)
-        delete(nodes[i]);
 
     pthread_cond_destroy(&cond);
 

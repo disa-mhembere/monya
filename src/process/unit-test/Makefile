@@ -19,12 +19,15 @@ CXXFLAGS +=-I../../../SAFS/libsafs -I../../structures -I..
 LDFLAGS :=-L../../../SAFS/libsafs -L../../structures -L.. -L../../process \
 	-lprocess -lstructures -lsafs $(LDFLAGS)
 
-TESTFILES = testWorkerThread
+TESTFILES = testWorkerThread testTaskQueue
 
 all: $(TESTFILES)
 
 testWorkerThread: testWorkerThread.o
 	$(CXX) -o testWorkerThread testWorkerThread.o $(LDFLAGS)
+
+testTaskQueue: testTaskQueue.o
+	$(CXX) -o testTaskQueue testTaskQueue.o $(LDFLAGS)
 
 clean:
 	rm -f *.d
