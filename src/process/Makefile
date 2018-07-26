@@ -25,7 +25,7 @@ libprocess: $(OBJS)
 	rm -f libprocess.a
 	ar -cvq libprocess.a $(OBJS)
 
-unit_test:
+unit_test: libprocess
 	$(MAKE) -C unit-test
 
 clean:
