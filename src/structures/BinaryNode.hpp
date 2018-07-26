@@ -79,7 +79,7 @@ class BinaryNode: public NodeView {
             // TODO
         }
 
-        ~BinaryNode() override {
+        virtual ~BinaryNode() override {
         }
 };
 

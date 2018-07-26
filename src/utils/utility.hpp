@@ -22,6 +22,7 @@
 
 #include <limits>
 #include <algorithm>
+#include "../common/types.hpp"
 
 #ifdef USE_NUMA
 #include <numa.h>
