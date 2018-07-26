@@ -32,20 +32,12 @@ namespace monya { namespace container {
         pthread_mutex_init(&mutex, &mutex_attr);
     }
 
-    bool Scheduler::is_complete(unsigned level) {
-        if (level >= 0) {
-            return true; // FIXME: figure out how to interrogate the trees
-        }
-        return true;
-    }
-
     // TODO: Batch the scheduling the reduce lock contention
     //  //
     void Scheduler::schedule(NodeView* node) {
         pthread_mutex_lock(&mutex);
-        typename ln_t::iterator it = nodes.find(current_level);
 
-        if (it == nodes.end()) {
+        if (current_level + 1 > nodes.size()) {
             nodes[current_level] = std::vector<NodeView*>{ node };
         } else {
             nodes[current_level].push_back(node);

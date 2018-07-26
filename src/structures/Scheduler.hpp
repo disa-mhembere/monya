@@ -23,7 +23,6 @@
 #include "../common/types.hpp"
 
 #include <vector>
-#include <unordered_map>
 #include <cmath>
 #include <iostream>
 
@@ -42,9 +41,8 @@ namespace monya { namespace container {
             // FIXME: Modification lock reading ..
             depth_t current_level;
             tree_t tree_id;
-            // Map is: level, nodes in level
-            typedef std::unordered_map<unsigned, std::vector<NodeView*> > ln_t;
-            ln_t nodes;
+            // Each level has a list of active nodes
+            std::vector<std::vector<NodeView*> > nodes;
             pthread_mutex_t mutex;
             pthread_mutexattr_t mutex_attr;
 
@@ -54,8 +52,6 @@ namespace monya { namespace container {
             bool level_is_full(unsigned level) {
                 return std::pow(fanout, level) == nodes[level].size();
             }
-
-            bool is_complete(unsigned level);
 
             /**
               \brief Add a node to the schedulers list given a particular
