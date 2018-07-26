@@ -29,7 +29,7 @@
 
 namespace monya {
 
-    WorkerThread::WorkerThread(const int _node_id, const unsigned _thd_id) :
+    WorkerThread::WorkerThread(const int _node_id, const int _thd_id) :
         node_id(_node_id), thd_id(_thd_id), state(WAIT) {
 
         pthread_mutexattr_init(&mutex_attr);
@@ -70,7 +70,6 @@ namespace monya {
             case TEST:
                 (*parent_pending_threads)++;
                 test();
-                lock_sleep();
                 break;
             case BUILD:
                 ; // TODO
@@ -88,12 +87,13 @@ namespace monya {
             default:
                 throw thread_exception("Unknown thread state\n");
         }
+        sleep();
     }
 
     void WorkerThread::test() {
         printf("Test method for thd: %d, NUMA node: %d\n", thd_id, node_id);
         printf("Sleeping for: %d ms\n", thd_id);
-        std::this_thread::sleep_for(std::chrono::milliseconds(thd_id));
+        std::this_thread::sleep_for(std::chrono::milliseconds(thd_id*100));
         printf("Thread %d waking back up!\n", thd_id);
     }
 
@@ -185,8 +185,7 @@ namespace monya {
     }
 
     void WorkerThread::join() {
-        void* join_status;
-        int rc = pthread_join(hw_thd, &join_status);
+        int rc = pthread_join(hw_thd, NULL);
         if (rc)
             throw thread_exception("pthread_join()", rc);
 
@@ -194,13 +193,12 @@ namespace monya {
     }
 
     WorkerThread::~WorkerThread() {
-        printf("\n\nDeallocating thread: %d\n", thd_id);
         pthread_cond_destroy(&cond);
         pthread_mutex_destroy(&mutex);
         pthread_mutexattr_destroy(&mutex_attr);
 
-        if (thd_id != INVALID_THD_ID)
-            join();
+        //if (thd_id != INVALID_THD_ID)
+            //join();
         printf("\n\nDeallocated thread: %d\n", thd_id);
     }
 }

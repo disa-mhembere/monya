@@ -56,12 +56,13 @@ int main(int argv, char* argc[]) {
     for (WorkerThread* thread : threads)
         thread->test();
 
-    printf("Coordinator thread regaining control ...\n");
-#if 0
+    printf("\nCoordinator thread regaining control & yeilding ...\n");
+#if 1
     // Run test method AGAIN
     for (WorkerThread* thread : threads)
-    for (WorkerThread* thread : threads)
+        thread->test();
 #endif
+    printf("\nCoordinator thread regaining control ...\n");
 
     // Delete the threads (calls join)
     printf("Deallocating the threads ...\n");

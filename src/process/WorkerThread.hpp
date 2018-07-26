@@ -60,7 +60,7 @@ protected:
 public:
     typedef WorkerThread* raw_ptr;
 
-    WorkerThread(const int node_id, const unsigned thd_id);
+    WorkerThread(const int node_id, const int  thd_id);
     void start(const ThreadState_t state=WAIT);
     virtual void run();
     virtual void sleep();
@@ -85,7 +85,7 @@ public:
         return state;
     }
 
-    const unsigned get_thd_id() const {
+    const int get_thd_id() const {
         return thd_id;
     }
 
