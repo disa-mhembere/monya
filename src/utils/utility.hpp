@@ -23,6 +23,10 @@
 #include <limits>
 #include <algorithm>
 
+#ifdef USE_NUMA
+#include <numa.h>
+#endif
+
 namespace monya { namespace utils {
 
 template<class T=data_t>
@@ -30,6 +34,14 @@ typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
     approx_equal(T x, T y, T ulp =0.1) {
     return std::abs(x-y) <= std::numeric_limits<T>::epsilon() * std::abs(x+y)
         * ulp || std::abs(x-y) < std::numeric_limits<T>::min();
+}
+
+int get_num_nodes() {
+#ifdef USE_NUMA
+    return numa_num_task_nodes();
+#else
+    return 1;
+#endif
 }
 
 } } // End namespace monya::utils
