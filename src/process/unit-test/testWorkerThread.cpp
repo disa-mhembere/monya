@@ -19,17 +19,19 @@
 
 #include "../WorkerThread.hpp"
 #include "../../structures/BinaryNode.hpp"
+#include "../../utils/utility.hpp"
 #include <random>
 
 #include <cassert>
 
 namespace mc = monya::container;
+namespace mu = monya::utils;
 using namespace monya;
 
 int main(int argv, char* argc[]) {
     constexpr size_t NNODES = 10;
     constexpr unsigned NTHREADS = 10;
-    constexpr int NNUMA_NODES = 1;
+    const int NNUMA_NODES = mu::get_num_nodes();
 
     std::vector<mc::BinaryNode*> nodes;
 

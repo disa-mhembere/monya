@@ -99,8 +99,7 @@ namespace monya {
 
     void* callback(void* arg) {
         WorkerThread* t = static_cast<WorkerThread*>(arg);
-//#ifdef USE_NUMA
-#if 0
+#ifdef USE_NUMA
         t->bind2node_id();
 #endif
 
@@ -196,9 +195,5 @@ namespace monya {
         pthread_cond_destroy(&cond);
         pthread_mutex_destroy(&mutex);
         pthread_mutexattr_destroy(&mutex_attr);
-
-        //if (thd_id != INVALID_THD_ID)
-            //join();
-        printf("\n\nDeallocated thread: %d\n", thd_id);
     }
 }

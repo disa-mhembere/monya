@@ -263,7 +263,7 @@ int main(int argc, char* argv[]) {
     MAT_ORIENT mo = MAT_ORIENT::COL;
 
     Params params(nsamples, nfeatures,
-            "/Research/monya/src/test-data/rand_32_16_cw.bin",
+            "/home/disa/Research/monya/src/test-data/rand_32_16_cw.bin",
             IOTYPE::SYNC, ntree, nthread, mo);
 
     constexpr depth_t max_depth = 4;
@@ -315,7 +315,7 @@ int main(int argc, char* argv[]) {
 
 #if 1
     // Query the Tree to make sure we don't have garbage!
-    std::string rw_fn = "/Research/monya/src/test-data/rand_32_16_rw.bin";
+    std::string rw_fn = "/home/disa/Research/monya/src/test-data/rand_32_16_rw.bin";
 
     io::IO::raw_ptr syncioer = new io::SyncIO(rw_fn,
             dimpair(nsamples, nfeatures), MAT_ORIENT::ROW);
