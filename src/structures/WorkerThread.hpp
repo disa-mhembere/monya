@@ -20,13 +20,11 @@
 #ifndef MONYA_WORKER_THREAD_HPP__
 #define MONYA_WORKER_THREAD_HPP__
 
-#include <pthread.h>
-
 #include <memory>
 #include <utility>
 #include <atomic>
-#include <string>
-#include <cassert>
+
+#include <pthread.h>
 
 #include "ThreadState.hpp"
 #include "../common/exception.hpp"

@@ -29,7 +29,9 @@ class MyNode: public mc::RBNode {
         MyNode* right;
 
         MyNode(unsigned val) { comparator = val; }
+        void prep() override { } // Do nothing
         void run() override { std::cout << comparator << " .."; }
+        const bool is_leaf() override { return true; } // Don't allow to spawn
 };
 
 void serial_test() {
@@ -44,6 +46,7 @@ void serial_test() {
         v.push_back(new MyNode(i));
 
     assert(v.size() == NNODES);
+
     std::cout << "Scheduling and running: ";
     for (unsigned i = 0; i < NNODES; i++) {
         scheduler.schedule(v[i]);
@@ -51,6 +54,11 @@ void serial_test() {
 
     std::cout << ".\n";
     v.back()->print();
+
+    for (unsigned i = 0; i <v.size(); i++)
+        delete(v[i]);
+
+    std::cout << "Serial testScheduler PASSED!\n";
 }
 
 int main(int argc, char* argv[]) {

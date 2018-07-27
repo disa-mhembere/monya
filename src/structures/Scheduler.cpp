@@ -38,7 +38,8 @@ namespace monya { namespace container {
         pthread_mutex_lock(&mutex);
 
         if (current_level + 1 > nodes.size()) {
-            nodes[current_level] = std::vector<NodeView*>{ node };
+            //nodes[current_level] = std::vector<NodeView*>{ node };
+            nodes.push_back(std::vector<NodeView*>{ node });
         } else {
             nodes[current_level].push_back(node);
         }

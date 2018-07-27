@@ -99,14 +99,6 @@ int main(int argc, char* argv[]) {
     DATALEN = 100000;
 #endif
 #if 1
-    fn =  "data/ordered_tree_10M.bin";
-    DATALEN = 10000000;
-#endif
-#if 0
-    fn = "data/data_9959.bin";
-    DATALEN = 9959;
-#endif
-#if 0
     fn =  "data/ordered_tree_1M.bin";
     DATALEN = 10000000;
 #endif
