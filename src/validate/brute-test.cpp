@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
 
     size_t nsamples = 32;
     size_t nfeatures = 16;
-    std::string fn = "/Research/monya/src/test-data/rand_32_16_rw.bin";
+    std::string fn = "../test-data/rand_32_16_rw.bin";
     std::vector<data_t> data(nsamples*nfeatures);
 
     io::IO* ioer = new io::SyncIO(fn, dimpair(32, 16), COL);
