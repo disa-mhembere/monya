@@ -34,8 +34,8 @@ namespace monya {
         private:
 
         protected:
-            short nnode_id; // NUMA node
             tree_t tree_id; // The ID of this tree
+            short numa_id; // NUMA node
             std::string exmem_fn;
             io::IO::raw_ptr ioer;
             size_t nsamples; // Max # of samples from which the tree is built
@@ -49,18 +49,19 @@ namespace monya {
             BinaryTreeProgram() : container::BinaryTree() {
             }
 
-            void set_nnode_id(const short nnode_id) {
-                this->nnode_id = nnode_id;
+            void set_numa_id(const short numa_id) {
+                this->numa_id = numa_id;
             }
 
-            const short get_nnode_id() const {
-                return nnode_id;
+            const short get_numa_id() const {
+                return numa_id;
             }
 
-            BinaryTreeProgram(Params& params, const tree_t _tree_id) :
-                tree_id (_tree_id) {
+            BinaryTreeProgram(Params& params, const tree_t _tree_id,
+                    const int _numa_id=0) :
+                tree_id (_tree_id), numa_id(_numa_id) {
+
                 exmem_fn = params.fn;
-
                 // Configure ioer
                 ioer = IOfactory::create(params.iotype);
                 ioer->set_fn(exmem_fn);
@@ -74,8 +75,13 @@ namespace monya {
                 nfeatures = params.nfeatures;
 
                 assert(params.fanout == 2);
+#ifdef USE_NUMA
                 scheduler = new container::Scheduler(params.fanout,
-                        params.max_depth, tree_id);
+                        params.max_depth, tree_id, params.nthread, numa_id);
+#else
+                scheduler = new container::Scheduler(params.fanout,
+                        params.max_depth, tree_id, params.nthread, 0;
+#endif
             }
 
             void set_root(container::BinaryNode*& node) {

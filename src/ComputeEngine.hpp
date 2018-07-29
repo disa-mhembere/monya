@@ -25,6 +25,7 @@
 #include "common/types.hpp"
 #include "common/exception.hpp"
 #include "structures/Query.hpp"
+#include "utils/utility.hpp"
 
 namespace monya {
     template <typename TreeProgramType>
@@ -39,7 +40,12 @@ namespace monya {
 
                 for (tree_t tree_id = 0; tree_id < params.ntree; tree_id++) {
                     std::cout << "Creating tree: " << tree_id << std::endl;
+#if USE_NUMA
+                    forest.push_back(new TreeProgramType(params, tree_id,
+                                tree_id % utils::get_num_nodes()));
+#else
                     forest.push_back(new TreeProgramType(params, tree_id));
+#endif
                 }
             }
 
