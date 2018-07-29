@@ -21,7 +21,7 @@
 #include "Query.hpp"
 #include "TaskQueue.hpp"
 
-namespace monya {
+namespace monya { namespace container {
 
     BuildTaskQueue::BuildTaskQueue() {
         pthread_mutexattr_init(&mutex_attr);
@@ -43,31 +43,52 @@ namespace monya {
     // TODO: Test -- Thread safe
     const bool BuildTaskQueue::has_task() {
         int rc;
-        bool has_task = false; // TODO: could cause errors
+        bool _has_task = false; // TODO: could cause errors
 
         rc = pthread_mutex_lock(&mutex);
         if (rc) perror("pthread_mutex_lock");
 
-        has_task = !tasks.empty();
+        _has_task = !tasks.empty();
 
         rc = pthread_mutex_unlock(&mutex);
         if (rc) perror("pthread_mutex_unlock");
 
-        return has_task;
+        return _has_task;
     }
 
     /**
       * Push nodes onto the task queue
+      * TODO: Only one thread can push onto the task queue
       */
-    void push(container::NodeView** nodes) {
-        throw not_implemented_exception(__FILE__, __LINE__);
+    void BuildTaskQueue::push(container::NodeView** nodes, const size_t nnodes) {
+        for (size_t i = 0; i < nnodes; i++)
+            tasks.push_back(nodes[i]);
     }
 
     /**
       * Allow worker threads to get tasks
       * TODO: Set the max number of tasks a thread can take at once
+      * TODO: Remove copy of NodeView* structs
+      * TODO: Each thread gets tasks serially
       */
-    void get_tasks(const size_t max_tasks) {
+    void BuildTaskQueue::get_tasks(std::vector<container::NodeView*>& runnables,
+            const size_t max_tasks) {
+        size_t obtained_tasks = 0;
+
+        while(obtained_tasks < max_tasks && has_task()) {
+            // TODO: Verify concurrency bugs
+            runnables.push_back(tasks.back());
+            tasks.pop_back(); // TODO: optimize for multiple removals
+            obtained_tasks++;
+        }
+    }
+
+    void BuildTaskQueue::enqueue(container::NodeView* runnable) {
+        // FIXME: now
+        throw not_implemented_exception(__FILE__, __LINE__);
+    }
+
+    void BuildTaskQueue::enqueue(container::NodeView** runnables) {
         throw not_implemented_exception(__FILE__, __LINE__);
     }
 
@@ -82,4 +103,4 @@ namespace monya {
             node->print();
         }
     }
-}
+} }

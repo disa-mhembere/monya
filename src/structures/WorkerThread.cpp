@@ -44,7 +44,7 @@ namespace monya {
         if (rc) perror("pthread_mutex_lock");
 
         (*parent_pending_threads)--;
-        set_thread_state(WAIT);
+        set_state(WAIT);
 
         if (*parent_pending_threads == 0) {
             rc = pthread_cond_signal(parent_cond); // Wake up parent thread
@@ -57,7 +57,7 @@ namespace monya {
     // Assumes caller has lock already ... or else ...
     void WorkerThread::sleep() {
         (*parent_pending_threads)--;
-        set_thread_state(WAIT);
+        set_state(WAIT);
 
         if (*parent_pending_threads == 0) {
             int rc = pthread_cond_signal(parent_cond); // Wake up parent thread
@@ -141,7 +141,7 @@ namespace monya {
         int rc;
         rc = pthread_mutex_lock(&mutex);
         if (rc) perror("pthread_mutex_lock");
-        set_thread_state(state);
+        set_state(state);
 
         // TODO: Implement Logic
 

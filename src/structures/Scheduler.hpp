@@ -25,10 +25,12 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
+#include <atomic>
 
-#include <pthread.h>
+namespace monya {
+    class WorkerThread;
 
-namespace monya { namespace container {
+    namespace container {
 
     class NodeView;
 
@@ -40,14 +42,19 @@ namespace monya { namespace container {
             // Depth of the tree being scheduled
             // FIXME: Modification lock reading ..
             depth_t current_level;
-            tree_t tree_id;
+            const tree_t tree_id;
+            const int numa_id;
             // Each level has a list of active nodes
             std::vector<std::vector<NodeView*> > nodes;
+            std::vector<WorkerThread*> threads;
             pthread_mutex_t mutex;
             pthread_mutexattr_t mutex_attr;
+            pthread_cond_t cond;
+            std::atomic<unsigned> pending_threads;
 
         public:
-            Scheduler(unsigned fanout, depth_t max_depth, tree_t tree_id);
+            Scheduler(unsigned fanout, depth_t max_depth,
+                    tree_t tree_id, const unsigned nthread, const int numa_id);
             // Have all the nodes in this level been placed in the queue
             bool level_is_full(unsigned level) {
                 return std::pow(fanout, level) == nodes[level].size();

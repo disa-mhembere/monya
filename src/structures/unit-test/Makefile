@@ -20,7 +20,7 @@ LDFLAGS :=-L.. -L../../../SAFS/libsafs -lsafs -lstructures $(LDFLAGS)
 
 TESTFILES = testBinaryNode testRBNode testRBTree testNAryNode \
 			 testScheduler perftest cppperftest testBinaryTree \
-			 testVecBinaryTree testStack testWorkerThread testTaskQueue
+			 testVecBinaryTree testStack testWorkerThread testBuildTaskQueue
 
 all: $(TESTFILES)
 
@@ -60,8 +60,8 @@ testStack: testStack.o
 testWorkerThread: testWorkerThread.o
 	$(CXX) -o testWorkerThread testWorkerThread.o $(LDFLAGS)
 
-testTaskQueue: testTaskQueue.o
-	$(CXX) -o testTaskQueue testTaskQueue.o $(LDFLAGS)
+testBuildTaskQueue: testBuildTaskQueue.o
+	$(CXX) -o testBuildTaskQueue testBuildTaskQueue.o $(LDFLAGS)
 
 clean:
 	rm -f *.d

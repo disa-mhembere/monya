@@ -30,16 +30,19 @@
 #include "../common/exception.hpp"
 
 #define INVALID_THD_ID -1
+#define MIN_BUILD_TASKS 2 // TODO: Make config
 
 namespace monya {
-class TaskQueue;
+    namespace container {
+        class BuildTaskQueue;
+    }
 
 class WorkerThread {
 protected:
     pthread_t hw_thd;
     unsigned node_id; // Which NUMA node are you on?
     int thd_id;
-    TaskQueue* task_queue;
+    container::BuildTaskQueue* task_queue;
 
     pthread_mutex_t mutex;
     pthread_cond_t cond;
@@ -51,7 +54,7 @@ protected:
 
     friend void* callback(void* arg);
 
-    void set_thread_state(const ThreadState_t state) {
+    void set_state(const ThreadState_t state) {
         this->state = state;
     }
 
@@ -75,7 +78,7 @@ public:
 
     void test();
 
-    TaskQueue* get_task_queue() const {
+    container::BuildTaskQueue* get_task_queue() const {
         return task_queue;
     }
 

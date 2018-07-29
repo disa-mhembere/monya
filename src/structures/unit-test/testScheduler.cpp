@@ -38,7 +38,7 @@ void serial_test() {
     std::vector<mc::RBNode*> v;
     constexpr unsigned LEVEL = 5;
     const unsigned NNODES = std::pow(2, LEVEL) - 1;
-    mc::Scheduler scheduler(2, LEVEL, 0);
+    mc::Scheduler scheduler(2, LEVEL, 0, 1, 0);
 
     std::cout << "Running: " << NNODES << " nodes for test\n\n";
 

@@ -22,19 +22,17 @@
 
 #include <vector>
 
-namespace monya {
-    namespace container {
-        class NodeView;
-        class Query;
-    }
-
-#define MIN_BUILD_TASKS 4 // TODO: Make config
+namespace monya { namespace container {
+    class NodeView;
+    class Query;
 
     // Interface
     class TaskQueue {
         public:
             virtual const size_t size() const = 0;
             virtual void print() const = 0;
+            virtual const bool has_task() = 0;
+            virtual bool steal_task() = 0;
             virtual ~TaskQueue() { };
     };
 
@@ -54,11 +52,21 @@ namespace monya {
 
             const bool has_task();
             bool steal_task();
-            void push(container::NodeView** nodes);
-            void get_tasks(const size_t max_tasks);
+
+            ////////////////////////////////////////////////////////////////////
+            void push(container::NodeView** nodes, const size_t nnodes);
+            void get_tasks(std::vector<container::NodeView*>& runnables,
+                    const size_t max_tasks);
+            void enqueue(container::NodeView* runnable);
+            void enqueue(container::NodeView** runnables);
+            static BuildTaskQueue* cast2(TaskQueue* q) {
+                return static_cast<BuildTaskQueue*>(q);
+            }
+            ////////////////////////////////////////////////////////////////////
+
             void print() const;
 
-            ~BuildTaskQueue();
+            ~BuildTaskQueue() override;
     };
 
     class QueryTaskQueue : TaskQueue {
@@ -75,6 +83,6 @@ namespace monya {
 
             void print() const;
     };
-}
+} } // End namespace monya::container
 
 #endif
