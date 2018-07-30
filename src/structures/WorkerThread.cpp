@@ -19,6 +19,7 @@
 
 #include "WorkerThread.hpp"
 #include "TaskQueue.hpp"
+#include "../common/exception.hpp"
 
 #ifdef USE_NUMA
 #include <numa.h>
@@ -56,12 +57,21 @@ namespace monya {
 
     // Assumes caller has lock already ... or else ...
     void WorkerThread::sleep() {
-        (*parent_pending_threads)--;
+        (*parent_pending_threads)--; // FIXME: Increment when threads awaken
         set_state(WAIT);
 
         if (*parent_pending_threads == 0) {
             int rc = pthread_cond_signal(parent_cond); // Wake up parent thread
             if (rc) perror("pthread_cond_signal");
+        }
+    }
+
+    // FIXME: Use
+    void WorkerThread::request_task() {
+        active_node = task_queue->dequeue(); // Aquires lock, releases & returns
+        if (NULL == active_node) { // No work? Goodnight
+            sleep();
+            pthread_mutex_unlock(&mutex);
         }
     }
 
@@ -72,20 +82,20 @@ namespace monya {
                 test();
                 break;
             case BUILD:
-                ; // TODO
+                ; // FIXME
                 break;
             case QUERY:
                 ; // TODO
                 break;
             case WAIT:
-                ; // TODO
-                // request_task(); // TODO
+                // FIXME
                 break;
             case EXIT:
-                throw thread_exception(
-                        "Thread state is EXIT but running!\n");
+                throw concurrency_exception("Thread state is EXIT but running!\n",
+                        911, __FILE__, __LINE__);
             default:
-                throw thread_exception("Unknown thread state\n");
+                throw concurrency_exception("Unknown thread state\n", 911,
+                        __FILE__, __LINE__);
         }
         sleep();
     }
@@ -124,13 +134,14 @@ namespace monya {
     }
 
 
-    void WorkerThread::start(const ThreadState_t state) {
+    void WorkerThread::start() {
         printf("Thread %d started ...\n", thd_id);
-        this->state = state;
+        set_state(WAIT);
         int rc = pthread_create(&hw_thd, NULL, callback, this);
         if (rc)
-            throw thread_exception(
-                    "Thread creation (pthread_create) failed!", rc);
+            throw concurrency_exception(
+                    "Thread creation (pthread_create) failed!", rc,
+                    __FILE__, __LINE__);
     }
 
     void WorkerThread::set_driver(void* driver) {
@@ -186,7 +197,8 @@ namespace monya {
     void WorkerThread::join() {
         int rc = pthread_join(hw_thd, NULL);
         if (rc)
-            throw thread_exception("pthread_join()", rc);
+            throw concurrency_exception("pthread_join()",
+                    rc, __FILE__, __LINE__);
 
         thd_id = INVALID_THD_ID;
     }

@@ -35,6 +35,7 @@
 namespace monya {
     namespace container {
         class BuildTaskQueue;
+        class NodeView;
     }
 
 class WorkerThread {
@@ -42,7 +43,6 @@ protected:
     pthread_t hw_thd;
     unsigned node_id; // Which NUMA node are you on?
     int thd_id;
-    container::BuildTaskQueue* task_queue;
 
     pthread_mutex_t mutex;
     pthread_cond_t cond;
@@ -51,6 +51,10 @@ protected:
     pthread_cond_t* parent_cond;
     std::atomic<unsigned>* parent_pending_threads;
     ThreadState_t state;
+
+    // Unique to building
+    container::BuildTaskQueue* task_queue;
+    container::NodeView* active_node;
 
     friend void* callback(void* arg);
 
@@ -62,12 +66,13 @@ public:
     typedef WorkerThread* raw_ptr;
 
     WorkerThread(const int node_id, const int  thd_id);
-    void start(const ThreadState_t state=WAIT);
+    void start();
     virtual void run();
     virtual void sleep();
     virtual void lock_sleep();
     virtual void wait();
     virtual void join();
+    void request_task();
 
     // Class that
     virtual void set_driver(void* driver);
