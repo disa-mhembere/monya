@@ -75,30 +75,29 @@ public:
     }
 
     parameter_exception(const std::string msg, const std::string file,
-            const int line) :
-        runtime_error(std::string("[ERROR]: '") + msg + file + std::string(":") +
-            std::to_string(line)) {
+            const int line) : parameter_exception(std::string("[ERROR]: '")
+                + msg + file + std::string(":") + std::to_string(line)) {
         }
 };
 
-class thread_exception: public std::exception {
+class concurrency_exception: public std::exception {
 
 private:
-    std::string msg = "[ERROR]: thread_exception ==> ";
+    std::string msg = "[ERROR]: concurrency_exception ==> ";
 
     virtual const char* what() const throw() {
         return this->msg.c_str();
     }
 
 public:
-    thread_exception(const std::string msg) {
+    concurrency_exception(const std::string msg) {
         this->msg += msg;
     }
 
-    thread_exception(const std::string msg, const int rc) :
-        thread_exception(msg) {
-        this->msg += std::string(". ERRCODE: ") + std::to_string(rc)
-            + std::string(" \n");
+    concurrency_exception(const std::string msg, const int rc,
+            const std::string file, const int line) : concurrency_exception(
+        msg + std::string(". ERRCODE: ") + std::to_string(rc) + std::string(". ")
+        + file + std::string(":") + std::to_string(line) + std::string(" \n")) {
     }
 };
 }
