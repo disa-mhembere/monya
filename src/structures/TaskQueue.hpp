@@ -20,7 +20,7 @@
 #ifndef __MONYA_TASK_QUEUE_HPP__
 #define __MONYA_TASK_QUEUE_HPP__
 
-#include <vector>
+#include <queue>
 
 namespace monya { namespace container {
     class NodeView;
@@ -39,9 +39,13 @@ namespace monya { namespace container {
     // Focus to build ths out
     class BuildTaskQueue : TaskQueue {
         private:
-            std::vector<container::NodeView*> tasks;
+            std::queue<container::NodeView*> tasks;
+            // Queue modification and property check -- use this lock
             pthread_mutex_t mutex;
             pthread_mutexattr_t mutex_attr;
+
+            void acquire_lock();
+            void release_lock();
 
         public:
             BuildTaskQueue();
@@ -54,24 +58,19 @@ namespace monya { namespace container {
             bool steal_task();
 
             ////////////////////////////////////////////////////////////////////
-            void push(container::NodeView** nodes, const size_t nnodes);
-            void get_tasks(std::vector<container::NodeView*>& runnables,
-                    const size_t max_tasks);
+            void enqueue(container::NodeView** nodes, const size_t nnodes);
             void enqueue(container::NodeView* runnable);
-            void enqueue(container::NodeView** runnables);
-            static BuildTaskQueue* cast2(TaskQueue* q) {
-                return static_cast<BuildTaskQueue*>(q);
-            }
+            container::NodeView* dequeue();
             ////////////////////////////////////////////////////////////////////
 
-            void print() const;
+            void print() const override;
 
             ~BuildTaskQueue() override;
     };
 
     class QueryTaskQueue : TaskQueue {
         private:
-            std::vector<container::Query*> tasks;
+            std::queue<container::Query*> tasks;
 
         public:
             QueryTaskQueue() {
@@ -81,7 +80,7 @@ namespace monya { namespace container {
                 return tasks.size();
             }
 
-            void print() const;
+            void print() const override;
     };
 } } // End namespace monya::container
 

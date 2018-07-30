@@ -29,9 +29,13 @@ namespace monya { namespace container {
         pthread_mutex_init(&mutex, &mutex_attr);
     }
 
+    // NOTE: Testing only expensive
     void BuildTaskQueue::print() const {
-        for (container::NodeView* node : tasks) {
-            node->print();
+        std::queue<NodeView*> tmp = tasks; // copy
+
+        while (!tmp.empty()) {
+            tmp.front()->print();
+            tmp.pop();
         }
     }
 
@@ -40,67 +44,64 @@ namespace monya { namespace container {
         pthread_mutexattr_destroy(&mutex_attr);
     }
 
-    // TODO: Test -- Thread safe
     const bool BuildTaskQueue::has_task() {
-        int rc;
+        acquire_lock();
         bool _has_task = false; // TODO: could cause errors
 
-        rc = pthread_mutex_lock(&mutex);
-        if (rc) perror("pthread_mutex_lock");
-
         _has_task = !tasks.empty();
-
-        rc = pthread_mutex_unlock(&mutex);
-        if (rc) perror("pthread_mutex_unlock");
-
+        release_lock();
         return _has_task;
     }
 
     /**
       * Push nodes onto the task queue
-      * TODO: Only one thread can push onto the task queue
       */
-    void BuildTaskQueue::push(container::NodeView** nodes, const size_t nnodes) {
+    void BuildTaskQueue::enqueue(NodeView** nodes, const size_t nnodes) {
+        acquire_lock();
         for (size_t i = 0; i < nnodes; i++)
-            tasks.push_back(nodes[i]);
+            tasks.push(nodes[i]);
+        release_lock();
     }
 
-    /**
-      * Allow worker threads to get tasks
-      * TODO: Set the max number of tasks a thread can take at once
-      * TODO: Remove copy of NodeView* structs
-      * TODO: Each thread gets tasks serially
-      */
-    void BuildTaskQueue::get_tasks(std::vector<container::NodeView*>& runnables,
-            const size_t max_tasks) {
-        size_t obtained_tasks = 0;
-
-        while(obtained_tasks < max_tasks && has_task()) {
-            // TODO: Verify concurrency bugs
-            runnables.push_back(tasks.back());
-            tasks.pop_back(); // TODO: optimize for multiple removals
-            obtained_tasks++;
-        }
+    void BuildTaskQueue::enqueue(NodeView* runnable) {
+        acquire_lock();
+        tasks.push(runnable);
+        release_lock();
     }
 
-    void BuildTaskQueue::enqueue(container::NodeView* runnable) {
-        // FIXME: now
+    NodeView* BuildTaskQueue::dequeue() {
+        acquire_lock();
+        NodeView* node = tasks.front();
+        tasks.pop();
+        release_lock();
+        return node;
+    }
+
+    void BuildTaskQueue::acquire_lock() {
+        int rc = pthread_mutex_lock(&mutex);
+        if (rc) throw concurrency_exception("pthread_mutex_lock", rc,
+                __FILE__, __LINE__);
+    }
+
+    void BuildTaskQueue::release_lock() {
         throw not_implemented_exception(__FILE__, __LINE__);
+        int rc = pthread_mutex_unlock(&mutex);
+        if (rc) throw concurrency_exception("pthread_mutex_unlock", rc,
+                __FILE__, __LINE__);
     }
 
-    void BuildTaskQueue::enqueue(container::NodeView** runnables) {
-        throw not_implemented_exception(__FILE__, __LINE__);
-    }
-
-    // Allow other worker to steal tasks
+    // TODO: Allow other workers to steal tasks (managed by scheduler)
     bool BuildTaskQueue::steal_task() {
         throw not_implemented_exception(__FILE__, __LINE__);
     }
 
     // QueryTaskQueue
+    // Note: Inefficient & used for testing only
     void QueryTaskQueue::print() const {
-        for (container::Query* node : tasks) {
-            node->print();
+        std::queue<Query*> tmp = tasks; // copy
+        while (!tmp.empty()) {
+            tmp.front()->print();
+            tmp.pop();
         }
     }
-} }
+} } // End namespace monya::container
