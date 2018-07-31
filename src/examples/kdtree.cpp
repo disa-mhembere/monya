@@ -258,7 +258,7 @@ int main(int argc, char* argv[]) {
     // TODO: Read from argv[]
     size_t nsamples = 32;
     size_t nfeatures = 16;
-    tree_t ntree = 2;
+    tree_t ntree = 1;
     unsigned nthread = 1;
     MAT_ORIENT mo = MAT_ORIENT::COL;
 

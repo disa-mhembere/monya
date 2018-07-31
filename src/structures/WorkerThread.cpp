@@ -20,6 +20,7 @@
 #include "WorkerThread.hpp"
 #include "TaskQueue.hpp"
 #include "../common/exception.hpp"
+#include "NodeView.hpp"
 
 #ifdef USE_NUMA
 #include <numa.h>
@@ -33,45 +34,61 @@ namespace monya {
     WorkerThread::WorkerThread(const int _node_id, const int _thd_id) :
         node_id(_node_id), thd_id(_thd_id), state(WAIT) {
 
+        // Task Queue
+        task_queue = new container::BuildTaskQueue();
+
         pthread_mutexattr_init(&mutex_attr);
         pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_ERRORCHECK);
-        pthread_mutex_init(&mutex, &mutex_attr);
+        pthread_mutex_init(&state_lock, &mutex_attr);
         pthread_cond_init(&cond, NULL);
     }
 
+    void WorkerThread::acquire_state_lock() {
+        int rc = pthread_mutex_lock(&state_lock);
+        if (rc) throw concurrency_exception("pthread_mutex_lock", rc,
+                    __FILE__, __LINE__);
+    }
+
+    void WorkerThread::release_state_lock() {
+        int rc = pthread_mutex_unlock(&state_lock);
+        if (rc) throw concurrency_exception("pthread_mutex_unlock", rc,
+                    __FILE__, __LINE__);
+    }
+
     void WorkerThread::lock_sleep() {
-        int rc;
-        rc = pthread_mutex_lock(&mutex);
-        if (rc) perror("pthread_mutex_lock");
+        acquire_state_lock();
 
         (*parent_pending_threads)--;
         set_state(WAIT);
 
         if (*parent_pending_threads == 0) {
-            rc = pthread_cond_signal(parent_cond); // Wake up parent thread
-            if (rc) perror("pthread_cond_signal");
+            int rc = pthread_cond_signal(parent_cond); // Wake up parent thread
+            if (rc) throw concurrency_exception("pthread_cond_signal", rc,
+                    __FILE__, __LINE__);
         }
-        rc = pthread_mutex_unlock(&mutex);
-        if (rc) perror("pthread_mutex_unlock");
+        release_state_lock();
     }
 
     // Assumes caller has lock already ... or else ...
     void WorkerThread::sleep() {
-        (*parent_pending_threads)--; // FIXME: Increment when threads awaken
+        acquire_state_lock();
         set_state(WAIT);
+        release_state_lock();
+
+        (*parent_pending_threads)--;
 
         if (*parent_pending_threads == 0) {
             int rc = pthread_cond_signal(parent_cond); // Wake up parent thread
-            if (rc) perror("pthread_cond_signal");
+            if (rc) throw concurrency_exception("pthread_cond_signal", rc,
+                    __FILE__, __LINE__);
         }
     }
 
-    // FIXME: Use
     void WorkerThread::request_task() {
         active_node = task_queue->dequeue(); // Aquires lock, releases & returns
         if (NULL == active_node) { // No work? Goodnight
+            // TODO: Try to steal tasks
             sleep();
-            pthread_mutex_unlock(&mutex);
         }
     }
 
@@ -82,13 +99,21 @@ namespace monya {
                 test();
                 break;
             case BUILD:
-                ; // FIXME
+                request_task();
+                // TODO: Combine into some meta-method
+                active_node->prep();
+                active_node->run();
+
+                // Only spawn if you're not a leaf
+                if (!active_node->is_leaf())
+                    active_node->spawn();
                 break;
             case QUERY:
-                ; // TODO
+                // TODO
+                throw not_implemented_exception(__FILE__, __LINE__);
                 break;
             case WAIT:
-                // FIXME
+                wait();
                 break;
             case EXIT:
                 throw concurrency_exception("Thread state is EXIT but running!\n",
@@ -105,6 +130,10 @@ namespace monya {
         printf("Sleeping for: %d ms\n", thd_id);
         std::this_thread::sleep_for(std::chrono::milliseconds(thd_id*100));
         printf("Thread %d waking back up!\n", thd_id);
+
+        acquire_state_lock();
+        set_state(WAIT);
+        release_state_lock();
     }
 
     void* callback(void* arg) {
@@ -114,9 +143,6 @@ namespace monya {
 #endif
 
         while (true) { // So we can receive task after task
-            if (t->get_state() == WAIT)
-                t->wait();
-
             if (t->get_state() == EXIT) {// No more work to do
                 //printf("Thread %d exiting ...\n", t->thd_id);
                 break;
@@ -136,6 +162,8 @@ namespace monya {
 
     void WorkerThread::start() {
         printf("Thread %d started ...\n", thd_id);
+        (*parent_pending_threads)++;
+
         set_state(WAIT);
         int rc = pthread_create(&hw_thd, NULL, callback, this);
         if (rc)
@@ -149,22 +177,24 @@ namespace monya {
     }
 
     void WorkerThread::wake(const ThreadState_t state) {
-        int rc;
-        rc = pthread_mutex_lock(&mutex);
-        if (rc) perror("pthread_mutex_lock");
+        acquire_state_lock();
+
         set_state(state);
+        (*parent_pending_threads)++;
 
-        // TODO: Implement Logic
+        // TODO: Reset/clear data structures?
 
-        rc = pthread_mutex_unlock(&mutex);
-        if (rc) perror("pthread_mutex_unlock");
+        release_state_lock();
 
-        rc = pthread_cond_signal(&cond);
-        if (rc) perror("pthread_cond_signal");
+        // Signal to run callback (end of pthread_cond_wait)
+        int rc = pthread_cond_signal(&cond);
+        if (rc) throw concurrency_exception("pthread_cond_signal", rc,
+                __FILE__, __LINE__);
     }
 
+    // TODO: Implement
     bool WorkerThread::try_steal_task() {
-        return false; // TODO: Not done
+        return false;
     }
 
     const void WorkerThread::print_task_queue() const {
@@ -172,17 +202,13 @@ namespace monya {
     }
 
     void WorkerThread::wait() {
-        int rc;
-        rc = pthread_mutex_lock(&mutex);
-        if (rc) perror("pthread_mutex_lock");
-
+        acquire_state_lock();
         while (state == WAIT) {
-            //printf("Thread %d begin cond_wait\n", thd_id);
-            rc = pthread_cond_wait(&cond, &mutex);
-            if (rc) perror("pthread_cond_wait");
+            int rc = pthread_cond_wait(&cond, &state_lock);
+            if (rc) throw concurrency_exception("pthread_cond_wait", rc,
+                    __FILE__, __LINE__);
         }
-
-        pthread_mutex_unlock(&mutex);
+        release_state_lock();
     }
 
     void WorkerThread::bind2node_id() {
@@ -205,7 +231,9 @@ namespace monya {
 
     WorkerThread::~WorkerThread() {
         pthread_cond_destroy(&cond);
-        pthread_mutex_destroy(&mutex);
+        pthread_mutex_destroy(&state_lock);
         pthread_mutexattr_destroy(&mutex_attr);
+
+        delete(task_queue);
     }
 }

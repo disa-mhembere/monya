@@ -24,6 +24,7 @@
 namespace monya { namespace container {
 
     BuildTaskQueue::BuildTaskQueue() {
+
         pthread_mutexattr_init(&mutex_attr);
         pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_ERRORCHECK);
         pthread_mutex_init(&mutex, &mutex_attr);
@@ -84,7 +85,6 @@ namespace monya { namespace container {
     }
 
     void BuildTaskQueue::release_lock() {
-        throw not_implemented_exception(__FILE__, __LINE__);
         int rc = pthread_mutex_unlock(&mutex);
         if (rc) throw concurrency_exception("pthread_mutex_unlock", rc,
                 __FILE__, __LINE__);

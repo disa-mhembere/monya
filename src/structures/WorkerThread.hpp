@@ -44,7 +44,7 @@ protected:
     unsigned node_id; // Which NUMA node are you on?
     int thd_id;
 
-    pthread_mutex_t mutex;
+    pthread_mutex_t state_lock;
     pthread_cond_t cond;
     pthread_mutexattr_t mutex_attr;
 
@@ -61,6 +61,11 @@ protected:
     void set_state(const ThreadState_t state) {
         this->state = state;
     }
+
+    void acquire_state_lock();
+    void release_state_lock();
+    void acquire_task_queue_lock();
+    void release_task_queue_lock();
 
 public:
     typedef WorkerThread* raw_ptr;
@@ -96,7 +101,7 @@ public:
     }
 
     pthread_mutex_t& get_lock() {
-        return mutex;
+        return state_lock;
     }
 
     pthread_cond_t& get_cond() {

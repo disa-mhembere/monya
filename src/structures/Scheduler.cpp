@@ -36,6 +36,7 @@ namespace monya { namespace container {
             pthread_cond_init(&cond, NULL);
             pending_threads = 0;
 
+            printf("Creating scheduler with %u threads: \n", nthread);
             for (unsigned tid = 0; tid < nthread; tid++) {
                 threads.push_back(new WorkerThread(numa_id, tid));
                 threads.back()->set_parent_cond(&cond);
@@ -88,16 +89,17 @@ namespace monya { namespace container {
 
 
 #else
-        for (WorkerThread* thread : threads) {
-            for (size_t i = 0; i < level_nodes.size(); i++) {
-                // FIXME: Give more than one task
-                if (thread->get_state() == WAIT) {
-                    // FIXME: requires lock!
-                    thread->get_task_queue()->enqueue(level_nodes[i]);
-                }
-            }
-            thread->run(); // FIXME: State not yet set
+        // All worker thread created and in waiting state initially
+        size_t i = 0;
+        size_t nthread = threads.size();
+        for (auto it = level_nodes.begin(); it != level_nodes.end(); ++it) {
+
+            size_t tid = i++ % nthread;
+            //printf("Scheduler feeding and waking tid: %lu\n", tid);
+            threads[tid]->get_task_queue()->enqueue(*it);
+            threads[tid]->wake(BUILD);
         }
+        printf("All nodes in level: %lu given to workers\n", level);
 #endif
     }
 
