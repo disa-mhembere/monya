@@ -23,7 +23,7 @@
 using namespace monya;
 
 namespace {
-class TestNode : container::BinaryNode {
+class TestNode : public container::BinaryNode {
 
     public:
         using container::BinaryNode::BinaryNode;
@@ -33,29 +33,33 @@ class TestNode : container::BinaryNode {
         }
 
         void run() override {
-            // TODO
-            printf("RUNNING\n");
         }
 };
 }
 
 int main(int argv, char* argc[]) {
-    constexpr size_t NNODES = 10;
+    constexpr size_t NNODES = 100;
     std::vector<TestNode*> nodes;
+    container::BuildTaskQueue* tq = new container::BuildTaskQueue();
 
     // Make nodes Comparator -> i
     for (size_t i = 0; i < NNODES; i++)
         nodes.push_back(new TestNode(i));
 
-    /* TODO: The test should create:
-       1. Multiple nodes
-       2. multiple task queues each containing multiple nodes
-       3. Multiple threads each with a task queue
+    for (TestNode* node : nodes)
+        tq->enqueue(node);
 
-       Next node->run() and add and purge task queues
-    */
+    assert(nodes.size() == tq->size());
 
+    int i = 0;
+    while (tq->has_task()) {
+        auto task =tq->dequeue();
+        assert(task == nodes[i++]); // address equality
+        task->run();
+    }
 
+    // Delete task queue
+    delete(tq);
 
     // Delete nodes
     printf("Deleting the nodes ...\n");

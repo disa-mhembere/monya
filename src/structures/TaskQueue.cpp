@@ -71,6 +71,10 @@ namespace monya { namespace container {
     }
 
     NodeView* BuildTaskQueue::dequeue() {
+        // TODO: Verify no lock need to check for empty
+        if (tasks.empty())
+            return NULL;
+
         acquire_lock();
         NodeView* node = tasks.front();
         tasks.pop();
