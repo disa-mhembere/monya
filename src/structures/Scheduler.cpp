@@ -34,15 +34,17 @@ namespace monya { namespace container {
             pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_ERRORCHECK);
             pthread_mutex_init(&mutex, &mutex_attr);
             pthread_cond_init(&cond, NULL);
-            pending_threads = 0;
+            pending_threads = nthread;
 
             printf("Creating scheduler with %u threads: \n", nthread);
             for (unsigned tid = 0; tid < nthread; tid++) {
                 threads.push_back(new WorkerThread(numa_id, tid));
                 threads.back()->set_parent_cond(&cond);
                 threads.back()->set_parent_pending_threads(&pending_threads);
-                threads.back()->start();
+                threads.back()->init();
             }
+
+            wait4completion(); // Wait for threads to init
         }
 
     // TODO: Batch the scheduling the reduce lock contention
@@ -73,7 +75,6 @@ namespace monya { namespace container {
         std::cout << "\nRunning level: " << level << "\n";
 
         std::vector<NodeView*> level_nodes = nodes[level];
-
 #if 0
         // Encodes dependency on levels below
         // Accounts underflow for level = 0
@@ -86,8 +87,6 @@ namespace monya { namespace container {
             if (!node->is_leaf())
                 node->spawn();
         }
-
-
 #else
         // All worker thread created and in waiting state initially
         size_t i = 0;
@@ -97,18 +96,49 @@ namespace monya { namespace container {
             size_t tid = i++ % nthread;
             //printf("Scheduler feeding and waking tid: %lu\n", tid);
             threads[tid]->get_task_queue()->enqueue(*it);
-            threads[tid]->wake(BUILD);
         }
+
         printf("All nodes in level: %lu given to workers\n", level);
+        wake4run(BUILD);
+        wait4completion(); // TODO: Level-wise barrier not necessary
 #endif
+    }
+
+    void Scheduler::wake4run(const ThreadState_t state) {
+        printf("wake4run()!\n");
+        for (auto thread : threads)
+            thread->wake(state);
+    }
+
+    void Scheduler::wait4completion() {
+        printf("wait4completion()\n");
+        int rc = pthread_mutex_lock(&mutex);
+        if (rc)
+            throw concurrency_exception("pthread_mutex_lock", rc,
+                    __FILE__, __LINE__);
+
+        while (pending_threads != 0) {
+            pthread_cond_wait(&cond, &mutex); // Used to wake up scheduler
+        }
+
+        rc = pthread_mutex_unlock(&mutex);
+        if (rc)
+            throw concurrency_exception("pthread_mutex_unlock", rc,
+                    __FILE__, __LINE__);
+    }
+
+    void Scheduler::destroy_threads() {
+        wake4run(EXIT); // First alert pthreads that threads are dead
+
+        // Deallocate structures representing threads
+        for (size_t tid = 0; tid < threads.size(); tid++)
+            delete(threads[tid]);
     }
 
     Scheduler::~Scheduler() {
         pthread_mutex_destroy(&mutex);
         pthread_mutexattr_destroy(&mutex_attr);
         pthread_cond_destroy(&cond);
-
-        for (size_t tid = 0; tid < threads.size(); tid++)
-            delete(threads[tid]);
+        destroy_threads();
     }
 } } // End namespace monya::container

@@ -20,12 +20,13 @@
 #ifndef MONYA_SCHEDULER_HPP__
 #define MONYA_SCHEDULER_HPP__
 
-#include "../common/types.hpp"
-
 #include <vector>
 #include <cmath>
 #include <iostream>
 #include <atomic>
+
+#include "ThreadState.hpp"
+#include "../common/types.hpp"
 
 namespace monya {
     class WorkerThread;
@@ -70,6 +71,9 @@ namespace monya {
               \brief Handoff nodes to threads
               */
             void run_level(const depth_t level);
+            void wake4run(const ThreadState_t state);
+            void wait4completion();
+            void destroy_threads();
 
             const depth_t get_max_depth() const { return max_levels; }
 

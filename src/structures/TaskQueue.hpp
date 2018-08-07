@@ -58,7 +58,7 @@ namespace monya { namespace container {
             bool steal_task();
 
             ////////////////////////////////////////////////////////////////////
-            void enqueue(container::NodeView** nodes, const size_t nnodes);
+            void enqueue(container::NodeView** runnables, const size_t nnodes);
             void enqueue(container::NodeView* runnable);
             container::NodeView* dequeue();
             ////////////////////////////////////////////////////////////////////

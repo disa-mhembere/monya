@@ -57,10 +57,10 @@ namespace monya { namespace container {
     /**
       * Push nodes onto the task queue
       */
-    void BuildTaskQueue::enqueue(NodeView** nodes, const size_t nnodes) {
+    void BuildTaskQueue::enqueue(NodeView** runnables, const size_t nnodes) {
         acquire_lock();
         for (size_t i = 0; i < nnodes; i++)
-            tasks.push(nodes[i]);
+            tasks.push(runnables[i]);
         release_lock();
     }
 
