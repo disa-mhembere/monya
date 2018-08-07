@@ -29,7 +29,6 @@
 #include "ThreadState.hpp"
 #include "../common/exception.hpp"
 
-#define INVALID_THD_ID -1
 #define MIN_BUILD_TASKS 2 // TODO: Make config
 
 namespace monya {
@@ -55,6 +54,7 @@ protected:
     // Unique to building
     container::BuildTaskQueue* task_queue;
     container::NodeView* active_node;
+    pthread_key_t thread_key;
 
     friend void* callback(void* arg);
 
@@ -62,21 +62,21 @@ protected:
         this->state = state;
     }
 
-    void acquire_state_lock();
+    void acquire_state_lock(std::string caller="");
     void release_state_lock();
     void acquire_task_queue_lock();
     void release_task_queue_lock();
+    // (De/In)crement parent pending threads
+    void inc_ppt() { (*parent_pending_threads)++; }
+    void dec_ppt() { (*parent_pending_threads)--; }
 
 public:
     typedef WorkerThread* raw_ptr;
 
     WorkerThread(const int node_id, const int  thd_id);
-    void start();
+    void init();
     virtual void run();
-    virtual void sleep();
-    virtual void lock_sleep();
     virtual void wait();
-    virtual void join();
     void request_task();
 
     // Class that
@@ -112,8 +112,8 @@ public:
         return node_id;
     }
 
-    void set_parent_cond(pthread_cond_t* cond) {
-        parent_cond = cond;
+    void set_parent_cond(pthread_cond_t* parent_cond) {
+        this->parent_cond = parent_cond;
     }
 
     void set_parent_pending_threads(std::atomic<unsigned>* ppt) {
