@@ -33,6 +33,7 @@ class TestNode : public container::BinaryNode {
         }
 
         void run() override {
+            std::cout << comparator << " ";
         }
 };
 }
@@ -57,6 +58,7 @@ int main(int argv, char* argc[]) {
         assert(task == nodes[i++]); // address equality
         task->run();
     }
+    std::cout << "\n";
 
     // Delete task queue
     delete(tq);

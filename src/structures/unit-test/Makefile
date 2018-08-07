@@ -19,8 +19,10 @@ CXXFLAGS +=-I.. -I../../../SAFS/libsafs
 LDFLAGS :=-L.. -L../../../SAFS/libsafs -lsafs -lstructures $(LDFLAGS)
 
 TESTFILES = testBinaryNode testRBNode testRBTree testNAryNode \
-			 testScheduler perftest cppperftest testBinaryTree \
-			 testVecBinaryTree testStack testWorkerThread testBuildTaskQueue
+			perftest cppperftest testBinaryTree \
+			testVecBinaryTree testStack testWorkerThread testBuildTaskQueue \
+			testScheduler
+
 
 all: $(TESTFILES)
 

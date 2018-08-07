@@ -30,19 +30,18 @@ class MyNode: public mc::RBNode {
 
         MyNode(unsigned val) { comparator = val; }
         void prep() override { } // Do nothing
-        //void run() override { std::cout << comparator << " .."; }
-        void run() override {  }
+        void run() override { printf("Comparator: %.1f\n", comparator); }
         const bool is_leaf() override { return true; } // Don't allow to spawn
 };
 
 void serial_test() {
     std::vector<mc::RBNode*> v;
-    constexpr unsigned LEVEL = 20;
+    constexpr unsigned LEVEL = 8;
     const unsigned NNODES = std::pow(2, LEVEL) - 1;
 
     constexpr unsigned FANOUT = 2;
     constexpr monya::tree_t TREE_ID = 0;
-    constexpr unsigned NTHREAD = 2;
+    constexpr unsigned NTHREAD = 4;
     constexpr int NUMA_ID = 0;
 
     mc::Scheduler scheduler(FANOUT, LEVEL, TREE_ID, NTHREAD, NUMA_ID);
@@ -54,13 +53,13 @@ void serial_test() {
 
     assert(v.size() == NNODES);
 
+    std::cout << "Processing this many elements: ";
+    v.back()->print();
+
     std::cout << "Scheduling and running: ";
     for (unsigned i = 0; i < NNODES; i++) {
         scheduler.schedule(v[i]);
     }
-
-    std::cout << "Processed this many elements: ";
-    v.back()->print();
 
     for (unsigned i = 0; i <v.size(); i++)
         delete(v[i]);

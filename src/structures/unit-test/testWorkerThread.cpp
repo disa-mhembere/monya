@@ -23,6 +23,9 @@
 
 #include <cassert>
 
+#include <thread>
+#include <chrono>
+
 using namespace monya;
 
 namespace {
@@ -35,41 +38,66 @@ void init_threads(std::vector<WorkerThread::raw_ptr>& threads,
         threads.push_back(new WorkerThread(tid % NNUMA_NODES, tid));
         threads.back()->set_parent_cond(&cond);
         threads.back()->set_parent_pending_threads(&ppt);
-        threads.back()->start();
+        threads.back()->init();
     }
 }
 }
 
 int main(int argv, char* argc[]) {
-    constexpr unsigned NTHREADS = 10;
+    printf("\n\n\n\n***************************************************\n\n\n");
+    constexpr int NTHREADS = 16;
 
     // Conditional to alert this thread to take control
     pthread_cond_t cond;
     pthread_cond_init(&cond, NULL);
-    std::atomic<unsigned> ppt(0);
+    std::atomic<unsigned> ppt(NTHREADS);
+
+    pthread_mutexattr_t mutex_attr;
+    pthread_mutex_t mutex;
+
+    pthread_mutexattr_init(&mutex_attr);
+    pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_ERRORCHECK);
+    pthread_mutex_init(&mutex, &mutex_attr);
 
     // Make threads
     std::vector<WorkerThread::raw_ptr> threads;
     init_threads(threads, NTHREADS, cond, ppt);
 
-    // Run test method (sleeps threads on completion)
-    printf("Coordinator thread yeilding control ...\n");
-    for (WorkerThread* thread : threads)
-        thread->test();
+    // Block for completion
+    pthread_mutex_lock(&mutex);
+    while (ppt != 0)
+        pthread_cond_wait(&cond, &mutex); // Used to wake up scheduler
+    pthread_mutex_unlock(&mutex);
 
-    printf("\nCoordinator thread regaining control & yeilding ...\n");
-#if 1
-    // Run test method AGAIN
+    printf("\nCoordinator regains control AFTER INIT calls TEST...\n");
+
     for (WorkerThread* thread : threads)
-        thread->test();
-#endif
-    printf("\nCoordinator thread regaining control ...\n");
+        thread->wake(TEST); // Threads fall asleep alone
+
+    // Block for completion
+    pthread_mutex_lock(&mutex);
+    while (ppt != 0)
+        pthread_cond_wait(&cond, &mutex); // Used to wake up scheduler
+    pthread_mutex_unlock(&mutex);
+    printf("\nCoordinator regains control AFTER TEST calls TEST, again ...\n");
+
+    for (WorkerThread* thread : threads)
+        thread->wake(TEST); // Threads fall asleep alone
+
+    // Block for completion
+    pthread_mutex_lock(&mutex);
+    while (ppt != 0)
+        pthread_cond_wait(&cond, &mutex); // Used to wake up scheduler
+    pthread_mutex_unlock(&mutex);
 
     // Delete the threads (calls join)
-    printf("Deallocating the threads ...\n");
-    for (size_t tid = 0; tid < threads.size(); tid++)
+    printf("Coordinated deallocates the threads ...\n");
+    for (size_t tid = 0; tid < threads.size(); tid++) {
         delete(threads[tid]);
+    }
 
+    pthread_mutex_destroy(&mutex);
+    pthread_mutexattr_destroy(&mutex_attr);
     pthread_cond_destroy(&cond);
 
     printf("WorkerThread test successful!\n");
