@@ -146,6 +146,31 @@ namespace monya {
             virtual void build() {
                 assert(NULL != this->get_root());
                 scheduler->schedule(this->get_root());
+
+                while (true) {
+                    depth_t procd_level = scheduler->get_current_level() - 1;
+                    assert(procd_level <= max_depth);
+
+                    std::vector<container::NodeView*> procd_nodes =
+                        scheduler->get_nodes(procd_level);
+
+//#pragma omp parallel for -- TODO: move schedule() out to separte loop
+                    // No skew for balanced tree
+                    // Schedule more than one at a time
+                    for (size_t i = 0; i < procd_nodes.size(); i++) {
+                        container::BinaryNode* curr_node =
+                            static_cast<container::BinaryNode*>(procd_nodes[i]);
+                        if (!curr_node->is_leaf()) {
+                            curr_node->spawn();
+                            if (curr_node->left)
+                                scheduler->schedule(curr_node->left);
+                            if (curr_node->right)
+                                scheduler->schedule(curr_node->right);
+                        }
+                    }
+                    if (procd_level == max_depth || scheduler->empty())
+                        break;
+                }
             }
 
             ~BinaryTreeProgram() {

@@ -31,8 +31,7 @@
 namespace monya {
     namespace container {
 
-    NodeView::NodeView() {
-        depth = 0;
+    NodeView::NodeView() : depth(0) {
         req_indxs.resize(0);
     }
 

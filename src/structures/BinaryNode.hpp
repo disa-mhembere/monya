@@ -46,8 +46,7 @@ class BinaryNode: public NodeView {
         // Inherit constructors
         using NodeView::NodeView;
 
-        BinaryNode* get_parent() { return parent;
-        }
+        BinaryNode* get_parent() { return parent; }
 
         virtual void run() override {
             throw abstract_exception("BinaryNode::run");

@@ -76,6 +76,11 @@ namespace monya {
             void destroy_threads();
 
             const depth_t get_max_depth() const { return max_levels; }
+            const depth_t get_current_level() const { return current_level; }
+            std::vector<NodeView*>& get_nodes(const unsigned level) {
+                return nodes[level];
+            }
+            const bool empty() const { return nodes.size() < current_level; }
 
             ~Scheduler();
     };

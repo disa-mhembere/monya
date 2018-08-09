@@ -70,7 +70,6 @@ namespace monya { namespace container {
         }
     }
 
-    // TODO: Handoff nodes to threads
     void Scheduler::run_level(const depth_t level) {
         std::cout << "\nRunning level: " << level << "\n";
 
@@ -98,6 +97,7 @@ namespace monya { namespace container {
             threads[tid]->get_task_queue()->enqueue(*it);
         }
 
+        // Run nodes in current level
         printf("All nodes in level: %lu given to workers\n", level);
         wake4run(BUILD);
         wait4completion(); // TODO: Level-wise barrier not necessary

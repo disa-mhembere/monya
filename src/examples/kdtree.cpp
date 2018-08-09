@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <random>
 #include <unordered_set>
+#include <set>
 
 #include "../common/monya.hpp"
 #include "../utils/time.hpp"
@@ -88,10 +89,6 @@ class kdnode: public container::BinaryNode {
             left->set_ph_data_index(&idxs[offsets[0]], offsets[1]-offsets[0]);
             right->set_ph_data_index(&idxs[offsets[1]],
                     idxs.size()-offsets[1]);
-
-            // Call Schedule
-            scheduler->schedule(left);
-            scheduler->schedule(right);
         }
 
         void set_split_dim(size_t split_dim) {
@@ -313,7 +310,7 @@ int main(int argc, char* argv[]) {
     }
 #endif
 
-#if 1
+#if 0
     // Query the Tree to make sure we don't have garbage!
     std::string rw_fn = "/home/disa/Research/monya/src/test-data/rand_32_16_rw.bin";
 

@@ -88,6 +88,11 @@ namespace monya {
                     __FILE__, __LINE__);
         }
 
+#ifdef VERB
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        printf("\n****t: %d, wait release_state_lock with ppt: %u ****\n",
+                thd_id, (unsigned)(*parent_pending_threads));
+#endif
         release_state_lock();
 #ifdef VERB
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -127,11 +132,7 @@ namespace monya {
                     // TODO: Combine into some meta-method
                     active_node->prep();
                     active_node->run();
-                    // Only spawn if you're not a leaf
-                    if (!active_node->is_leaf())
-                        active_node->spawn();
                     // End TODO: Combine into some meta-method
-
                     request_task(); // Keep requesting tasks
                 }
                 break;
@@ -239,7 +240,8 @@ namespace monya {
                 __FILE__, __LINE__);
 #ifdef VERB
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        printf("\n****t: %d, leaving wake****\n", thd_id);
+        printf("\n****t: %d, leaving wake in state %s****\n", thd_id,
+                str::to(get_state()).c_str());
 #endif
     }
 

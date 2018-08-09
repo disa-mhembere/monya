@@ -96,7 +96,7 @@ public:
         return state;
     }
 
-    const int get_thd_id() const {
+    const int get_id() const {
         return thd_id;
     }
 
