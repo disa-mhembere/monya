@@ -160,7 +160,11 @@ namespace monya {
                     for (size_t i = 0; i < procd_nodes.size(); i++) {
                         container::BinaryNode* curr_node =
                             static_cast<container::BinaryNode*>(procd_nodes[i]);
-                        if (!curr_node->is_leaf()) {
+                        // Termination conditions:
+                        // 1. Max depth
+                        // 2. Node has only one sample
+                        if (curr_node->get_depth() < max_depth
+                                && curr_node->get_data_index().size() > 1) {
                             curr_node->spawn();
                             if (curr_node->left)
                                 scheduler->schedule(curr_node->left);

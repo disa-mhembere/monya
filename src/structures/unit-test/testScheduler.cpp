@@ -31,7 +31,6 @@ class MyNode: public mc::RBNode {
         MyNode(unsigned val) { comparator = val; }
         void prep() override { } // Do nothing
         void run() override { /*printf("Comparator: %.1f\n", comparator);*/ }
-        const bool is_leaf() override { return true; } // Don't allow to spawn
 };
 
 void serial_test() {

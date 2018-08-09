@@ -263,7 +263,7 @@ int main(int argc, char* argv[]) {
             "/home/disa/Research/monya/src/test-data/rand_32_16_cw.bin",
             IOTYPE::SYNC, ntree, nthread, mo);
 
-    constexpr depth_t max_depth = 4;
+    constexpr depth_t max_depth = 3;
     params.max_depth = max_depth;
 
     params.print();
@@ -289,9 +289,8 @@ int main(int argc, char* argv[]) {
 
                 // Which dim to split on
                 kdnode::cast2(root)->set_split_dim(split_dim);
-                kdnode::cast2(root)->set_index(split_dim); // Which samples it owns
-                kdnode::cast2(root)->set_scheduler(tree->get_scheduler());
-
+                // Which col to get from the data & place in memory
+                kdnode::cast2(root)->set_index(split_dim);
                 tree->set_root(root);
                 splits.insert(split_dim); // Keep track of used split dims
                 break;

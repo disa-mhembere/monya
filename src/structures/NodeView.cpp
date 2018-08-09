@@ -18,7 +18,6 @@
  */
 
 #include "NodeView.hpp"
-#include "Scheduler.hpp"
 #include "Query.hpp"
 #include "SampleVector.hpp"
 
@@ -33,10 +32,6 @@ namespace monya {
 
     NodeView::NodeView() : depth(0) {
         req_indxs.resize(0);
-    }
-
-    const bool NodeView::is_leaf() {
-        return (depth == get_max_depth() || get_data_index().size() == 1);
     }
 
     NodeView::NodeView(data_t val): NodeView() {
@@ -109,17 +104,7 @@ namespace monya {
         return depth;
     }
 
-    const depth_t NodeView::get_max_depth() const {
-        return scheduler->get_max_depth();
-    }
-
-    // This is run first
     void NodeView::prep() {
-        if (get_depth() <= get_max_depth())
-            get_data(); // Put data into mem
-    }
-
-    void NodeView::get_data() {
         assert(ioer->get_orientation() == MAT_ORIENT::COL); // TODO: Impl
         // FIXME
         assert(req_indxs.size() == 1); // TODO: Impl
@@ -142,14 +127,6 @@ namespace monya {
         data_index.print();
 #endif
 
-    }
-
-    void NodeView::set_scheduler(Scheduler* scheduler) {
-        this->scheduler = scheduler;
-    }
-
-    Scheduler* NodeView::get_scheduler() {
-        return this->scheduler;
     }
 
     void NodeView::sort_data_index(bool par) {
@@ -211,15 +188,10 @@ namespace monya {
     void NodeView::spawn() {
     }
 
-    void NodeView::schedule() {
-        scheduler->schedule(this);
-    }
-
     // @param node: inherits properties from the object
      void NodeView::bestow(NodeView* node) {
          node->parent = this;
          node->set_ioer(ioer);
-         node->set_scheduler(scheduler);
          node->set_depth(depth+1);
 
          assert(node->parent->get_comparator() == get_comparator());

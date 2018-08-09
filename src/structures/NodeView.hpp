@@ -34,7 +34,6 @@ namespace monya {
     namespace container {
 
 // Fwd decl
-class Scheduler;
 class Query;
 class SampleVector;
 
@@ -69,10 +68,8 @@ class NodeView {
         data_t comparator; // The split comparator
         // When the data required is in memory run this computation
         depth_t depth; // Depth of the node used as an idendifier
-        Scheduler* scheduler;
         io::IO* ioer;
         NodeView* parent;
-
         // TODO: End visibility
 
 #ifdef __unix__
@@ -93,7 +90,6 @@ class NodeView {
         NodeView(data_t val);
         NodeView(IndexVector& data_index);
 
-        virtual const bool is_leaf();
         virtual const bool has_child() = 0;
         void schedule();
 
@@ -123,9 +119,6 @@ class NodeView {
         void set_depth(depth_t depth);
         const depth_t get_depth() const;
         const depth_t get_max_depth() const;
-        void get_data();
-        void set_scheduler(Scheduler* scheduler);
-        Scheduler* get_scheduler();
         void sort_data_index(bool par=false);
         IndexVector& get_data_index();
         virtual const void print() const;

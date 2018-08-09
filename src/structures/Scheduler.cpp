@@ -74,19 +74,7 @@ namespace monya { namespace container {
         std::cout << "\nRunning level: " << level << "\n";
 
         std::vector<NodeView*> level_nodes = nodes[level];
-#if 0
-        // Encodes dependency on levels below
-        // Accounts underflow for level = 0
-        for (auto node : level_nodes) {
-            assert(node->get_depth() <= get_max_depth());
-            node->prep();
-            node->run();
 
-            // Only spawn if you're not a leaf
-            if (!node->is_leaf())
-                node->spawn();
-        }
-#else
         // All worker thread created and in waiting state initially
         size_t i = 0;
         size_t nthread = threads.size();
@@ -101,7 +89,6 @@ namespace monya { namespace container {
         printf("All nodes in level: %lu given to workers\n", level);
         wake4run(BUILD);
         wait4completion(); // TODO: Level-wise barrier not necessary
-#endif
     }
 
     void Scheduler::wake4run(const ThreadState_t state) {
