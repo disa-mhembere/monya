@@ -68,6 +68,9 @@ namespace monya {
                 ioer->set_orientation(params.orientation);
                 ioer->shape(dimpair(params.nsamples, params.nfeatures));
 
+                if (params.iotype == IOTYPE::MEM)
+                    static_cast<io::MemoryIO*>(ioer)->from_file();
+
                 // Configure Tree
                 max_depth = params.max_depth;
                 depth = 0;

@@ -144,14 +144,38 @@ class IO {
 
 // Basically a matrix represented as a vector
 class MemoryIO: public IO {
+    private:
+        bool is_data_local;
     public:
         MemoryIO(): IO() {
+            is_data_local = false;
         }
 
         MemoryIO(data_t* data, dimpair dim,
                 MAT_ORIENT orient):
             IO (dim, orient) {
             this->data = data;
+        }
+
+        void from_file() {
+            assert (!this->fn.empty());
+            std::fstream fs;
+
+            fs.open(this->fn.c_str(), std::ios_base::in);
+            if (!fs.is_open())
+                throw io_exception(std::string("Failure to open file: '")
+                        + fn + std::string("'\n"));
+
+            if (NULL == data)
+                data = new data_t[dim.first*dim.second];
+
+            fs.read(reinterpret_cast<char*>(&data[0]),
+                    dim.first*dim.second*dtype_size);
+            is_data_local = true;
+#if 0
+            printf("Echoing the full dataset:\n");
+            print_mat(&data[0], dim.first, dim.second);
+#endif
         }
 
         void read(data_t* buf, const offset_t offset,
@@ -216,12 +240,17 @@ class MemoryIO: public IO {
 
         // No copying
         data_t* get_row(const offset_t offset) override {
-            if (this->orientation == MAT_ORIENT::ROW)
+            if (this->orientation == MAT_ORIENT::ROW) {
                 return &data[offset*this->dim.second];
-            else if (this->orientation == MAT_ORIENT::COL)
+            } else if (this->orientation == MAT_ORIENT::COL) {
+                // FIXME: Memory leak if not freed
+                data_t* tmp = new data_t[dim.second];
+                for (size_t col = 0; col < dim.second; col++)
+                    tmp[col] = data[col*dim.first+offset];
+                return tmp;
+            } else {
                 throw not_implemented_exception(__FILE__, __LINE__);
-            else
-                throw not_implemented_exception(__FILE__, __LINE__);
+            }
         }
 
         static MemoryIO* cast2(IO::raw_ptr iop) {
@@ -229,6 +258,8 @@ class MemoryIO: public IO {
         }
 
         void destroy() override {
+            if (is_data_local)
+                delete [] data;
         }
 };
 
@@ -301,9 +332,16 @@ class SyncIO: public IO {
 
                 fs.read(reinterpret_cast<char*>(&data[0]),
                         dtype_size*dim.first);
+#if 0
+                std::string str_col = "Echo of col retrieved: \n[ ";
+                for (size_t i = 0; i < dim.first; i++) {
+                    str_col += std::to_string(data[i]) + std::string(" ");
+                }
+                str_col += std::string("]");
+                printf("%s\n", str_col.c_str());
+#endif
                 return data;
             } else if (this->orientation == MAT_ORIENT::ROW) {
-
                 // FIXME: Memory leak if not freed
                 printf("WARNING: Inefficent method `get_col` for rowwise\n");
                 data_t* tmp = new data_t[dim.first];

@@ -30,6 +30,8 @@
 #include <cassert>
 #include <algorithm>
 
+#include "exception.hpp"
+
 #define INVALID_ID -1
 
 namespace monya {
@@ -113,9 +115,13 @@ namespace monya {
             this->orientation = orientation;
             this->fanout = fanout;
             this->max_depth = max_depth;
+
+            if (iotype != IOTYPE::MEM && nthread > 1)
+                throw parameter_exception("Multithreading only support for in"
+                        " memory mode currently!\n");
         }
 
-        const void print () const {
+        void print() {
             std::cout << "Params: \n" <<
                 "# features: " << nfeatures << std::endl <<
                 "# samples: "<< nsamples << std::endl <<
@@ -186,15 +192,14 @@ namespace monya {
                 return val != other.get_val();
             }
 
-            const void print() const {
-                std::cout << "(" << get_index() << ", " <<
-                get_val() << ")" << "\n";
-            }
-
             std::string to_string() {
                 return std::string("(") + std::to_string(get_index()) +
                     std::string(", ") + std::to_string(get_val()) +
                     std::string(")");
+            }
+
+            void print() {
+               printf("%s\n", to_string().c_str());
             }
     };
 
@@ -233,10 +238,16 @@ namespace monya {
                 return this->_[index];
             }
 
-            const void print() const {
-                for (size_t i = 0; i < _.size(); i++) {
+            void print() {
+                for (size_t i = 0; i < _.size(); i++)
                     _[i].print();
-                }
+            }
+
+            std::string to_string() {
+                std::string __repr__ = "";
+                for (auto item : _)
+                    __repr__ + item.to_string() + std::string("\n");
+                return __repr__;
             }
 
             // Insert indexes with placeholder values
