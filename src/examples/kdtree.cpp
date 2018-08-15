@@ -123,7 +123,7 @@ class kdnode: public container::BinaryNode {
 
         // This is run next
         void run() override {
-            std::cout << "\n\nkdnode at depth: " << depth << " run()\n";
+            printf("\n\nkdnode at depth: %lu run()\n", depth);
             if (depth < 3) {
                 sort_data_index(true); // Paralleize the sort
             } else {
@@ -132,11 +132,8 @@ class kdnode: public container::BinaryNode {
 
             this->set_comparator(data_index[data_index.size() / 2 ].get_val());
 #if 1
-            std::cout << "Printing data from node at depth: " << depth <<
-                std::endl;
-            data_index.print();
-
-            std::cout << "Comparator = " << get_comparator() << std::endl;
+            printf("Printing data from node at depth: %lu with comparator "
+                    ":%.2f\n", depth, get_comparator());
 #endif
 
 #if 1
@@ -145,14 +142,16 @@ class kdnode: public container::BinaryNode {
 #endif
         }
 
-        const void print() const override {
-            std::cout << "Comparator: " << get_comparator() << "\n";
-            std::cout << "Split dim: " << get_split_dim() << "\n";
-            std::cout << "Membership: \n"; data_index.print();
+        void print() override {
+            printf("Comparator: %.2f, Split dim: %lu\n %s\n", get_comparator(),
+            get_split_dim(), data_index.to_string().c_str());
+            printf("Membership: %s\n",  data_index.to_string().c_str());
+#if 0
             std::cout << "Upper bounds:\n";
             io::print_arr<data_t>(&upper_bounds[0], upper_bounds.size());
             std::cout << "Lower bounds:\n";
             io::print_arr<data_t>(&lower_bounds[0], lower_bounds.size());
+#endif
             std::cout << "\n";
         }
 };
@@ -256,14 +255,14 @@ int main(int argc, char* argv[]) {
     size_t nsamples = 32;
     size_t nfeatures = 16;
     tree_t ntree = 1;
-    unsigned nthread = 1;
+    unsigned nthread = atoi(argv[1]);
     MAT_ORIENT mo = MAT_ORIENT::COL;
 
     Params params(nsamples, nfeatures,
             "/home/disa/Research/monya/src/test-data/rand_32_16_cw.bin",
-            IOTYPE::SYNC, ntree, nthread, mo);
+            IOTYPE::MEM, ntree, nthread, mo);
 
-    constexpr depth_t max_depth = 3;
+    constexpr depth_t max_depth = 5;
     params.max_depth = max_depth;
 
     params.print();
@@ -309,7 +308,7 @@ int main(int argc, char* argv[]) {
     }
 #endif
 
-#if 0
+#if 1
     // Query the Tree to make sure we don't have garbage!
     std::string rw_fn = "/home/disa/Research/monya/src/test-data/rand_32_16_rw.bin";
 

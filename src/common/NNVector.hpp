@@ -290,7 +290,7 @@ class NNVector {
             return false;
         }
 
-        const void print() const {
+        void print() {
             printf("Printing list with size: %lu\n", _size);
             Node* curr = sentinel->next;
 

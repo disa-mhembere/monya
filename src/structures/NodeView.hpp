@@ -121,7 +121,7 @@ class NodeView {
         const depth_t get_max_depth() const;
         void sort_data_index(bool par=false);
         IndexVector& get_data_index();
-        virtual const void print() const;
+        virtual void print();
         virtual const std::string to_string();
         const data_t get_comparator() const;
         void set_comparator(const data_t comparator);

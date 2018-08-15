@@ -22,6 +22,11 @@
 #include "WorkerThread.hpp"
 #include "TaskQueue.hpp"
 
+#if 0
+#include <thread>
+#include <chrono>
+#endif
+
 namespace monya { namespace container {
 
     // One per tree
@@ -36,7 +41,6 @@ namespace monya { namespace container {
             pthread_cond_init(&cond, NULL);
             pending_threads = nthread;
 
-            printf("Creating scheduler with %u threads: \n", nthread);
             for (unsigned tid = 0; tid < nthread; tid++) {
                 threads.push_back(new WorkerThread(numa_id, tid));
                 threads.back()->set_parent_cond(&cond);
@@ -71,7 +75,7 @@ namespace monya { namespace container {
     }
 
     void Scheduler::run_level(const depth_t level) {
-        std::cout << "\nRunning level: " << level << "\n";
+        printf("\nRunning level: %lu\n", level);
 
         std::vector<NodeView*> level_nodes = nodes[level];
 
@@ -80,8 +84,8 @@ namespace monya { namespace container {
         size_t nthread = threads.size();
         for (auto it = level_nodes.begin(); it != level_nodes.end(); ++it) {
 
+            // TODO: Give many tasks to each thread at once
             size_t tid = i++ % nthread;
-            //printf("Scheduler feeding and waking tid: %lu\n", tid);
             threads[tid]->get_task_queue()->enqueue(*it);
         }
 
@@ -89,16 +93,20 @@ namespace monya { namespace container {
         printf("All nodes in level: %lu given to workers\n", level);
         wake4run(BUILD);
         wait4completion(); // TODO: Level-wise barrier not necessary
+#if 0
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        printf("NODES AFTER:\n");
+        for (auto node : level_nodes)
+            node->print();
+#endif
     }
 
     void Scheduler::wake4run(const ThreadState_t state) {
-        printf("wake4run()!\n");
         for (auto thread : threads)
             thread->wake(state);
     }
 
     void Scheduler::wait4completion() {
-        printf("wait4completion()\n");
         int rc = pthread_mutex_lock(&mutex);
         if (rc)
             throw concurrency_exception("pthread_mutex_lock", rc,

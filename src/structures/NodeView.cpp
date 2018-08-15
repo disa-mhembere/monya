@@ -109,7 +109,6 @@ namespace monya {
         // FIXME
         assert(req_indxs.size() == 1); // TODO: Impl
         data_t* ret = ioer->get_col(req_indxs[0]);
-
         // Check state of data_index to see if placeholder indexes are there
         if (data_index.empty()) {
             data_index.set_indexes(ret, ioer->shape().first);
@@ -141,7 +140,7 @@ namespace monya {
         return data_index;
     }
 
-    const void NodeView::print() const {
+    void NodeView::print() {
         std::cout << comparator << std::endl;
     }
 

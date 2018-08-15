@@ -132,7 +132,6 @@ namespace monya {
                     // TODO: Combine into some meta-method
                     active_node->prep();
                     active_node->run();
-                    // End TODO: Combine into some meta-method
                     request_task(); // Keep requesting tasks
                 }
                 break;
