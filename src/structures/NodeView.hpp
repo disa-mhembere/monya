@@ -43,7 +43,22 @@ class NodeView: public safs::callback {
 #else
 class NodeView {
 #endif
+    protected:
+        // TODO: Visibility
+        IndexVector data_index; // Indexes that nodes hold to data & mapping
+
+        // FIXME: mem waster
+        std::vector<sample_id_t> req_indxs; // Indexes a node will req from ioer
+        data_t comparator; // The split comparator
+        // When the data required is in memory run this computation
+        depth_t depth; // Depth of the node used as an idendifier
+        io::IO* ioer;
+        NodeView* parent;
+        // TODO: End visibility
+
     public:
+        data_t& get_comparator() { return comparator; }
+
         virtual void run() = 0;
         virtual void init(Params&) = 0;
 
@@ -56,20 +71,7 @@ class NodeView {
         }
 
         virtual void query(const QueryParams&, Query*);
-
         virtual void spawn();
-
-        // TODO: Visibility
-        IndexVector data_index; // Indexes that nodes hold to data & mapping
-
-        // FIXME: mem waster
-        std::vector<sample_id_t> req_indxs; // Indexes a node will req from ioer
-        data_t comparator; // The split comparator
-        // When the data required is in memory run this computation
-        depth_t depth; // Depth of the node used as an idendifier
-        io::IO* ioer;
-        NodeView* parent;
-        // TODO: End visibility
 
 #ifdef __unix__
         virtual int invoke(safs::io_request *reqs[], int num) override {

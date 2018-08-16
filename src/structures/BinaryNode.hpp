@@ -37,9 +37,8 @@ class BinaryNode: public NodeView {
         BinaryNode* left;
         BinaryNode* right;
 #endif
-
         // TODO: rm
-#if 1
+#ifdef VECNODES
         size_t vecpos;
 #endif
 

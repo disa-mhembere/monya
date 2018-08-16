@@ -54,7 +54,9 @@ int main(int argc, char* argv[]) {
         mean +=  node.get_comparator();
 
     mc::BinaryNode root(mean/static_cast<monya::data_t>(init.size()));
+#ifdef VECNODES
     root.vecpos = 0;
+#endif
 
     tree->set_root(root);
     std::cout << "Root is: \n";

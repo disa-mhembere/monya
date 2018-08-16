@@ -34,7 +34,7 @@ namespace monya { namespace container {
         for (int i = 0; i < tabs; ++i) {
             std::cout << "\t\t";
         }
-        std::cout << node->comparator << std::endl;
+        std::cout << node->get_comparator() << std::endl;
 
         echo(node->right, tabs + 1);
     }

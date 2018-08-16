@@ -35,7 +35,7 @@ namespace monya { namespace container {
                 std::cout << "\n";
                 print_depth++;
             }
-            std::cout << (*nodes)[i].comparator << " ";
+            std::cout << (*nodes)[i].get_comparator() << " ";
         }
         std::cout << "\n";
     }
@@ -81,6 +81,7 @@ namespace monya { namespace container {
     // TODO: Check if we can avoid copy here
     void VecBinaryTree::insert_at(BinaryNode new_node,
             BinaryNode* node, bchild_t pos) {
+#ifdef VECNODES
         // Compute position
         size_t child_pos = get_child_idx(node->vecpos, pos);
         new_node.vecpos = child_pos;
@@ -93,13 +94,14 @@ namespace monya { namespace container {
             //nodes->resize(child_pos + 1);
             //(*nodes)[child_pos] = new_node;
             //}
-
+#endif
     }
 
     // TODO: Check if we can avoid copy here
     void VecBinaryTree::insert_at(BinaryNode new_node,
             const size_t parent_idx, const bchild_t pos) {
         // Compute position
+#ifdef VECNODES
         size_t child_pos = get_child_idx(parent_idx, pos);
         new_node.vecpos = child_pos;
 
@@ -107,6 +109,7 @@ namespace monya { namespace container {
         // TODO: Inherit other metadata
         // FIXME: Preallocate when threading only works for 1 thread
         nodes->push_back(new_node);
+#endif
     }
 
     void VecBinaryTree::insert(BinaryNode* node) {
