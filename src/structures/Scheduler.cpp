@@ -27,6 +27,9 @@
 #include <chrono>
 #endif
 
+// TODO: Implement guided by backing this off
+#define MIN_TASKS_PT 4
+
 namespace monya { namespace container {
 
     // One per tree
@@ -51,8 +54,6 @@ namespace monya { namespace container {
             wait4completion(); // Wait for threads to init
         }
 
-    // TODO: Batch the scheduling the reduce lock contention
-    //  //
     void Scheduler::schedule(NodeView* node) {
         pthread_mutex_lock(&mutex);
 
@@ -80,13 +81,22 @@ namespace monya { namespace container {
         std::vector<NodeView*> level_nodes = nodes[level];
 
         // All worker thread created and in waiting state initially
-        size_t i = 0;
-        size_t nthread = threads.size();
-        for (auto it = level_nodes.begin(); it != level_nodes.end(); ++it) {
+        assert(level_nodes.size());
 
-            // TODO: Give many tasks to each thread at once
-            size_t tid = i++ % nthread;
-            threads[tid]->get_task_queue()->enqueue(*it);
+        cunsigned tid(threads.size());
+        size_t task_index = 0;
+        size_t ntasks;
+
+        // circular buffer the threads
+        while (true) {
+            ntasks = task_index + MIN_TASKS_PT < level_nodes.size() + 1 ?
+                MIN_TASKS_PT : level_nodes.size() - task_index;
+
+                threads[tid++]->get_task_queue()->enqueue(
+                        &level_nodes[task_index], ntasks);
+                task_index += ntasks;
+                if (task_index == level_nodes.size())
+                    break;
         }
 
         // Run nodes in current level

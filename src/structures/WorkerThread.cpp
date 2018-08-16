@@ -224,8 +224,6 @@ namespace monya {
 
         set_state(state);
         inc_ppt();
-
-        // TODO: Reset/clear data structures?
         release_state_lock();
 
 #if 0

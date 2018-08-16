@@ -28,8 +28,6 @@
 
 // NOTE: We initally assume all the Trees are the same
 namespace monya {
-    static constexpr unsigned READ_SZ_BYTES = 4096; // TODO: Alter
-
     class BinaryTreeProgram: public container::BinaryTree {
         private:
 
