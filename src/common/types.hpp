@@ -327,6 +327,31 @@ namespace monya {
                 return sorted;
             }
     };
+
+
+    // circular integer
+    class cunsigned {
+        private:
+            unsigned val;
+            unsigned max; // NOTE: Exclusive so `max` never occurs i.e like mod
+
+        public:
+            cunsigned(unsigned _max) : val(0), max(_max) {
+                if (max == 0)
+                    throw parameter_exception("max must be > 0",
+                            __FILE__, __LINE__);
+            }
+
+            void inc() {
+                val = val == max - 1 ? 0 : val + 1;
+            }
+            void dec() {
+                val = val == 0 ? max - 1: val - 1;
+            }
+            const unsigned get() const {
+                return val;
+            }
+    };
 } // End monya
 
 #endif

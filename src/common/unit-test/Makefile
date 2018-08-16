@@ -15,7 +15,7 @@
 
 include ../../../Makefile.common
 
-TESTFILES = testIndexVector metric-test testNNVector
+TESTFILES = testIndexVector metric-test testNNVector testTypes
 
 all: $(TESTFILES)
 
@@ -30,6 +30,9 @@ metric-test: metric-test.o
 
 testNNVector: testNNVector.o
 	$(CXX) -o testNNVector testNNVector.o $(LDFLAGS)
+
+testTypes: testTypes.o
+	$(CXX) -o testTypes testTypes.o $(LDFLAGS)
 
 clean:
 	rm -f *.d

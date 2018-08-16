@@ -53,21 +53,6 @@ namespace monya {
             pthread_cond_t cond;
             std::atomic<unsigned> pending_threads;
 
-            // circular integer
-            class cunsinged {
-                unsigned val;
-                unsigned max;
-                cunsigned(unsigned max) : val(0), max(max) { }
-                cunsigned& operator++() {
-                    val = val == max ? 0 : val + 1;
-                    return *this;
-                }
-                cunsigned& operator--() {
-                    val = val == 0 ? max : val - 1;
-                    return *this;
-                }
-            };
-
         public:
             Scheduler(unsigned fanout, depth_t max_depth,
                     tree_t tree_id, const unsigned nthread, const int numa_id);

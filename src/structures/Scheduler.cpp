@@ -92,8 +92,9 @@ namespace monya { namespace container {
             ntasks = task_index + MIN_TASKS_PT < level_nodes.size() + 1 ?
                 MIN_TASKS_PT : level_nodes.size() - task_index;
 
-                threads[tid++]->get_task_queue()->enqueue(
+                threads[tid.get()]->get_task_queue()->enqueue(
                         &level_nodes[task_index], ntasks);
+                tid.inc();
                 task_index += ntasks;
                 if (task_index == level_nodes.size())
                     break;

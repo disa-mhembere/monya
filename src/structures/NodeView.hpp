@@ -55,7 +55,6 @@ class NodeView {
             throw abstract_exception("NodeView::distance");
         }
 
-        // TODO: make more of these
         virtual void query(const QueryParams&, Query*);
 
         virtual void spawn();
