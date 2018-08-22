@@ -15,7 +15,7 @@
 
 include ../../../Makefile.common
 
-TESTFILES = testIOFactory testIO
+TESTFILES = testIOFactory testIO test_vecs_reader
 
 all: $(TESTFILES)
 
@@ -30,6 +30,9 @@ testIOFactory: testIOFactory.o
 
 testIO: testIO.o
 	$(CXX) -o testIO testIO.o $(LDFLAGS)
+
+test_vecs_reader: test_vecs_reader.o
+	$(CXX) -o test_vecs_reader test_vecs_reader.o $(LDFLAGS)
 
 clean:
 	rm -f *.d
