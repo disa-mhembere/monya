@@ -105,15 +105,12 @@ namespace monya {
     }
 
     void NodeView::prep() {
-        assert(ioer->get_orientation() == MAT_ORIENT::COL); // TODO: Impl
-        // FIXME
         assert(req_indxs.size() == 1); // TODO: Impl
         data_t* ret = ioer->get_col(req_indxs[0]);
         // Check state of data_index to see if placeholder indexes are there
         if (data_index.empty()) {
             data_index.set_indexes(ret, ioer->shape().first);
         } else {
-            // FIXME works with 1 column only
             // TODO: Bad access pattern for ret vector..
             for (size_t i = 0; i < data_index.size(); i++) {
                 auto idx = data_index[i].get_index();
@@ -121,6 +118,8 @@ namespace monya {
             }
         }
 
+        if (ioer->get_orientation() == MAT_ORIENT::ROW)
+            delete [] ret;
 #if 0
         std::cout << "Printing full index after set:\n";
         data_index.print();
