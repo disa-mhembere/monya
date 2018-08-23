@@ -50,7 +50,7 @@ class Metric {
             size_t match_count = std::accumulate(matches.begin(),
                     matches.end(), 0);
             if (match_count)
-                return match_count/((double)matches.size());
+                return match_count/((data_t)matches.size());
             return 0;
         }
 
@@ -73,7 +73,7 @@ class Metric {
             size_t match_count = std::accumulate(matches.begin(),
                     matches.end(), 0);
             if (match_count)
-                return match_count/((double)matches.size());
+                return match_count/((data_t)matches.size());
             return 0;
         }
 };

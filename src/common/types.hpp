@@ -41,7 +41,7 @@ namespace monya {
     typedef size_t offset_t; // The offset position of a file
     typedef unsigned tree_t; // The number of trees in the forest
     typedef size_t depth_t; // The depth of trees in the forest
-    typedef double data_t; // The type of the data
+    typedef float data_t; // The type of the data
 
     // Constants
     const static depth_t MAX_DEPTH = std::numeric_limits<depth_t>::max();

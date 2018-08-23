@@ -23,37 +23,36 @@
 
 #include "sucommon.hpp"
 
-namespace mc = monya::container;
-namespace mt = monya::test;
+using namespace monya;
 
 void test_manual_construction() {
-    mc::BinaryTree::ptr tree = mc::BinaryTree::create();
+    container::BinaryTree::ptr tree = container::BinaryTree::create();
 
-    mc::BinaryNode* root = new mc::BinaryNode(5.0);
+    container::BinaryNode* root = new container::BinaryNode(5.0);
     tree->set_root(root);
 
-    mc::BinaryNode* l = new mc::BinaryNode(2.0);
+    container::BinaryNode* l = new container::BinaryNode(2.0);
     l->parent = root;
     root->left = l;
-    mc::BinaryNode* r = new mc::BinaryNode(8.0);
+    container::BinaryNode* r = new container::BinaryNode(8.0);
     r->parent = root;
     root->right = r;
 
     l->left = l->right = r->left = r->right = NULL;
 
-    mc::BinaryNode* ll = new mc::BinaryNode(1.0);
+    container::BinaryNode* ll = new container::BinaryNode(1.0);
     ll->parent = l;
     l->left = ll;
 
-    mc::BinaryNode* lr = new mc::BinaryNode(4.0);
+    container::BinaryNode* lr = new container::BinaryNode(4.0);
     lr->parent = l;
     l->right = lr;
 
-    mc::BinaryNode* rl = new mc::BinaryNode(6.0);
+    container::BinaryNode* rl = new container::BinaryNode(6.0);
     rl->parent = r;
     r->left = rl;
 
-    mc::BinaryNode* rr = new mc::BinaryNode(10.0);
+    container::BinaryNode* rr = new container::BinaryNode(10.0);
     rr->parent = r;
     r->right = rr;
 
@@ -68,13 +67,13 @@ int main(int argc, char* argv[]) {
 
     ////////////////////////////////////////////////////////////////////////////
 
-    std::vector<double> members {0.10, 0.8, 0.14, 0.6};
+    std::vector<data_t> members {0.10, 0.8, 0.14, 0.6};
 
-    mc::BinaryTree::ptr tree = mc::BinaryTree::create();
+    container::BinaryTree::ptr tree = container::BinaryTree::create();
 
-    for (std::vector<double>::iterator it = members.begin();
+    for (std::vector<data_t>::iterator it = members.begin();
             it != members.end(); ++it) {
-        mc::BinaryNode* node = new mc::BinaryNode((double)*it);
+        container::BinaryNode* node = new container::BinaryNode((data_t)*it);
         tree->insert(node);
     }
 
@@ -85,8 +84,8 @@ int main(int argc, char* argv[]) {
 
     for (auto i : members) {
         // Asserts on failure to find
-        mc::BinaryNode* q = new mc::BinaryNode(i);
-        mc::BinaryNode* a = tree->find(q);
+        container::BinaryNode* q = new container::BinaryNode(i);
+        container::BinaryNode* a = tree->find(q);
         assert(*q == *a);
         delete(q);
     }
@@ -96,28 +95,28 @@ int main(int argc, char* argv[]) {
     constexpr unsigned FANOUT = 2;
     constexpr unsigned NRAND = std::pow(FANOUT, NLEVELS) - 1;
     std::default_random_engine generator;
-    std::uniform_real_distribution<double> distribution(0, 5);
+    std::uniform_real_distribution<data_t> distribution(0, 5);
 
-    mc::BinaryTree::ptr tree2 = mc::BinaryTree::create();
+    container::BinaryTree::ptr tree2 = container::BinaryTree::create();
 
-    mt::NodeMapper nm;
+    test::NodeMapper nm;
 
     // Deal with the root node special case separtely
-    std::vector<mc::BinaryNode*> init;
+    std::vector<container::BinaryNode*> init;
     for (unsigned i = 0; i < FANOUT; i++)
-        init.push_back(new mc::BinaryNode(distribution(generator)));
+        init.push_back(new container::BinaryNode(distribution(generator)));
 
     monya::data_t mean = 0;
     for (auto node : init)
         mean +=  node->get_comparator();
 
-    nm.insert(new mc::BinaryNode(mean/static_cast<monya::data_t>(init.size())));
+    nm.insert(new container::BinaryNode(mean/static_cast<monya::data_t>(init.size())));
     for (auto node : init)
         mean +=  node->get_comparator();
 
     // Test arbitrary insertion
     for (unsigned i = 0; i < NRAND-(FANOUT+1); i++) {
-        nm.insert(new mc::BinaryNode(distribution(generator)));
+        nm.insert(new container::BinaryNode(distribution(generator)));
     }
 
     std::cout << "nm:\n";
@@ -139,7 +138,7 @@ int main(int argc, char* argv[]) {
 
             for (size_t ii = 0; ii < nodes.size(); ii++) {
                 // Already an assert on find failure
-                mc::BinaryNode* node = nodes[ii];
+                container::BinaryNode* node = nodes[ii];
                 std::cout << "Looking for "; node->print(); std::cout << "\n";
 
                 auto ret = tree2->find(node); // Find this node in the tree2

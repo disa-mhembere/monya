@@ -20,9 +20,7 @@
 #ifndef MONYA_VECS_READER_HPP__
 #define MONYA_VECS_READER_HPP__
 
-#include <iostream>
 #include <fstream>
-#include <utility>
 
 #include "../common/exception.hpp"
 #include "../common/types.hpp"
@@ -51,8 +49,8 @@ namespace monya { namespace io {
                             + fn + std::string("'\n"));
             }
 
-            virtual void read(std::vector<float>& buf) = 0;
-            virtual void read(float* buf) = 0;
+            virtual void read(std::vector<data_t>& buf) = 0;
+            virtual void read(data_t* buf) = 0;
             virtual ~vecs_reader() { fs.close();}
     };
 
@@ -62,11 +60,11 @@ namespace monya { namespace io {
                     const size_t ncol) : vecs_reader(fn, nrow, ncol) {
             }
 
-            void read(std::vector<float>& buf) override {
+            void read(std::vector<data_t>& buf) override {
                 read(&buf[0]);
             }
 
-            void read(float* buf) override {
+            void read(data_t* buf) override {
                 int read_dim;
                 for (size_t row = 0; row < dim.first; row++) {
                     fs.read(reinterpret_cast<char*>(&read_dim), sizeof(buf[0]));
@@ -76,8 +74,6 @@ namespace monya { namespace io {
                             dim.second*sizeof(buf[0]));
                 }
             }
-
-
     };
 
 } } // End namespace monya::io

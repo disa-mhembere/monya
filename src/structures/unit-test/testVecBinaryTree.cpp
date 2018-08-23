@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
     constexpr unsigned FANOUT = 2;
     constexpr unsigned NRAND = std::pow(FANOUT, NLEVELS) - 1;
     std::default_random_engine generator;
-    std::uniform_real_distribution<double> distribution(0, 5);
+    std::uniform_real_distribution<data_t> distribution(0, 5);
 
     mc::VecBinaryTree::ptr tree = mc::VecBinaryTree::create();
     printf("Created tree!\n");

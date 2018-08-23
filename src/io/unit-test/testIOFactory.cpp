@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
 
     constexpr size_t NROW = 8;
     constexpr size_t NCOL = 16;
-    std::vector<double> d;
+    std::vector<data_t> d;
 
     for (size_t i = 0; i < NROW*NCOL; i++) {
         d.push_back(i);
@@ -43,10 +43,10 @@ int main(int argc, char* argv[]) {
     io::MemoryIO::cast2(ioer)->set_data(&d[0]);
     ioer->set_orientation(MAT_ORIENT::COL);
 
-    double *buf = NULL;
+    data_t *buf = NULL;
 
     for (size_t col = 0; col < NCOL; col++) {
-        buf = static_cast<double*>(ioer->get_col(col));
+        buf = static_cast<data_t*>(ioer->get_col(col));
 
         for (size_t row = 0; row < NROW; row++)
             assert(buf[row] == d[NROW*col + row]);

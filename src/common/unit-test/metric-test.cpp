@@ -42,7 +42,7 @@ void test_metric() {
 
     auto ra = Metric::get_raw_accuracy(approx, exact);
     std::cout << "Raw accuracy: " << ra << std::endl;
-    assert(ra == (double)2/3);
+    assert(ra == (data_t)2/3);
     }
 
     {
@@ -69,7 +69,7 @@ void test_metric() {
 
     auto ra = Metric::get_raw_accuracy(approx, exact);
     std::cout << "Raw accuracy: " << ra << std::endl;
-    assert(ra == (double)1);
+    assert(ra == (data_t)1);
     }
 
     {
@@ -96,7 +96,7 @@ void test_metric() {
 
     auto ra = Metric::get_raw_accuracy(approx, exact);
     std::cout << "Raw accuracy: " << ra << std::endl;
-    assert(ra == 3/(double)5);
+    assert(ra == 3/(data_t)5);
     }
 }
 
