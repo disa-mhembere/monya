@@ -29,6 +29,7 @@
 #include "../common/exception.hpp"
 #include "../common/types.hpp"
 #include "../utils/FileUtil.hpp"
+#include "vecs_reader.hpp"
 
 namespace monya { namespace io {
 
@@ -178,22 +179,28 @@ class MemoryIO: public IO {
 
         void from_file() {
             assert (!this->fn.empty());
-            std::fstream fs;
-
-            fs.open(this->fn.c_str(), std::ios_base::in);
-            if (!fs.is_open())
-                throw io_exception(std::string("Failure to open file: '")
-                        + fn + std::string("'\n"));
-
             if (NULL == data)
                 data = new data_t[dim.first*dim.second];
 
-            fs.read(reinterpret_cast<char*>(&data[0]),
-                    dim.first*dim.second*dtype_size);
+            // TODO: Use an enum for filetype
+            if (utils::get_file_ext(fn) == "fvecs") {
+                vecs_reader* vr = new fvecs_reader(fn, dim.first, dim.second);
+                vr->read(data);
+                delete vr;
+            } else {
+                std::fstream fs;
+                fs.open(this->fn.c_str(), std::ios_base::in);
+                if (!fs.is_open())
+                    throw io_exception(std::string("Failure to open file: '")
+                            + fn + std::string("'\n"));
+
+                fs.read(reinterpret_cast<char*>(&data[0]),
+                        dim.first*dim.second*dtype_size);
+            }
             is_data_local = true;
 #if 0
-            printf("Echoing the full dataset:\n");
-            print_mat(&data[0], dim.first, dim.second);
+            printf("Echoing 2 samples of the dataset:\n");
+            print_mat(&data[0], 2, dim.second);
 #endif
         }
 

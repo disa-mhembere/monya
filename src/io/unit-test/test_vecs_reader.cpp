@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
     io::vecs_reader* vr = new io::fvecs_reader(
             "./siftsmall_base.fvecs", nrow, ncol);
 
-    std::vector<float> v(nrow*ncol);
+    std::vector<data_t> v(nrow*ncol);
     vr->read(v);
 
     std::cout << "Echoing the first 2 rows ...\n";
@@ -41,6 +41,20 @@ int main(int argc, char* argv[]) {
     }
 
     delete vr;
-    std::cout << "Test vecs_reader successful" << std::endl;
+    std::cout << "Test vecs_reader w vector successful" << std::endl;
+
+    vr = new io::fvecs_reader(
+            "./siftsmall_base.fvecs", nrow, ncol);
+    data_t* v2 = new data_t[nrow*ncol];
+    vr->read(v2);
+
+    for (size_t i = 0; i < nrow*ncol; i++)
+        assert(v2[i] == v[i]);
+
+    delete vr;
+    delete [] v2;
+
+    std::cout << "Test vecs_reader w array successful" << std::endl;
+
     return EXIT_SUCCESS;
 }

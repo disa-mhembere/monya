@@ -21,6 +21,8 @@
 #define MONYA_FILEUTIL_HPP__
 
 #include <sys/stat.h>
+#include <iostream>
+#include <string>
 
 namespace monya { namespace utils {
 static size_t get_file_size(std::string filename) {
@@ -32,6 +34,15 @@ static size_t get_file_size(std::string filename) {
 inline bool file_exists(const std::string& fn) {
     std::ifstream file(fn);
     return static_cast<bool>(file);
+}
+
+static std::string get_file_ext(const std::string& s) {
+    size_t i = s.rfind('.', s.length());
+
+    if (i != std::string::npos) {
+        return (s.substr(i + 1, s.length() - i));
+    }
+    return "";
 }
 
 #if 0
