@@ -78,10 +78,12 @@ namespace monya {
                 assert(params.fanout == 2);
 #ifdef USE_NUMA
                 scheduler = new container::Scheduler(params.fanout,
-                        params.max_depth, tree_id, params.nthread, numa_id);
+                        params.max_depth, tree_id,
+                        params.nthread/params.ntree, numa_id);
 #else
                 scheduler = new container::Scheduler(params.fanout,
-                        params.max_depth, tree_id, params.nthread, 0;
+                        params.max_depth, tree_id,
+                        params.nthread/params.ntree, 0;
 #endif
             }
 
@@ -156,9 +158,8 @@ namespace monya {
                     std::vector<container::NodeView*> procd_nodes =
                         scheduler->get_nodes(procd_level);
 
-//#pragma omp parallel for -- TODO: move schedule() out to separte loop
                     // No skew for balanced tree
-                    // Schedule more than one at a time
+#pragma omp parallel for num_threads (get_nthread())
                     for (size_t i = 0; i < procd_nodes.size(); i++) {
                         container::BinaryNode* curr_node =
                             static_cast<container::BinaryNode*>(procd_nodes[i]);
@@ -168,19 +169,26 @@ namespace monya {
                         if (curr_node->get_depth() < max_depth
                                 && curr_node->get_data_index().size() > 1) {
                             curr_node->spawn();
-                            if (curr_node->left)
-                                scheduler->schedule(curr_node->left);
-                            if (curr_node->right)
-                                scheduler->schedule(curr_node->right);
-
                             if (!one_spawned) one_spawned = true;
                         }
                     }
 
+                    // Terminal: No spawning or max depth reached
                     if (procd_level == max_depth || !one_spawned) break;
                     one_spawned = false; // Reset
+
+                    for (size_t i = 0; i < procd_nodes.size(); i++) {
+                        container::BinaryNode* curr_node =
+                            static_cast<container::BinaryNode*>(procd_nodes[i]);
+                            if (curr_node->left)
+                                scheduler->schedule(curr_node->left);
+                            if (curr_node->right)
+                                scheduler->schedule(curr_node->right);
+                    }
                 }
             }
+
+            const unsigned get_nthread() { return scheduler->get_nthread(); }
 
             ~BinaryTreeProgram() {
                 delete scheduler;

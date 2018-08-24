@@ -107,8 +107,11 @@ namespace monya {
             void train() {
                 assert(forest.size() == params.ntree);
 
-                for (auto it = forest.begin(); it != forest.end(); ++it)
-                    (*it)->build();
+#pragma omp parallel for num_threads(forest.size())
+                for (size_t i = 0; i < forest.size(); i++) {
+                    printf("Builing tree %lu! \n", i);
+                    forest[i]->build();
+                }
             }
 
             void query(container::Query* pq) {
