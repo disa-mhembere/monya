@@ -27,6 +27,7 @@
 #include "../io/IO.hpp"
 #include "../structures/SampleVector.hpp"
 #include "../validate/BruteForcekNN.hpp"
+#include "../common/cxxopts/cxxopts.hpp"
 
 using namespace monya;
 
@@ -54,7 +55,9 @@ class kdnode: public container::BinaryNode {
             assert(NULL != member);
             data_t dist = distance::euclidean(s1->raw_data(),
                     member, s1->size());
-            delete [] member;
+
+            if (ioer->get_orientation() != ROW)
+                delete [] member;
             return dist;
         }
 
@@ -117,13 +120,14 @@ class kdnode: public container::BinaryNode {
                     if (sample[feat_id] > upper_bounds[feat_id])
                         upper_bounds[feat_id] = sample[feat_id];
                 }
-                delete [] sample; // TODO: Coz wrong access pattern
+
+                if (ioer->get_orientation() != ROW)
+                    delete [] sample; // TODO: Coz wrong access pattern
             }
         }
 
         // This is run next
         void run() override {
-            printf("\n\nkdnode at depth: %lu run()\n", depth);
             if (depth < 3) {
                 sort_data_index(true); // Paralleize the sort
             } else {
@@ -135,7 +139,6 @@ class kdnode: public container::BinaryNode {
             printf("Printing data from node at depth: %lu with comparator "
                     ":%.2f\n", depth, get_comparator());
 #endif
-
 #if 1
             // What makes pruning possible
             compute_bounds();
@@ -250,21 +253,70 @@ class RandomSplit {
 };
 
 int main(int argc, char* argv[]) {
+    // Positional args
+    std::string datafn;
+    size_t nsamples;
+    size_t nfeatures;
 
-    // TODO: Read from argv[]
-    size_t nsamples = 32;
-    size_t nfeatures = 16;
-    tree_t ntree = 1;
-    unsigned nthread = atoi(argv[1]);
+    // Optional args
+    tree_t ntree;
+    unsigned nthread;
+    depth_t max_depth;
     MAT_ORIENT mo = MAT_ORIENT::COL;
+    constexpr unsigned FANOUT = 2;
+    bool approx = false;
 
-    Params params(nsamples, nfeatures,
-            "/home/disa/Research/monya/src/test-data/rand_32_16_cw.bin",
-            IOTYPE::MEM, ntree, nthread, mo);
+    try {
+        cxxopts::Options options(argv[0],
+                "kdtree data-file nsamples nfeatures [alg-options]\n");
+        options.positional_help("[optional args]");
 
-    constexpr depth_t max_depth = 5;
-    params.max_depth = max_depth;
+        options.add_options()
+            ("f,datafn", "Path to data-file on disk",
+             cxxopts::value<std::string>(datafn), "FILE")
+            ("n,nsamples", "Number of samples in the dataset (rows)",
+             cxxopts::value<std::string>())
+            ("m,nfeatures", "Number of features in the dataset (columns)",
+             cxxopts::value<std::string>())
+            ("t,ntree", "Number of trees in the forest",
+             cxxopts::value<tree_t>(ntree)->default_value("1"))
+            ("T,num_thread", "The number of threads to run",
+             cxxopts::value<unsigned>(nthread)->default_value("1"))
+            ("d,depth", "Max tree depth",
+             cxxopts::value<depth_t>(max_depth)->default_value("10"))
+            ("o,orientation", "data orientataion `row` or `col`)",
+             cxxopts::value<std::string>()->default_value("col"))
+            ("A,approx", "Do approx rather than exact kNN",
+             cxxopts::value<bool>(approx))
+            ("h,help", "Print help");
 
+        options.parse_positional({"datafn", "nsamples", "nfeatures"});
+        int nargs = argc;
+        options.parse(argc, argv);
+
+        if (options.count("help") || (nargs == 1)) {
+            std::cout << options.help() << std::endl;
+            exit(EXIT_SUCCESS);
+        }
+
+        if (nargs < 4) {
+            std::cout << "[ERROR]: Not enough default arguments\n";
+            std::cout << options.help() << std::endl;
+            exit(EXIT_SUCCESS);
+        }
+
+        nsamples = atol(options["nsamples"].as<std::string>().c_str());
+        nfeatures = atol(options["nfeatures"].as<std::string>().c_str());
+        mo = options["orientation"].as<std::string>() == "col" ? COL : ROW;
+
+    } catch (const cxxopts::OptionException& e) {
+        std::cout << "error parsing options: " << e.what() << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    Params params(nsamples, nfeatures, datafn,
+            IOTYPE::MEM, ntree, nthread, mo, FANOUT, max_depth);
+    assert(ntree < params.nfeatures);
     params.print();
 
     ComputeEngine<kdTreeProgram>::ptr engine =
@@ -299,8 +351,9 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Roots initialized ... Training trees\n";
     engine->train();
+    std::cout << "Trees trained!\n";
 
-#if 1
+#if 0
     std::cout << "Echoing the tree contents:\n";
     for (auto tree : engine->get_forest()) {
         std::cout << "\n TREE: " << tree->get_id() << "\n";
@@ -308,7 +361,7 @@ int main(int argc, char* argv[]) {
     }
 #endif
 
-#if 1
+#if 0
     // Query the Tree to make sure we don't have garbage!
     std::string rw_fn = "/home/disa/Research/monya/src/test-data/rand_32_16_rw.bin";
 
@@ -324,7 +377,7 @@ int main(int argc, char* argv[]) {
     for (size_t i = 0; i < nsamples; i++) {
         data_t* tmp = syncioer->get_row(i);
 
-#if 1
+#if 0
         constexpr unsigned k = 5;
         auto qsample = container::DenseVector::create_raw(tmp, nfeatures);
         container::Query* pq = new container::ProximityQuery(qsample, k, ntree);
