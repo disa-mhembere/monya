@@ -1,7 +1,7 @@
 language: cpp
 sudo: required
 dist:
-    - trusty
+    - xenial
 notifications:
   email: false
 install: sudo ./install.sh
