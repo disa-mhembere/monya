@@ -262,7 +262,7 @@ int main(int argc, char* argv[]) {
     tree_t ntree;
     unsigned nthread;
     depth_t max_depth;
-    MAT_ORIENT mo = MAT_ORIENT::COL;
+    mat_orient_t mo = mat_orient_t::COL;
     constexpr unsigned FANOUT = 2;
     bool approx = false;
 
@@ -315,7 +315,7 @@ int main(int argc, char* argv[]) {
     }
 
     Params params(nsamples, nfeatures, datafn,
-            IOTYPE::MEM, ntree, nthread, mo, FANOUT, max_depth);
+            io_t::MEM, ntree, nthread, mo, FANOUT, max_depth);
     assert(ntree < params.nfeatures);
     params.print();
 
@@ -363,10 +363,11 @@ int main(int argc, char* argv[]) {
 
 #if 0
     // Query the Tree to make sure we don't have garbage!
-    std::string rw_fn = "/home/disa/Research/monya/src/test-data/rand_32_16_rw.bin";
+    std::string rw_fn =
+        "/home/disa/Research/monya/src/test-data/rand_32_16_rw.bin";
 
     io::IO::raw_ptr syncioer = new io::SyncIO(rw_fn,
-            dimpair(nsamples, nfeatures), MAT_ORIENT::ROW);
+            dimpair(nsamples, nfeatures), mat_orient_t::ROW);
 
     std::vector<data_t> data(nsamples*nfeatures);
     static_cast<io::SyncIO*>(syncioer)->read(&data[0]);
@@ -377,7 +378,7 @@ int main(int argc, char* argv[]) {
     for (size_t i = 0; i < nsamples; i++) {
         data_t* tmp = syncioer->get_row(i);
 
-#if 0
+#if 1
         constexpr unsigned k = 5;
         auto qsample = container::DenseVector::create_raw(tmp, nfeatures);
         container::Query* pq = new container::ProximityQuery(qsample, k, ntree);

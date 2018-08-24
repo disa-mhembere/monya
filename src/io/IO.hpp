@@ -62,7 +62,7 @@ class IO {
         std::string fn;
         size_t dtype_size;
         data_t* data;
-        MAT_ORIENT orientation;
+        mat_orient_t orientation;
         dimpair dim;
 
     public:
@@ -71,7 +71,7 @@ class IO {
         IO() {
             data = NULL;
             fn = "";
-            orientation = MAT_ORIENT::INVALID;
+            orientation = mat_orient_t::INVALID;
             dtype_size = sizeof(data_t);
         }
 
@@ -82,7 +82,7 @@ class IO {
         virtual void print() {
             printf("fn: %s\n dypte size: %lu, orientation: %s, shape:"
                 " (%lu, %lu)\n", fn.c_str(), dtype_size,
-                (orientation == MAT_ORIENT::COL ? "COL" : "ROW"),
+                (orientation == mat_orient_t::COL ? "COL" : "ROW"),
                  dim.first, dim.second);
         }
 
@@ -90,16 +90,16 @@ class IO {
             this->fn = fn;
         }
 
-        IO(const dimpair dim, MAT_ORIENT orient): IO() {
+        IO(const dimpair dim, mat_orient_t orient): IO() {
             this->dim = dim;
             this->orientation = orient;
         }
 
-        void set_orientation(const MAT_ORIENT orient) {
+        void set_orientation(const mat_orient_t orient) {
             this->orientation = orient;
         }
 
-        const MAT_ORIENT get_orientation() const {
+        const mat_orient_t get_orientation() const {
             return this->orientation;
         }
 
@@ -172,7 +172,7 @@ class MemoryIO: public IO {
         }
 
         MemoryIO(data_t* data, dimpair dim,
-                MAT_ORIENT orient):
+                mat_orient_t orient):
             IO (dim, orient) {
             this->data = data;
         }
@@ -230,18 +230,18 @@ class MemoryIO: public IO {
         void transpose() override {
             data_t* tmp = new data_t[dim.first*dim.second];
 
-            if (orientation == MAT_ORIENT::ROW) {
+            if (orientation == mat_orient_t::ROW) {
                 for (size_t row = 0; row < dim.first; row++) {
                     for (size_t col = 0; col < dim.second; col++)
                         tmp[col*dim.first+row] = data[row*dim.second+col];
                 }
-                orientation = MAT_ORIENT::COL;
+                orientation = mat_orient_t::COL;
             } else {
                 for (size_t row = 0; row < dim.first; row++) {
                     for (size_t col = 0; col < dim.second; col++)
                         tmp[col*dim.first+row] = data[row*dim.second+col];
                 }
-                orientation = MAT_ORIENT::ROW;
+                orientation = mat_orient_t::ROW;
             }
 
             data = std::move(tmp);
@@ -251,9 +251,9 @@ class MemoryIO: public IO {
         // No copying
         data_t* get_col(const offset_t offset) override {
 
-            if (this->orientation == MAT_ORIENT::COL) {
+            if (this->orientation == mat_orient_t::COL) {
                 return &data[offset*this->dim.first];
-            } else if (this->orientation == MAT_ORIENT::ROW) {
+            } else if (this->orientation == mat_orient_t::ROW) {
                 // FIXME: Memory leak if not freed
                 data_t* tmp = new data_t[dim.first];
                 for (size_t row = 0; row < dim.first; row++)
@@ -266,9 +266,9 @@ class MemoryIO: public IO {
 
         // No copying
         data_t* get_row(const offset_t offset) override {
-            if (this->orientation == MAT_ORIENT::ROW) {
+            if (this->orientation == mat_orient_t::ROW) {
                 return &data[offset*this->dim.second];
-            } else if (this->orientation == MAT_ORIENT::COL) {
+            } else if (this->orientation == mat_orient_t::COL) {
                 // FIXME: Memory leak if not freed
                 data_t* tmp = new data_t[dim.second];
                 for (size_t col = 0; col < dim.second; col++)
@@ -303,7 +303,7 @@ class SyncIO: public IO {
         }
 
         SyncIO(const std::string fn, dimpair dim,
-                MAT_ORIENT orient) : IO (dim, orient) {
+                mat_orient_t orient) : IO (dim, orient) {
             set_fn(fn);
         }
 
@@ -351,7 +351,7 @@ class SyncIO: public IO {
         // No copying
         data_t* get_col(const offset_t offset) override {
             assert(fs.is_open());
-            if (this->orientation == MAT_ORIENT::COL) {
+            if (this->orientation == mat_orient_t::COL) {
                 fs.seekp(offset*dim.first*dtype_size);
                 if (NULL == data)
                     data = new data_t[dim.first];
@@ -367,7 +367,7 @@ class SyncIO: public IO {
                 printf("%s\n", str_col.c_str());
 #endif
                 return data;
-            } else if (this->orientation == MAT_ORIENT::ROW) {
+            } else if (this->orientation == mat_orient_t::ROW) {
                 // FIXME: Memory leak if not freed
                 printf("WARNING: Inefficent method `get_col` for rowwise\n");
                 data_t* tmp = new data_t[dim.first];
@@ -386,12 +386,12 @@ class SyncIO: public IO {
         data_t* get_row(const offset_t offset) override {
             assert(fs.is_open());
 
-            if (this->orientation == MAT_ORIENT::ROW) {
+            if (this->orientation == mat_orient_t::ROW) {
                 data_t* tmp = new data_t[dim.second];
                 fs.seekp((offset*dim.second)*dtype_size);
                 fs.read(reinterpret_cast<char*>(tmp), dtype_size*dim.second);
                 return tmp;
-            } else if (this->orientation == MAT_ORIENT::COL) {
+            } else if (this->orientation == mat_orient_t::COL) {
 #if 1
                 // FIXME: Memory leak if not freed
                 printf("WARNING: Inefficent method `get_row` for colwise\n");

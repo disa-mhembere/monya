@@ -30,7 +30,7 @@ class IOfactory {
         bool is_direct;
 
     public:
-        static io::IO::raw_ptr create(IOTYPE iotype) {
+        static io::IO::raw_ptr create(io_t iotype) {
 
             switch (iotype) {
                 case MEM:

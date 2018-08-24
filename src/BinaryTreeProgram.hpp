@@ -66,7 +66,7 @@ namespace monya {
                 ioer->set_orientation(params.orientation);
                 ioer->shape(dimpair(params.nsamples, params.nfeatures));
 
-                if (params.iotype == IOTYPE::MEM)
+                if (params.iotype == io_t::MEM)
                     static_cast<io::MemoryIO*>(ioer)->from_file();
 
                 // Configure Tree

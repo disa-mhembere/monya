@@ -118,7 +118,7 @@ namespace monya {
             }
         }
 
-        if (ioer->get_orientation() == MAT_ORIENT::ROW)
+        if (ioer->get_orientation() == mat_orient_t::ROW)
             delete [] ret;
 #if 0
         std::cout << "Printing full index after set:\n";

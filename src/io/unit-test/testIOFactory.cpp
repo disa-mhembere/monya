@@ -25,7 +25,7 @@ using namespace monya;
 
 int main(int argc, char* argv[]) {
     // Test Sync
-    io::IO::raw_ptr ioer = IOfactory::create(IOTYPE::SYNC);
+    io::IO::raw_ptr ioer = IOfactory::create(io_t::SYNC);
     assert(ioer->get_fn().empty());
     ioer->destroy();
 
@@ -38,10 +38,10 @@ int main(int argc, char* argv[]) {
     }
 
     // Test memory
-    ioer = IOfactory::create(IOTYPE::MEM);
+    ioer = IOfactory::create(io_t::MEM);
     ioer->shape(dimpair(NROW, NCOL));
     io::MemoryIO::cast2(ioer)->set_data(&d[0]);
-    ioer->set_orientation(MAT_ORIENT::COL);
+    ioer->set_orientation(mat_orient_t::COL);
 
     data_t *buf = NULL;
 

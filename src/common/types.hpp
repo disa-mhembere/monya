@@ -53,6 +53,14 @@ namespace monya {
     //  Returned results contain the ID of the NN and distance
     typedef std::pair<sample_id_t, data_t> NNpair;
 
+    enum file_t {
+        BIN,
+        FVECS,
+        IVECS,
+        BVECS,
+        HDF5
+    };
+
     // Traversal order of the tree
     enum order_t {
         PREORDER,
@@ -70,7 +78,7 @@ namespace monya {
       Whether we are running in memory, semi-external memory or in memory
       with synchronous I/O
       */
-    enum IOTYPE {
+    enum io_t {
         MEM = 0,
         SEM = 1, // Always async
         SYNC = 2, // Synchronous is for testing only
@@ -82,7 +90,7 @@ namespace monya {
          COL: colwise
          BAND: banded
     */
-    enum MAT_ORIENT {
+    enum mat_orient_t {
         ROW,
         COL,
         BAND,
@@ -94,17 +102,20 @@ namespace monya {
             size_t nsamples; // Max # of samples from which the tree is built
             size_t nfeatures; // Number of features
             std::string fn;
-            IOTYPE iotype;
+            io_t iotype;
             tree_t ntree;
             unsigned nthread;
-            MAT_ORIENT orientation;
+            mat_orient_t orientation;
             unsigned fanout; // The number of children a node a can have
             depth_t max_depth; // Maximum depth the tree can reach
+            file_t filetype; // file format
+
 
         Params(size_t nsamples=0, size_t nfeatures=0, std::string fn="",
-                IOTYPE iotype=IOTYPE::MEM, tree_t ntree=1, unsigned nthread=1,
-                MAT_ORIENT orientation=MAT_ORIENT::COL, unsigned fanout=2,
-                depth_t max_depth=std::numeric_limits<depth_t>::max()) {
+                io_t iotype=io_t::MEM, tree_t ntree=1, unsigned nthread=1,
+                mat_orient_t orientation=mat_orient_t::COL, unsigned fanout=2,
+                depth_t max_depth=std::numeric_limits<depth_t>::max(),
+                file_t filetype=file_t::BIN) {
 
             this->nsamples = nsamples;
             this->nfeatures = nfeatures;
@@ -115,8 +126,9 @@ namespace monya {
             this->orientation = orientation;
             this->fanout = fanout;
             this->max_depth = max_depth;
+            this->filetype = filetype;
 
-            if (iotype != IOTYPE::MEM && nthread > 1)
+            if (iotype != io_t::MEM && nthread > 1)
                 throw parameter_exception("Multithreading only support for in"
                         " memory mode currently!\n");
         }
@@ -135,7 +147,11 @@ namespace monya {
                         orientation == COL ? "Column" :
                         orientation == BAND ? "Band" : "Invalid") << std::endl <<
                 "fanout: " << fanout << std::endl <<
-                "max depth: " << max_depth << std::endl;
+                "max depth: " << max_depth << std::endl <<
+                "filetype:" << (filetype == BIN ? "Binary" :
+                        filetype == FVECS ? "fvecs" :
+                        filetype == IVECS ? "ivecs" :
+                        filetype == BVECS ? "bvecs": "hdf5") << std::endl;
         }
     };
 
