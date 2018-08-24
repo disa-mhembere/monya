@@ -148,6 +148,7 @@ namespace monya {
                 assert(NULL != this->get_root());
                 scheduler->schedule(this->get_root());
 
+                bool one_spawned = false;
                 while (true) {
                     depth_t procd_level = scheduler->get_current_level() - 1;
                     assert(procd_level <= max_depth);
@@ -171,10 +172,13 @@ namespace monya {
                                 scheduler->schedule(curr_node->left);
                             if (curr_node->right)
                                 scheduler->schedule(curr_node->right);
+
+                            if (!one_spawned) one_spawned = true;
                         }
                     }
-                    if (procd_level == max_depth || scheduler->empty())
-                        break;
+
+                    if (procd_level == max_depth || !one_spawned) break;
+                    one_spawned = false; // Reset
                 }
             }
 

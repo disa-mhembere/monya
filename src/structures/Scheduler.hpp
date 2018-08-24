@@ -80,7 +80,6 @@ namespace monya {
             std::vector<NodeView*>& get_nodes(const unsigned level) {
                 return nodes[level];
             }
-            const bool empty() const { return nodes.size() < current_level; }
 
             ~Scheduler();
     };
