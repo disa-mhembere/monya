@@ -81,6 +81,12 @@ namespace monya {
                 return nodes[level];
             }
 
+            const unsigned get_nthread() const {
+                return threads.size();
+            }
+
+
+
             ~Scheduler();
     };
 } } // End namespace monya::container

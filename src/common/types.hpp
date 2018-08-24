@@ -110,7 +110,6 @@ namespace monya {
             depth_t max_depth; // Maximum depth the tree can reach
             file_t filetype; // file format
 
-
         Params(size_t nsamples=0, size_t nfeatures=0, std::string fn="",
                 io_t iotype=io_t::MEM, tree_t ntree=1, unsigned nthread=1,
                 mat_orient_t orientation=mat_orient_t::COL, unsigned fanout=2,

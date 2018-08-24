@@ -28,7 +28,7 @@
 #endif
 
 // TODO: Implement guided by backing this off
-#define MIN_TASKS_PT 4
+#define MIN_TASKS_PT 8
 
 namespace monya { namespace container {
 
@@ -43,6 +43,9 @@ namespace monya { namespace container {
             pthread_mutex_init(&mutex, &mutex_attr);
             pthread_cond_init(&cond, NULL);
             pending_threads = nthread;
+
+            printf("Launching scheduler %u with %u nthreads!\n",
+                    tree_id, nthread);
 
             for (unsigned tid = 0; tid < nthread; tid++) {
                 threads.push_back(new WorkerThread(numa_id, tid));
