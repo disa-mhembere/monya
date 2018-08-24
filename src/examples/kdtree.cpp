@@ -135,7 +135,7 @@ class kdnode: public container::BinaryNode {
             }
 
             this->set_comparator(data_index[data_index.size() / 2 ].get_val());
-#if 1
+#if 0
             printf("Printing data from node at depth: %lu with comparator "
                     ":%.2f\n", depth, get_comparator());
 #endif
