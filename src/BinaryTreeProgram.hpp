@@ -76,14 +76,14 @@ namespace monya {
                 nfeatures = params.nfeatures;
 
                 assert(params.fanout == 2);
+                unsigned nworkers = std::max(1,
+                        static_cast<int>(params.nthread/params.ntree));
 #ifdef USE_NUMA
                 scheduler = new container::Scheduler(params.fanout,
-                        params.max_depth, tree_id,
-                        params.nthread/params.ntree, numa_id);
+                        params.max_depth, tree_id, nworkers, numa_id);
 #else
                 scheduler = new container::Scheduler(params.fanout,
-                        params.max_depth, tree_id,
-                        params.nthread/params.ntree, 0;
+                        params.max_depth, tree_id, nworkers, 0;
 #endif
             }
 
