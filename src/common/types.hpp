@@ -351,21 +351,39 @@ namespace monya {
             unsigned max; // NOTE: Exclusive so `max` never occurs i.e like mod
 
         public:
-            cunsigned(unsigned _max) : val(0), max(_max) {
+            cunsigned(unsigned max) : val(0), max(max) {
                 if (max == 0)
                     throw parameter_exception("max must be > 0",
                             __FILE__, __LINE__);
             }
 
-            void inc() {
+            cunsigned(unsigned val, unsigned max) : val(val), max(max) {
+                if (max == 0)
+                    throw parameter_exception("max must be > 0",
+                            __FILE__, __LINE__);
+                if (val >= max)
+                    throw parameter_exception("val must be < max",
+                            __FILE__, __LINE__);
+            }
+
+            void set(unsigned val) {
+                this->val = val;
+                if (val >= max)
+                    throw parameter_exception("val must be < max",
+                            __FILE__, __LINE__);
+            }
+
+            unsigned inc() {
                 val = val == max - 1 ? 0 : val + 1;
-            }
-            void dec() {
-                val = val == 0 ? max - 1: val - 1;
-            }
-            const unsigned get() const {
                 return val;
             }
+
+             unsigned dec() {
+                val = val == 0 ? max - 1: val - 1;
+                return val;
+            }
+
+            const unsigned get() const { return val; }
     };
 } // End monya
 
