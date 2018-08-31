@@ -44,9 +44,6 @@ namespace monya { namespace container {
             pthread_cond_init(&cond, NULL);
             pending_threads = nthread;
 
-            printf("Launching scheduler %u with %u nthreads!\n",
-                    tree_id, nthread);
-
             for (unsigned tid = 0; tid < nthread; tid++) {
                 threads.push_back(new WorkerThread(numa_id, tid));
                 threads.back()->set_parent_cond(&cond);
@@ -79,7 +76,7 @@ namespace monya { namespace container {
     }
 
     void Scheduler::run_level(const depth_t level) {
-        printf("\nRunning level: %lu\n", level);
+        if (tree_id == 0) printf("Running level: %lu\n", level);
 
         std::vector<NodeView*> level_nodes = nodes[level];
 
@@ -104,7 +101,6 @@ namespace monya { namespace container {
         }
 
         // Run nodes in current level
-        printf("All nodes in level: %lu given to workers\n", level);
         wake4run(BUILD);
         wait4completion(); // TODO: Level-wise barrier not necessary
 #if 0

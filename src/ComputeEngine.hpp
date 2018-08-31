@@ -129,6 +129,10 @@ namespace monya {
                 return forest[id];
             }
 
+            const size_t ntree() const {
+                return forest.size();
+            }
+
             ~ComputeEngine() {
                 assert(forest.size() == params.ntree);
                 for (auto it = forest.begin(); it != forest.end(); ++it)
