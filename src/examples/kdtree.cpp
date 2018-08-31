@@ -34,7 +34,9 @@ using namespace monya;
 class kdnode: public container::BinaryNode {
     private:
         size_t split_dim;
+#ifdef PRUNE
         std::vector<data_t> upper_bounds, lower_bounds;
+#endif
         bool complete;
 
     public:
@@ -103,6 +105,7 @@ class kdnode: public container::BinaryNode {
         }
 
         // TODO: ||ize
+#ifdef PRUNE
         void compute_bounds() {
             // Upper and lower bounds at this node
             lower_bounds.assign(ioer->shape().second,
@@ -125,6 +128,7 @@ class kdnode: public container::BinaryNode {
                     delete [] sample; // TODO: Coz wrong access pattern
             }
         }
+#endif
 
         // This is run next
         void run() override {
@@ -139,7 +143,7 @@ class kdnode: public container::BinaryNode {
             printf("Printing data from node at depth: %lu with comparator "
                     ":%.2f\n", depth, get_comparator());
 #endif
-#if 1
+#ifdef PRUNE
             // What makes pruning possible
             compute_bounds();
 #endif
@@ -243,8 +247,9 @@ class RandomSplit {
         std::default_random_engine generator;
         std::uniform_int_distribution<size_t> distribution;
     public:
-        RandomSplit(size_t nfeatures, size_t npick) {
+        RandomSplit(size_t nfeatures) {
             distribution = std::uniform_int_distribution<size_t>(0, nfeatures);
+            distribution(generator); // Throw away the first one
         }
 
         size_t generate() {
@@ -323,35 +328,37 @@ int main(int argc, char* argv[]) {
         ComputeEngine<kdTreeProgram>::create(params);
     std::cout << "Engine created ...\n";
 
+    utils::time timer;
+    timer.tic();
+
     // Create the root with no duplicates for split dimension
     // TODO: Create root/node initializer that is passed to node
-    RandomSplit rs(params.nfeatures, ntree);
-    std::set<size_t> splits;
+    RandomSplit rs(params.nfeatures);
 
-    for (auto tree : engine->get_forest()) {
-        while (true) {
-            size_t split_dim = rs.generate();
-            auto sp = splits.find(split_dim); // Pick the split dim
-            if (sp == splits.end()) {
-                std::cout << "Tree: " << tree->get_id() <<
-                    " INIT Choosing split: " << split_dim << std::endl;
+    // Pick the first tree's split dim
+    cunsigned split_dim(rs.generate(), params.nfeatures);
 
-                container::BinaryNode* root = new kdnode;
+    for (size_t tid = 0; tid < engine->get_forest().size(); tid++) {
+        auto tree = engine->get_tree(tid);
 
-                // Which dim to split on
-                kdnode::cast2(root)->set_split_dim(split_dim);
-                // Which col to get from the data & place in memory
-                kdnode::cast2(root)->set_index(split_dim);
-                tree->set_root(root);
-                splits.insert(split_dim); // Keep track of used split dims
-                break;
-            }
-        }
+        std::cout << "Tree: " << tree->get_id() <<
+            " INIT Choosing split: " << split_dim.get() << std::endl;
+        container::BinaryNode* root = new kdnode;
+
+        // Which dim to split on
+        kdnode::cast2(root)->set_split_dim(split_dim.get());
+        // Which col to get from the data & place in memory
+        kdnode::cast2(root)->set_index(split_dim.get());
+        tree->set_root(root);
+        split_dim.inc();
     }
 
     std::cout << "Roots initialized ... Training trees\n";
     engine->train();
     std::cout << "Trees trained!\n";
+
+    std::cout << "Algorithmic time " << params.nthread << " threads: "
+        <<  timer.toc() << " sec\n";
 
 #if 0
     std::cout << "Echoing the tree contents:\n";
