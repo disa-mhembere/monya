@@ -26,24 +26,28 @@
 namespace monya { namespace utils {
 class time {
     private:
-        std::chrono::system_clock::time_point start;
-        bool _;
+        std::chrono::time_point<std::chrono::high_resolution_clock> start;
+        bool flag;
+        std::chrono::duration<double> duration;
 
     public:
-        time() {
-            _ = false;
-        }
+        time(): flag(false) {}
+
         void tic() {
-            start = std::chrono::system_clock::now();
-            _ = true;
+            start = std::chrono::high_resolution_clock::now();
+            flag = true;
+        }
+
+        double len() {
+            return duration.count();
         }
 
         double toc() {
-            if (!_)
+            if (!flag)
                 std::cerr << "[WARNING]: time(): multiple calls to `toc`\n";
-
-            _ = false;
-            return (std::chrono::system_clock::now() - start).count();
+            flag = false;
+            duration = std::chrono::high_resolution_clock::now() - start;
+            return duration.count();
         }
 };
 
