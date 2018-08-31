@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
         v.push_back(i);
 
     std::cout << "Creating MemoryIO unit ...\n";
-    io::IO::raw_ptr memioer = new io::MemoryIO(&v[0],
+    io::IO::raw_ptr memioer = io::MemoryIO::create(&v[0],
             dimpair(NROW, NCOL), mat_orient_t::ROW);
 
     std::string fn = std::string("inmem_n") + std::to_string(NROW) +

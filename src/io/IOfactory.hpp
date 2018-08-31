@@ -25,16 +25,12 @@
 
 namespace monya {
 class IOfactory {
-    private:
-        std::string fn; // Either name in safs or OS file system
-        bool is_direct;
-
     public:
         static io::IO::raw_ptr create(io_t iotype) {
 
             switch (iotype) {
                 case MEM:
-                    return new io::MemoryIO();
+                    return io::MemoryIO::create();
                     break;
                 case SEM:
                     throw not_implemented_exception(__FILE__, __LINE__);

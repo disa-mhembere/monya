@@ -68,11 +68,8 @@ class IO {
     public:
         typedef IO* raw_ptr;
 
-        IO() {
-            data = NULL;
-            fn = "";
-            orientation = mat_orient_t::INVALID;
-            dtype_size = sizeof(data_t);
+        IO() : fn(""), dtype_size(sizeof(data_t)), data(NULL),
+                orientation(INVALID), dim(dimpair(0,0)) {
         }
 
         virtual void transpose() {
@@ -95,7 +92,7 @@ class IO {
             this->orientation = orient;
         }
 
-        void set_orientation(const mat_orient_t orient) {
+        virtual void set_orientation(const mat_orient_t orient) {
             this->orientation = orient;
         }
 
@@ -163,28 +160,65 @@ class IO {
 };
 
 // Basically a matrix represented as a vector
+class MemoryIO;
+static MemoryIO* memIOSingleton = NULL;
+
+// Singleton, but not thread safe. Called serially by `TreeProgram`s
 class MemoryIO: public IO {
     private:
         bool is_data_local;
+
     public:
+        static MemoryIO* create() {
+            if (!memIOSingleton)
+                memIOSingleton = new MemoryIO;
+            return memIOSingleton;
+        }
+
+        static MemoryIO* create(data_t* data, dimpair dim,
+                mat_orient_t orient) {
+            if (!memIOSingleton)
+                memIOSingleton = new MemoryIO(data, dim, orient);
+            return memIOSingleton;
+        }
+
         MemoryIO(): IO() {
             is_data_local = false;
         }
 
-        MemoryIO(data_t* data, dimpair dim,
-                mat_orient_t orient):
-            IO (dim, orient) {
+        MemoryIO(data_t* data, dimpair _dim,
+                mat_orient_t orient): IO (_dim, orient) {
             this->data = data;
         }
 
+        void set_fn(const std::string fn) override {
+            if (this->fn.empty())
+                IO::set_fn(fn);
+        }
+
+        void set_orientation(const mat_orient_t orient) override {
+            if (this->orientation == mat_orient_t::INVALID)
+                IO::set_orientation(orient);
+            // else do nothing
+        }
+
+        void shape(const dimpair dim) override {
+            if (this->dim == dimpair(0,0))
+                IO::shape(dim);
+            // else do nothing
+        }
+
         void from_file() {
+            if (NULL != data) return;
+
             assert (!this->fn.empty());
             if (NULL == data)
                 data = new data_t[dim.first*dim.second];
 
             // TODO: Use an enum for filetype
             if (utils::get_file_ext(fn) == "fvecs") {
-                vecs_reader* vr = new fvecs_reader(fn, dim.first, dim.second);
+                vecs_reader* vr = new fvecs_reader(fn, dim.first,
+                        dim.second);
                 vr->read(data);
                 delete vr;
             } else {
@@ -210,6 +244,7 @@ class MemoryIO: public IO {
         }
 
         void set_data(data_t* data) {
+            if (this->data) return;
             this->data = data;
         }
 
@@ -248,7 +283,6 @@ class MemoryIO: public IO {
             std::swap(dim.first, dim.second);
         }
 
-        // No copying
         data_t* get_col(const offset_t offset) override {
 
             if (this->orientation == mat_orient_t::COL) {
@@ -284,8 +318,10 @@ class MemoryIO: public IO {
         }
 
         void destroy() override {
-            if (is_data_local)
+            if (NULL != data && is_data_local) {
                 delete [] data;
+                data = NULL;
+            }
         }
 };
 
