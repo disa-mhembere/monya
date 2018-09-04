@@ -7,6 +7,9 @@ notifications:
 install: sudo ./install.sh
 compiler:
 - g++
+branches:
+    except:
+        - mem-reorg
 script:
 - make clean && make
 - cd src/common/unit-test && make test && cd -
