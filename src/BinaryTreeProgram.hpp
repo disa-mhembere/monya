@@ -25,6 +25,7 @@
 #include "structures/BinaryNode.hpp"
 #include "io/IOfactory.hpp"
 #include "structures/Scheduler.hpp"
+#include <omp.h>
 
 // NOTE: We initally assume all the Trees are the same
 namespace monya {
@@ -78,6 +79,7 @@ namespace monya {
                 assert(params.fanout == 2);
                 unsigned nworkers = std::max(1,
                         static_cast<int>(params.nthread/params.ntree));
+                omp_set_num_threads(nworkers);
 #ifdef USE_NUMA
                 scheduler = new container::Scheduler(params.fanout,
                         params.max_depth, tree_id, nworkers, numa_id);
@@ -159,8 +161,9 @@ namespace monya {
                         scheduler->get_nodes(procd_level);
 
                     // No skew for balanced tree
-#pragma omp parallel for num_threads (get_nthread())
+#pragma omp parallel for
                     for (size_t i = 0; i < procd_nodes.size(); i++) {
+                        //printf("omp threads: %d\n", omp_get_thread_num());
                         container::BinaryNode* curr_node =
                             static_cast<container::BinaryNode*>(procd_nodes[i]);
                         // Termination conditions:

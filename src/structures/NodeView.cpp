@@ -27,6 +27,8 @@
 #include <parallel/algorithm>
 #include "../io/IO.hpp"
 
+#include <omp.h>
+
 namespace monya {
     namespace container {
 
@@ -128,11 +130,13 @@ namespace monya {
     }
 
     void NodeView::sort_data_index(bool par) {
-        if (par)
+        if (par) {
+            omp_set_num_threads(omp_get_num_threads());
             __gnu_parallel::sort(data_index.begin(),
                     data_index.end());
-        else
+        } else {
             std::sort(data_index.begin(), data_index.end());
+        }
     }
 
     IndexVector& NodeView::get_data_index() {
