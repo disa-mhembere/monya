@@ -183,9 +183,6 @@ namespace monya {
         return depth == 0;
     }
 
-    void NodeView::spawn() {
-    }
-
     // @param node: inherits properties from the object
      void NodeView::bestow(NodeView* node) {
          node->parent = this;

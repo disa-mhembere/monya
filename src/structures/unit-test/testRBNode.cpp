@@ -23,21 +23,21 @@ namespace mc = monya::container;
 
 int main(int argc, char* argv[]) {
 
-    mc::BinaryNode* root = new mc::RBNode(10);
+    mc::RBNode* root = new mc::RBNode(10);
     mc::RBNode::cast2(root)->color = 0;
 #if 0
     std::cout << "Print test: " << *root << std::endl;
 #endif
     root->print();
 
-    mc::BinaryNode* left = new mc::RBNode(4);
+    mc::RBNode* left = new mc::RBNode(4);
     mc::RBNode::cast2(left)->color = 1;
 #if 0
     std::cout << *left << std::endl;
 #endif
     root->left = left;
 
-    mc::BinaryNode* right = new mc::RBNode(14);
+    mc::RBNode* right = new mc::RBNode(14);
     mc::RBNode::cast2(right)->color = 1;
 #if 0
     std::cout << *right << std::endl;
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
     assert(mc::RBNode::cast2(root->left)->color
             == mc::RBNode::cast2(left)->color);
 
-    mc::BinaryNode* t = new mc::RBNode;
+    mc::RBNode* t = new mc::RBNode;
     mc::RBNode::cast2(t)->color = 0;
     assert(!mc::RBNode::cast2(t)->color);
 

@@ -29,28 +29,32 @@ int main(int argc, char* argv[]) {
 #endif
     root->print();
 
-    mc::BinaryNode* left = new mc::BinaryNode(4);
+    mc::BinaryNode* lnode = new mc::BinaryNode(4);
+    lnode->children = new mc::BinaryNode[2];
+    lnode->left = lnode->right = true;
 #if 0
-    std::cout << *left << std::endl;
+    std::cout << *lnode << std::endl;
 #endif
-    root->left = left;
+    root->children = new mc::BinaryNode[2];
+    root->left = root-> right = true;
+    root->children[0] = *lnode;
 
-    mc::BinaryNode* right = new mc::BinaryNode(14);
+    mc::BinaryNode* rnode = new mc::BinaryNode(14);
 #if 0
-    std::cout << *right << std::endl;
+    std::cout << *rnode << std::endl;
 #endif
-    root->right = right;
+    root->children[1] = *rnode;
 
-    root->left->right = right;
-    root->right->left = left;
+    //root->lnode->rnode = rnode;
+    //root->rnode->lnode = lnode;
 
-    assert(*root->right == *right);
-    assert(*root->left == *left);
-    assert(*root->left->right == *right);
-    assert(*root->right->left == *left);
+    assert(root->children[0] == *lnode);
+    assert(root->children[1] == *rnode);
+    //assert(*root->lnode->rnode == *rnode);
+    //assert(*root->rnode->lnode == *lnode);
 
-    delete(left);
-    delete(right);
+    delete(lnode);
+    delete(rnode);
     delete(root);
 
     std::cout << "BinaryNode Test successful!\n\n";

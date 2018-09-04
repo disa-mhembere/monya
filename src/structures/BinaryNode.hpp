@@ -34,8 +34,8 @@ class BinaryNode: public NodeView {
         // TODO: rm
 #if 1
         BinaryNode* parent;
-        BinaryNode* left;
-        BinaryNode* right;
+        BinaryNode* children; // Reduce # allocs when balanced
+        bool left, right;
 #endif
         // TODO: rm
 #ifdef VECNODES
@@ -45,36 +45,19 @@ class BinaryNode: public NodeView {
         // Inherit constructors
         using NodeView::NodeView;
 
+        BinaryNode() : left(false), right(false) {
+            this->depth = 0;
+            req_indxs.resize(0);
+        }
+
         BinaryNode* get_parent() { return parent; }
-
-        virtual void run() override {
-            throw abstract_exception("BinaryNode::run");
-        }
-
-        virtual void init(Params&) override {
-            throw abstract_exception("BinaryNode::init");
-        }
 
         static BinaryNode* cast2(NodeView* nv) {
             return static_cast<BinaryNode*>(nv);
         }
 
         const bool has_child() override {
-            return left|| right;
-        }
-
-        void read_svm() {
-            // TODO
-        }
-
-        // Async writeback
-        void persist() {
-            // TODO
-        }
-
-        // Keep the node in memory
-        void cache() {
-            // TODO
+            return left || right;
         }
 
         virtual ~BinaryNode() override {

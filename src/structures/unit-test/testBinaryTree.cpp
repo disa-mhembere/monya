@@ -73,8 +73,10 @@ int main(int argc, char* argv[]) {
 
     for (std::vector<data_t>::iterator it = members.begin();
             it != members.end(); ++it) {
+#if 0
         container::BinaryNode* node = new container::BinaryNode((data_t)*it);
         tree->insert(node);
+#endif
     }
 
 #ifdef MONYA_VERBOSE
@@ -82,6 +84,7 @@ int main(int argc, char* argv[]) {
     tree->echo();
 #endif
 
+#if 0
     for (auto i : members) {
         // Asserts on failure to find
         container::BinaryNode* q = new container::BinaryNode(i);
@@ -89,6 +92,7 @@ int main(int argc, char* argv[]) {
         assert(*q == *a);
         delete(q);
     }
+#endif
 
     // Add some numbers in an ad hoc fashion
     constexpr unsigned NLEVELS = 3;

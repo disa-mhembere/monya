@@ -42,7 +42,7 @@ class BinaryTree {
     public:
         typedef std::shared_ptr<BinaryTree> ptr;
 
-        BinaryTree(): root(NULL) {
+        BinaryTree(): root(NULL), depth(0) {
         }
 
         static ptr create() {
@@ -61,6 +61,10 @@ class BinaryTree {
             return root;
         }
 
+        void descend() {
+            depth++;
+        }
+
         void set_depth(const size_t depth) {
             this->depth = depth;
         }
@@ -75,10 +79,6 @@ class BinaryTree {
 
         virtual void set_root(BinaryNode*& node);
         virtual size_t get_nnodes(BinaryNode* node, size_t& nnodes);
-        virtual void insert_at(BinaryNode*& new_node,
-                BinaryNode* node, bchild_t pos);
-        virtual void insert(BinaryNode*& node);
-        BinaryNode* find(const BinaryNode* shell);
         void echo();
         ~BinaryTree();
 };

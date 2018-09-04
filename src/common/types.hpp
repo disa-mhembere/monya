@@ -70,8 +70,8 @@ namespace monya {
     };
 
     enum bchild_t {
-        LEFT,
-        RIGHT
+        LEFT = 0,
+        RIGHT = 1
     };
 
     /**

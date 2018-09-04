@@ -44,7 +44,8 @@ class kdnode: public container::BinaryNode {
         using container::BinaryNode::BinaryNode;
 
         kdnode() {
-            parent = left = right = NULL;
+            parent = NULL;
+            left = right = false;
         }
 
         static kdnode* cast2(container::BinaryNode* node) {
@@ -64,21 +65,29 @@ class kdnode: public container::BinaryNode {
         }
 
         void spawn() override {
-
             // TODO: Boilerplate
-            left = new kdnode;
-            right = new kdnode;
-
-            bestow(left);
-            bestow(right);
+            children = new kdnode[2];
+            bestow(&children[0]);
+            bestow(&children[1]);
             // End TODO: Boilerplate
 
             auto next_split = split_dim+1 == ioer->shape().second ?
                     0 : split_dim+1;
-            cast2(left)->set_split_dim(next_split);
-            cast2(left)->set_index(next_split);
-            cast2(right)->set_split_dim(next_split);
-            cast2(right)->set_index(next_split);
+            cast2(&children[0])->set_split_dim(next_split);
+            cast2(&children[0])->set_index(next_split);
+            children[0].set_comparator(69);
+            printf("\n\n");
+            children[0].print();
+            printf("\n\n");
+
+            cast2(&children[1])->set_split_dim(next_split);
+            cast2(&children[1])->set_index(next_split);
+            exit(0);
+            children[1].set_comparator(6969);
+
+            printf("\n\n");
+            children[1].print();
+            printf("\n\n");
 
 
             std::vector<sample_id_t> idxs;
@@ -91,8 +100,14 @@ class kdnode: public container::BinaryNode {
             // TODO: Better way to set split value
             assert(offsets.size() == 2);
 
-            left->set_ph_data_index(&idxs[offsets[0]], offsets[1]-offsets[0]);
-            right->set_ph_data_index(&idxs[offsets[1]],
+            //cast2(&children[0])->set_ph_data_index(
+                    //&idxs[offsets[0]], offsets[1]-offsets[0]);
+            //cast2(&children[1])->set_ph_data_index(&idxs[offsets[1]],
+                    //idxs.size()-offsets[1]);
+
+            children[0].set_ph_data_index(
+                    &idxs[offsets[0]], offsets[1]-offsets[0]);
+            children[1].set_ph_data_index(&idxs[offsets[1]],
                     idxs.size()-offsets[1]);
         }
 
@@ -138,7 +153,7 @@ class kdnode: public container::BinaryNode {
                 sort_data_index(false);
             }
 
-            this->set_comparator(data_index[data_index.size() / 2 ].get_val());
+            this->set_comparator(data_index[data_index.size() / 2].get_val());
 #if 0
             printf("Printing data from node at depth: %lu with comparator "
                     ":%.2f\n", depth, get_comparator());
@@ -152,8 +167,10 @@ class kdnode: public container::BinaryNode {
         void print() override {
             printf("Comparator: %.2f, Split dim: %lu\n %s\n", get_comparator(),
             get_split_dim(), data_index.to_string().c_str());
-            printf("Membership: %s\n",  data_index.to_string().c_str());
 #if 0
+            printf("Comparator: %.2f, Split dim: %lu\n %s\n", get_comparator(),
+            get_split_dim(), data_index.to_string().c_str());
+            printf("Membership: %s\n",  data_index.to_string().c_str());
             std::cout << "Upper bounds:\n";
             io::print_arr<data_t>(&upper_bounds[0], upper_bounds.size());
             std::cout << "Lower bounds:\n";
@@ -189,9 +206,22 @@ class kdTreeProgram: public BinaryTreeProgram {
                 // compare
                 auto split_dim = node->get_split_dim();
                 if ((*query)[split_dim] > node->get_comparator()) {
-                    node = kdnode::cast2(node->right);
-                } else {
-                    node = kdnode::cast2(node->left);
+                    if (node->left) {
+                        if (node->right)
+                            node = kdnode::cast2(&node->children[1]);
+                        else
+                            node = NULL;
+                    } else {
+                        if (node->right)
+                            node = kdnode::cast2(&node->children[0]);
+                        else
+                            node = NULL;
+                    }
+                } else { // (*query)[split_dim] <= node->get_comparator()
+                    if (node->left)
+                        node = kdnode::cast2(&node->children[0]);
+                    else
+                        node = NULL;
                 }
             } while (node);
 #if 1
@@ -201,6 +231,7 @@ class kdTreeProgram: public BinaryTreeProgram {
                 node->print();
             }
 #endif
+#if 1
             // Found query's closest node in tree, now compute dist from samples
             while (!visited.empty()) {
                 kdnode* node = visited.pop(); // Now complete
@@ -221,24 +252,41 @@ class kdTreeProgram: public BinaryTreeProgram {
                         query->eval(iv.get_index(), dist, tree_id);
                     }
                 } else {
-                    auto l = completed.find(node->left);
-                    if (l == completed.end()) { // lhs hasn't been processed
-                        std::cout << "Node c: " << node->get_comparator() <<
-                            " pushing Node c: " <<
-                            node->left->get_comparator() << "\n";
-                        visited.push(kdnode::cast2(node->left));
+                    if (node->left) {
+                        // lhs hasn't been processed
+                        if (completed.find(&node->children[0]) == completed.end()) {
+                            std::cout << "Node c: " << node->get_comparator() <<
+                                " pushing Node c: " <<
+                                node->children[0].get_comparator() << "\n";
+                            visited.push(kdnode::cast2(&node->children[0]));
+                        }
                     }
 
-                    auto r = completed.find(node->right);
-                    if (r == completed.end()) { // rhs hasn't been processed
-                        std::cout << "Node c: " << node->get_comparator() <<
-                            " pushing Node c: " << node->right->get_comparator()
-                            << " ";
-                        visited.push(kdnode::cast2(node->right));
+                    if (node->right) {
+                        if (node->left) {
+                            // rhs hasn't been processed
+                            if (completed.find(&node->children[1])
+                                    == completed.end()) {
+                                std::cout << "Node c: " << node->get_comparator()
+                                << " pushing Node c: " <<
+                                node->children[1].get_comparator() << " ";
+                                visited.push(kdnode::cast2(&node->children[1]));
+                            }
+                        } else {
+                            // rhs hasn't been processed
+                            if (completed.find(&node->children[0])
+                                    == completed.end()) {
+                                std::cout << "Node c: " << node->get_comparator()
+                                    << " pushing Node c: " <<
+                                    node->children[0].get_comparator() << " ";
+                                visited.push(kdnode::cast2(&node->children[0]));
+                            }
+                        }
                     }
                 }
                 completed.insert(node);
             }
+#endif
         }
 };
 

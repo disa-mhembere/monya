@@ -59,8 +59,13 @@ class NodeView {
     public:
         data_t& get_comparator() { return comparator; }
 
-        virtual void run() = 0;
-        virtual void init(Params&) = 0;
+        virtual void run() {
+            throw abstract_exception("NodeView::run");
+        }
+
+        virtual void init(Params&) {
+            throw abstract_exception("NodeView::init");
+        }
 
         virtual data_t distance(SampleVector*, const sample_id_t) {
             throw abstract_exception("NodeView::distance");
@@ -70,8 +75,11 @@ class NodeView {
             throw abstract_exception("NodeView::distance");
         }
 
+        virtual void spawn() {
+            throw abstract_exception("NodeView::spawn");
+        }
+
         virtual void query(const QueryParams&, Query*);
-        virtual void spawn();
 
 #ifdef __unix__
         virtual int invoke(safs::io_request *reqs[], int num) override {

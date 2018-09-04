@@ -78,14 +78,16 @@ namespace monya {
         }
 
         void populate_tree(std::shared_ptr<mc::BinaryTree> tree) {
+#if 0
             constexpr unsigned FANOUT = 2;
+#endif
             assert(tree->empty());
             mc::BinaryNode* parent = NULL;
 
             for (unsigned key = 0; key < map.size(); key++) {
                 if (key == 0) {
                     parent = map[key][0];
-                    tree->insert(parent); // root
+                    tree->set_root(parent); // root
 
 #ifdef MONYA_VERBOSE
                     std::cout << "Inserting root: "; parent->print();
@@ -93,6 +95,7 @@ namespace monya {
 #endif
                 } else {
                     // All other levels
+#if 0
                     auto nodes = map[key]; // vector of nodes on the level
                     mc::BinaryNode* left = NULL;
                     mc::BinaryNode* right = NULL;
@@ -128,6 +131,7 @@ namespace monya {
                         tree->insert_at(left, parent, bchild_t::LEFT);
                         tree->insert_at(right, parent, bchild_t::RIGHT);
                     }
+#endif
                 }
             }
         }

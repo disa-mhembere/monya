@@ -29,7 +29,8 @@ class TestNode : public container::BinaryNode {
         using container::BinaryNode::BinaryNode;
 
         TestNode() {
-            parent = left = right = NULL;
+            parent = NULL;
+           left = right = false;
         }
 
         void run() override {

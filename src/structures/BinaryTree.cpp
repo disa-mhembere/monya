@@ -29,14 +29,20 @@ namespace monya { namespace container {
             return;
         }
 
-        echo(node->left, tabs + 1);
+        if (node->left)
+            echo(&node->children[0], tabs + 1);
 
         for (int i = 0; i < tabs; ++i) {
             std::cout << "\t\t";
         }
         std::cout << node->get_comparator() << std::endl;
 
-        echo(node->right, tabs + 1);
+        if (node->right) {
+            if (node->left)
+                echo(&node->children[1], tabs + 1);
+            else
+                echo(&node->children[0], tabs + 1);
+        }
     }
 
     void BinaryTree::delete_node(BinaryNode* node) {
@@ -45,19 +51,21 @@ namespace monya { namespace container {
         }
 
         if (node->left) {
-            delete_node(node->left);
+            delete_node(&node->children[0]);
         }
 
         if (node->right) {
-            delete_node(node->right);
+            if (!node->left)
+                delete_node(&node->children[0]);
+            else
+                delete_node(&node->children[1]);
         }
-
         delete node;
     }
 
     void BinaryTree::set_root(BinaryNode*& node) {
         assert(NULL != node);
-        insert(node);
+        root = node;
     }
 
     size_t BinaryTree::get_nnodes(BinaryNode* node, size_t& nnodes) {
@@ -66,88 +74,17 @@ namespace monya { namespace container {
         }
 
         nnodes++;
-        get_nnodes(node->left, nnodes);
-        get_nnodes(node->right, nnodes);
-        return nnodes;
-    }
+        if (node->left)
+            get_nnodes(&node->children[0], nnodes);
 
-    void BinaryTree::insert_at(BinaryNode*& new_node,
-            BinaryNode* node, bchild_t pos) {
-        if (pos == bchild_t::LEFT && NULL != node->left) {
-            throw std::runtime_error("BinaryTree::insert_at: "
-                    "Left child already populated");
-        } else if (pos == bchild_t::RIGHT && NULL != node->right) {
-            throw std::runtime_error("BinaryTree::insert_at: "
-                    "Right child already populated");
-        }
-
-        BinaryNode* parent = node;
-
-        // If the parent is NULL then the tree is empty
-        if (!parent) {
-            new_node = root = node;
-            new_node->parent = new_node->left = new_node->right = NULL;
-            depth = 1; // Data race ok
-        } else {
-            new_node->parent = parent;
-            new_node->left = new_node->right = NULL;
-
-            if (pos == bchild_t::LEFT)
-                parent->left = new_node;
+        if (node->right) {
+            if (node->left)
+                get_nnodes(&node->children[1], nnodes);
             else
-                parent->right = new_node;
-        }
-    }
-
-    void BinaryTree::insert(BinaryNode*& node) {
-        BinaryNode* tmp; // A tmp node used to find the parent
-        BinaryNode* parent; // Will hold the parent of node being inserted
-        BinaryNode* new_node = NULL; // The new node being inserted
-
-        parent = NULL;
-        tmp = root;
-        // Traverse the tree to find the parent of the node to be inserted
-        while (tmp) {
-            parent = tmp;
-            if (*node < *tmp) {
-                tmp = tmp->left;
-            } else {
-                tmp = tmp->right;
-            }
+                get_nnodes(&node->children[0], nnodes);
         }
 
-        // If the parent is NULL then the tree is empty
-        if (!parent) {
-            new_node = root = node;
-            new_node->parent = new_node->left = new_node->right = NULL;
-        } else {
-            new_node = node;
-            new_node->parent = parent;
-            new_node->left = new_node->right = NULL;
-
-            if (*(new_node) < *(parent)) {
-                parent->left = new_node;
-            } else {
-                parent->right = new_node;
-            }
-        }
-    }
-
-    BinaryNode* BinaryTree::find(const BinaryNode* shell) {
-        BinaryNode *node = root;
-        while (node) {
-            if (*node > *shell) {
-
-                node = node->left;
-            } else if (*node < *shell) {
-
-                node = node->right;
-            } else {
-                return node;
-            }
-        }
-
-        throw std::runtime_error("node not found");
+        return nnodes;
     }
 
     void BinaryTree::echo() {

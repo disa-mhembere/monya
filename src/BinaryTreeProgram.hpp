@@ -71,7 +71,6 @@ namespace monya {
 
                 // Configure Tree
                 max_depth = params.max_depth;
-                depth = 0;
                 nsamples = params.nsamples;
                 nfeatures = params.nfeatures;
 
@@ -136,10 +135,6 @@ namespace monya {
                 this->exmem_fn = exmem_fn;
             }
 
-            void descend() {
-                depth++;
-            }
-
             void destroy() {
                 if (ioer)
                     ioer->destroy();
@@ -180,10 +175,16 @@ namespace monya {
                     for (size_t i = 0; i < procd_nodes.size(); i++) {
                         container::BinaryNode* curr_node =
                             static_cast<container::BinaryNode*>(procd_nodes[i]);
+                        if (curr_node->left) {
+                            scheduler->schedule(&curr_node->children[0]);
+                        }
+
+                        if (curr_node->right) {
                             if (curr_node->left)
-                                scheduler->schedule(curr_node->left);
-                            if (curr_node->right)
-                                scheduler->schedule(curr_node->right);
+                                scheduler->schedule(&curr_node->children[1]);
+                            else
+                                scheduler->schedule(&curr_node->children[0]);
+                        }
                     }
                 }
             }
