@@ -1,0 +1,3 @@
+[submodule "thirdparty/Hoard"]
+	path = thirdparty/Hoard
+	url = https://github.com/disa-mhembere/Hoard.git
