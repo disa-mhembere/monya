@@ -46,7 +46,6 @@ class ProximityQuery: public Query {
         //const short k; // k nearest
         short k; // k nearest
         SampleVector* qsample;
-        tree_t ntree;
         std::vector<NNVector*> result;
 
     public:

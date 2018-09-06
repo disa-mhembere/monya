@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
     // Add some numbers in an ad hoc fashion
     constexpr unsigned NLEVELS = 3;
     constexpr unsigned FANOUT = 2;
-    constexpr unsigned NRAND = std::pow(FANOUT, NLEVELS) - 1;
+    const unsigned NRAND = std::pow(FANOUT, NLEVELS) - 1;
     std::default_random_engine generator;
     std::uniform_real_distribution<data_t> distribution(0, 5);
 

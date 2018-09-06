@@ -23,6 +23,15 @@ cd $HOME
 apt-get update
 
 apt-get install -y build-essential
+
+# cmake
+apt-get install clang-3.9
+ln -s `which clang++-3.9` /usr/local/bin/clang++
+ln -s `which clang-3.9` /usr/local/bin/clang
+
+# clang omp
+apt-get install libiomp-dev
+
 # In memory dependencies
 apt-get install -y libboost-all-dev
 
@@ -36,3 +45,11 @@ apt-get install -y libgoogle-perftools-dev
 
 # Source control
 apt-get install -y git
+
+# Hoard
+git clone https://github.com/emeryberger/Hoard.git &&\
+cd Hoard/src &&\
+make &&\
+export LD_PRELOAD=`pwd`/libhoard.so &&\
+echo "export LD_PRELOAD=`pwd`/libhoard.so" >> ~/.profile &&\
+source ~/.profile

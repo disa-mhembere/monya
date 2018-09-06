@@ -29,6 +29,10 @@
 #include "../validate/BruteForcekNN.hpp"
 #include "../common/cxxopts/cxxopts.hpp"
 
+#ifdef PROFILER
+#include <gperftools/profiler.h>
+#endif
+
 using namespace monya;
 
 class kdnode: public container::BinaryNode {
@@ -37,8 +41,6 @@ class kdnode: public container::BinaryNode {
 #ifdef PRUNE
         std::vector<data_t> upper_bounds, lower_bounds;
 #endif
-        bool complete;
-
     public:
         // Inherit constructors
         using container::BinaryNode::BinaryNode;
@@ -271,6 +273,10 @@ int main(int argc, char* argv[]) {
     constexpr unsigned FANOUT = 2;
     bool approx = false;
 
+#ifdef PROFILER
+    ProfilerStart("kdtree.perf");
+#endif
+
     try {
         cxxopts::Options options(argv[0],
                 "kdtree data-file nsamples nfeatures [alg-options]\n");
@@ -420,5 +426,8 @@ int main(int argc, char* argv[]) {
     syncioer->destroy();
 #endif
 
+#ifdef PROFILER
+   ProfilerStop();
+#endif
     return EXIT_SUCCESS;
 }

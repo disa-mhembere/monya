@@ -12,6 +12,7 @@ struct test
 
 int main()
 {
+    {
 	test *t = new test;
 	printf("alloc %p\n", t);
 	for (int i = 0; i < sizeof(t->data); i++)
@@ -21,8 +22,10 @@ int main()
 	delete t;
 	printf("alloc %ld objs and %ld bytes\n",
 			get_alloc_objs(), get_alloc_bytes());
+    }
 
-	t = new test[3];
+    {
+	test *t = new test[3];
 	printf("alloc %p\n", t);
 	for (int j = 0; j < 3; j++)
 		for (int i = 0; i < sizeof(t->data); i++)
@@ -32,4 +35,5 @@ int main()
 	delete [] t;
 	printf("alloc %ld objs and %ld bytes\n",
 			get_alloc_objs(), get_alloc_bytes());
+    }
 }

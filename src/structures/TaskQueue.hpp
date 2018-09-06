@@ -54,8 +54,8 @@ namespace monya { namespace container {
                 return tasks.size();
             }
 
-            const bool has_task();
-            bool steal_task();
+            const bool has_task() override;
+            bool steal_task() override;
 
             ////////////////////////////////////////////////////////////////////
             void enqueue(container::NodeView** runnables, const size_t nnodes);

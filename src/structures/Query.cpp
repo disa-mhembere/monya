@@ -26,7 +26,7 @@
 namespace monya { namespace container {
 
     ProximityQuery::ProximityQuery(const short k, const tree_t ntree)
-        : k(k), ntree(ntree) {
+        : k(k) {
             for (size_t i = 0; i < ntree; i++)
                 result.push_back(new NNVector(k));
     }

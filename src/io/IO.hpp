@@ -376,7 +376,7 @@ class SyncIO: public IO {
             write(buf, nbytes);
         }
 
-        void append(const data_t* buf, const size_t nelem) {
+        void append(const data_t* buf, const size_t nelem) override {
             fs.write(reinterpret_cast<const char*>(buf),dtype_size*nelem);
         }
 
