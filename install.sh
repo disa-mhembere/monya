@@ -47,7 +47,7 @@ apt-get install -y libgoogle-perftools-dev
 apt-get install -y git
 
 # Hoard
-git clone https://github.com/emeryberger/Hoard.git &&\
+git clone https://github.com/disa-mhembere/Hoard.git &&\
 cd Hoard/src &&\
 make &&\
 export LD_PRELOAD=`pwd`/libhoard.so &&\
