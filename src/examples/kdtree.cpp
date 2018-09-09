@@ -272,6 +272,7 @@ int main(int argc, char* argv[]) {
     mat_orient_t mo = mat_orient_t::COL;
     constexpr unsigned FANOUT = 2;
     bool approx = false;
+    unsigned k;
 
 #ifdef PROFILER
     ProfilerStart("kdtree.perf");
@@ -299,6 +300,8 @@ int main(int argc, char* argv[]) {
              cxxopts::value<std::string>()->default_value("col"))
             ("A,approx", "Do approx rather than exact kNN",
              cxxopts::value<bool>(approx))
+            ("k,num_neighs", "The number of nearest neighbors",
+             cxxopts::value<unsigned>(k)->default_value("3"))
             ("h,help", "Print help");
 
         options.parse_positional({"datafn", "nsamples", "nfeatures"});
@@ -391,8 +394,7 @@ int main(int argc, char* argv[]) {
     for (size_t i = 0; i < nsamples; i++) {
         data_t* tmp = syncioer->get_row(i);
 
-#if 1
-        constexpr unsigned k = 5;
+#if 0
         auto qsample = container::DenseVector::create_raw(tmp, nfeatures);
         container::Query* pq = new container::ProximityQuery(qsample, k, ntree);
 
@@ -415,8 +417,9 @@ int main(int argc, char* argv[]) {
             for(size_t i = 1; i < ntree; i++)
                 assert(*(nnvs[0]) == (*nnvs[1]));
 
-        for (auto nnv : nnvs)
-            assert(*nnv == iv);
+        //for (auto nnv : nnvs) {
+            //assert(*nnv == iv);
+        //}
 
         delete(container::ProximityQuery::raw_cast(pq));
 

@@ -126,6 +126,7 @@ class NodeView {
         virtual const std::string to_string();
         const data_t get_comparator() const;
         void set_comparator(const data_t comparator);
+        virtual void deschedule();
         virtual bool operator==(const NodeView& other);
         virtual bool operator!=(const NodeView& other);
         virtual bool operator<(const NodeView& other);

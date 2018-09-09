@@ -29,6 +29,7 @@
 #include <limits>
 #include <cassert>
 #include <algorithm>
+#include <unordered_map>
 
 #include "exception.hpp"
 
@@ -226,6 +227,8 @@ namespace monya {
             return stream;
         }
 
+    // TODO: Make a generic Vector from which IndexVector will inherit
+
     class IndexVector {
         private:
             std::vector<IndexVal<data_t> >_;
@@ -341,8 +344,121 @@ namespace monya {
             const bool is_sorted() const {
                 return sorted;
             }
+
+            void clear() {
+                sorted = false;
+                _.clear();
+            }
     };
 
+    // A class to hold data obtained from IO requests
+    class IndexMatrix {
+        private:
+            std::unordered_map<size_t, std::vector<IndexVal<data_t>>> _;
+            std::unordered_map<size_t, bool> sorted; // Is each entry sorted?
+            typedef typename std::unordered_map<size_t,
+                    std::vector<IndexVal<data_t>>>::iterator iterator;
+
+        public:
+            IndexMatrix() { } // Default ctor
+
+            std::vector<IndexVal<data_t> >& operator[](const int index) {
+                return this->_[index];
+            }
+
+            void print() {
+                for (auto kv : _) {
+                    printf("Element: %lu\n", kv.first);
+                    for (auto elem : kv.second)
+                        elem.print();
+                    printf("\n");
+                }
+            }
+
+            std::string to_string() {
+                std::string __repr__ = "";
+                for (auto it : _) {
+                    __repr__ += "\nEntry: " + std::to_string(it.first) +
+                        std::string("\n");
+                    for (auto item : it.second) {
+                        __repr__ += item.to_string() + std::string("\n");
+                    }
+                }
+                return __repr__;
+            }
+
+            // Insert indexes with placeholder values: common case
+            void set_indexes(const sample_id_t* idxs,
+                    const size_t pos, const size_t nelem) {
+
+                if (_.find(pos) == _.end())
+                    _[pos] = std::vector<IndexVal<data_t>>();
+                else
+                    _[pos].clear();
+
+                sorted[pos] = false;
+
+                for (size_t i = 0; i < nelem; i++)
+                   _[pos].push_back(IndexVal<data_t>(idxs[i], 0));
+            }
+
+            // Insert values with contiguous indexes
+            void set_indexes(const data_t* vals,
+                    const size_t pos, const size_t nelem) {
+
+                if (_.find(pos) != _.end())
+                    _[pos].clear();
+                else
+                    _[pos] = std::vector<IndexVal<data_t>>();
+
+                sorted[pos] = false;
+
+                for (size_t i = 0; i < nelem; i++)
+                    _[pos].push_back(IndexVal<data_t>(i, vals[i]));
+            }
+
+            void get_indexes(std::vector<sample_id_t>& v, const size_t pos) {
+                assert(v.empty());
+                for (auto i : _[pos]) {
+                    v.push_back(i.get_index());
+                }
+            }
+
+            bool find(IndexVal<data_t>& iv, const size_t pos) {
+                if (!sorted[pos])
+                    sort(pos);
+                return std::binary_search(_[pos].begin(), _[pos].end(), iv);
+            }
+
+            void set_sorted(const bool val, const size_t pos) {
+                sorted[pos] = val;
+            }
+
+            const bool is_sorted(const size_t pos) {
+                return sorted[pos];
+            }
+
+            void sort(size_t pos) {
+                std::sort(_[pos].begin(), _[pos].end());
+                sorted[pos] = true;
+            }
+
+            void sort() {
+                for (auto kv : _) {
+                    std::sort(kv.second.begin(), kv.second.end());
+                    sorted[kv.first] = true;
+                }
+            }
+
+            bool empty() const { return _.empty(); }
+            iterator begin() { return _.begin(); }
+            iterator end() { return _.end(); }
+
+            void clear() {
+                _.clear();
+                sorted.clear();
+            }
+    };
 
     // circular integer
     class cunsigned {

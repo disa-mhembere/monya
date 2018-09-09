@@ -15,7 +15,8 @@
 
 include ../../../Makefile.common
 
-TESTFILES = testIndexVector metric-test testNNVector testTypes
+TESTFILES = testIndexVector metric-test testNNVector testTypes \
+			testIndexMatrix
 
 all: $(TESTFILES)
 
@@ -24,6 +25,9 @@ test:
 
 testIndexVector: testIndexVector.o
 	$(CXX) -o testIndexVector testIndexVector.o $(LDFLAGS)
+
+testIndexMatrix: testIndexMatrix.o
+	$(CXX) -o testIndexMatrix testIndexMatrix.o $(LDFLAGS)
 
 metric-test: metric-test.o
 	$(CXX) -o metric-test metric-test.o $(LDFLAGS)

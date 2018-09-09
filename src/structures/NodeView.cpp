@@ -73,6 +73,12 @@ namespace monya {
         req_indxs.push_back(index);
     }
 
+    void NodeView::deschedule() {
+        // Free this memory
+        data_index.clear();
+        req_indxs.clear();
+    }
+
     // For data index
     void NodeView::set_ph_data_index(const std::vector<sample_id_t>& indxs) {
         data_index.set_indexes(&indxs[0], indxs.size());
@@ -110,7 +116,7 @@ namespace monya {
         assert(req_indxs.size() == 1); // TODO: Impl
         data_t* ret = ioer->get_col(req_indxs[0]);
         // Check state of data_index to see if placeholder indexes are there
-        if (data_index.empty()) {
+        if (data_index.empty()) { // Only done for root
             data_index.set_indexes(ret, ioer->shape().first);
         } else {
             // TODO: Bad access pattern for ret vector..

@@ -172,6 +172,7 @@ namespace monya {
                         if (curr_node->get_depth() < max_depth
                                 && curr_node->get_data_index().size() > 1) {
                             curr_node->spawn();
+                            curr_node->deschedule();
                             if (!one_spawned) one_spawned = true;
                         }
                     }
