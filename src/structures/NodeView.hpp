@@ -45,10 +45,8 @@ class NodeView {
 #endif
     protected:
         // TODO: Visibility
-        IndexVector data_index; // Indexes that nodes hold to data & mapping
+        IndexMatrix data_index; // Indexes that nodes hold to data & mapping
 
-        // FIXME: mem waster
-        std::vector<sample_id_t> req_indxs; // Indexes a node will req from ioer
         data_t comparator; // The split comparator
         // When the data required is in memory run this computation
         depth_t depth; // Depth of the node used as an idendifier
@@ -61,6 +59,7 @@ class NodeView {
 
         virtual void run() = 0;
         virtual void init(Params&) = 0;
+        virtual void request(const sample_id_t index);
 
         virtual data_t distance(SampleVector*, const sample_id_t) {
             throw abstract_exception("NodeView::distance");
@@ -89,14 +88,11 @@ class NodeView {
 
         NodeView();
         NodeView(data_t val);
-        NodeView(IndexVector& data_index);
+        NodeView(IndexMatrix& data_index);
 
         virtual const bool has_child() = 0;
+        virtual bool can_split();
         void schedule();
-
-        // Range index
-        virtual void set_index_range(sample_id_t start_idx,
-                const sample_id_t nsamples);
 
         // Defaults to grabbing index data
         virtual void prep();
@@ -107,8 +103,10 @@ class NodeView {
         void set_index(const sample_id_t index);
 
         // Data_index i.e. samples index
-        void set_ph_data_index(const std::vector<sample_id_t>& indexes);
-        void set_ph_data_index(const sample_id_t*, const size_t nelem);
+        void set_ph_data_index(const std::vector<sample_id_t>& indexes,
+                const size_t pos);
+        void set_ph_data_index(const sample_id_t*,
+                const size_t nelem, const size_t pos);
         void data_index_append(const sample_id_t idx);
         void data_index_append(const sample_id_t idx, const data_t val=0);
 
@@ -121,7 +119,8 @@ class NodeView {
         const depth_t get_depth() const;
         const depth_t get_max_depth() const;
         void sort_data_index(bool par=false);
-        IndexVector& get_data_index();
+        void sort_data_index(bool par, const size_t pos);
+        IndexMatrix& get_data_index();
         virtual void print();
         virtual const std::string to_string();
         const data_t get_comparator() const;

@@ -28,11 +28,8 @@ using namespace monya;
 namespace mc = monya::container;
 namespace mt = monya::test;
 
-static inline bool is_even(const size_t val) {
-    return val % 2 == 0;
-}
-
 int main(int argc, char* argv[]) {
+#ifdef VECNODES
     // Add some numbers in an ad hoc fashion
     constexpr unsigned NLEVELS = 3;
     constexpr unsigned FANOUT = 2;
@@ -54,9 +51,7 @@ int main(int argc, char* argv[]) {
         mean +=  node.get_comparator();
 
     mc::BinaryNode root(mean/static_cast<monya::data_t>(init.size()));
-#ifdef VECNODES
     root.vecpos = 0;
-#endif
 
     tree->set_root(root);
     std::cout << "Root is: \n";
@@ -78,7 +73,7 @@ int main(int argc, char* argv[]) {
         mc::BinaryNode* parent = tree->get_at_idx(tree->get_parent_idx(vecpos));
 
         mc::BinaryNode node(mc::BinaryNode(distribution(generator)));
-        if (is_even(vecpos))
+        if (vecpos % 2 ==0)
             tree->insert_at(node, parent, LEFT);
         else
             tree->insert_at(node, parent, RIGHT);
@@ -89,6 +84,7 @@ int main(int argc, char* argv[]) {
     std::cout << "\nEchoing tree:\n";
     tree->echo();
 
+#endif
     std::cout << "VecBinaryTree Test successful!\n\n";
     return EXIT_SUCCESS;
 }

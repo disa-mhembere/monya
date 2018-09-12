@@ -24,7 +24,6 @@
 #include <utility>
 #include <iostream>
 #include <algorithm>
-#include <parallel/algorithm>
 #include "../io/IO.hpp"
 
 #include <omp.h>
@@ -33,14 +32,13 @@ namespace monya {
     namespace container {
 
     NodeView::NodeView() : depth(0) {
-        req_indxs.resize(0);
     }
 
     NodeView::NodeView(data_t val): NodeView() {
         comparator = val;
     }
 
-    NodeView::NodeView(IndexVector& data_index): NodeView() {
+    NodeView::NodeView(IndexMatrix& data_index): NodeView() {
         this->data_index = data_index;
     }
 
@@ -49,49 +47,20 @@ namespace monya {
         throw not_implemented_exception(__FILE__, __LINE__);
     }
 
-    // Range index
-    void NodeView::set_index_range(sample_id_t start_idx,
-            const sample_id_t stop_idx) {
-        for (sample_id_t idx = start_idx; idx < stop_idx; idx++) {
-            req_indxs.push_back(idx);
-        }
-    }
-
-    // Iterative index
-    void NodeView::set_index(const std::vector<sample_id_t>& indxs) {
-        req_indxs = indxs; // TODO: Verify copy
-    }
-
-    void NodeView::set_index(const sample_id_t* indxs, const size_t nelem) {
-        req_indxs.insert(req_indxs.begin(), indxs, indxs+nelem);
-    }
-
-    void NodeView::set_index(const sample_id_t index) {
-        if (req_indxs.size())
-            req_indxs.clear();
-
-        req_indxs.push_back(index);
-    }
-
     void NodeView::deschedule() {
         // Free this memory
         data_index.clear();
-        req_indxs.clear();
     }
 
     // For data index
-    void NodeView::set_ph_data_index(const std::vector<sample_id_t>& indxs) {
-        data_index.set_indexes(&indxs[0], indxs.size());
+    void NodeView::set_ph_data_index(const std::vector<sample_id_t>& indxs,
+            const size_t pos) {
+        data_index.set_indexes(&indxs[0], pos, indxs.size());
     }
 
     void NodeView::set_ph_data_index(const sample_id_t* indxs,
-            const size_t nelem) {
-        data_index.set_indexes(indxs, nelem);
-    }
-
-    void NodeView::data_index_append(const sample_id_t idx,
-            const data_t val) {
-        data_index.append(idx, val);
+            const size_t nelem, const size_t pos) {
+        data_index.set_indexes(indxs, pos, nelem);
     }
     // End for data index
 
@@ -112,40 +81,44 @@ namespace monya {
         return depth;
     }
 
+    void NodeView::request(const sample_id_t index) {
+        data_index.request(index);
+    }
+
     void NodeView::prep() {
-        assert(req_indxs.size() == 1); // TODO: Impl
-        data_t* ret = ioer->get_col(req_indxs[0]);
-        // Check state of data_index to see if placeholder indexes are there
-        if (data_index.empty()) { // Only done for root
-            data_index.set_indexes(ret, ioer->shape().first);
-        } else {
-            // TODO: Bad access pattern for ret vector..
-            for (size_t i = 0; i < data_index.size(); i++) {
-                auto idx = data_index[i].get_index();
-                data_index[i].set_val(ret[idx]);
+        for (auto indexvec : data_index) {
+            // TODO: What if row?
+            data_t* ret = ioer->get_col(indexvec.first);
+            // Check state of data_index to see if placeholder indexes are there
+            if (indexvec.second.empty()) { // Only done for root
+                data_index.set_indexes(ret, indexvec.first, ioer->shape().first);
+            } else {
+                // TODO: Bad access pattern for ret vector..
+                // TODO: Use iterator?
+                for (size_t i = 0; i < indexvec.second.size(); i++) {
+                    auto idx = data_index[indexvec.first][i].get_index();
+                    data_index[indexvec.first][i].set_val(ret[idx]);
+                }
             }
-        }
 
-        if (ioer->get_orientation() == mat_orient_t::ROW)
-            delete [] ret;
+            if (ioer->get_orientation() == orient_t::ROW)
+                delete [] ret;
 #if 0
-        std::cout << "Printing full index after set:\n";
-        data_index.print();
+            std::cout << "Printing full index after set:\n";
+            data_index.print();
 #endif
+        }
+    }
 
+    void NodeView::sort_data_index(bool par, const size_t pos) {
+        data_index.sort(pos, par);
     }
 
     void NodeView::sort_data_index(bool par) {
-        if (par) {
-            omp_set_num_threads(omp_get_num_threads());
-            __gnu_parallel::sort(data_index.begin(),
-                    data_index.end());
-        } else {
-            std::sort(data_index.begin(), data_index.end());
-        }
+        data_index.sort(par);
     }
 
-    IndexVector& NodeView::get_data_index() {
+    IndexMatrix& NodeView::get_data_index() {
         return data_index;
     }
 
@@ -193,8 +166,16 @@ namespace monya {
         return depth == 0;
     }
 
-    void NodeView::spawn() {
+    bool NodeView::can_split() {
+        size_t count = 0;
+        for (auto indexvec : data_index) {
+            count += indexvec.second.size();
+            if (count > 1) return true; // short circuiter
+        }
+        return false;
     }
+
+    void NodeView::spawn() { }
 
     // @param node: inherits properties from the object
      void NodeView::bestow(NodeView* node) {
