@@ -15,10 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#CC = gcc
-#CXX = g++
-CC = clang
-CXX = clang++
+CC = gcc
+CXX = g++
+#CC = clang
+#CXX = clang++
 _GLIBCXX_PARALLEL = 1
 #MEMCHECK=1
 #PROF=1
@@ -62,8 +62,10 @@ ifeq ($(PRUNE), 1)
 endif
 
 CLANG_FLAGS = -Wno-attributes
-LDFLAGS += -lpthread $(TRACE_FLAGS) -rdynamic -lrt -fopenmp=libiomp5
-CXXFLAGS += -mavx -g -O3 -I. -Wall -fPIC -std=c++11 $(TRACE_FLAGS) $(CLANG_FLAGS) -DSTATISTICS -DBOOST_LOG_DYN_LINK -fopenmp=libiomp5
+#LDFLAGS += -lpthread $(TRACE_FLAGS) -rdynamic -lrt -fopenmp=libiomp5
+LDFLAGS += -lpthread $(TRACE_FLAGS) -rdynamic -lrt -fopenmp
+#CXXFLAGS += -mavx -g -O3 -I. -Wall -fPIC -std=c++11 $(TRACE_FLAGS) $(CLANG_FLAGS) -DSTATISTICS -DBOOST_LOG_DYN_LINK -fopenmp=libiomp5
+CXXFLAGS += -mavx -g -O3 -I. -Wall -fPIC -std=c++11 $(TRACE_FLAGS) $(CLANG_FLAGS) -DSTATISTICS -DBOOST_LOG_DYN_LINK -fopenmp
 ifdef PROF
 	LDFLAGS +=-lprofiler
 	CXXFLAGS += -DPROFILER
