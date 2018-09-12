@@ -170,7 +170,7 @@ namespace monya {
                         // 1. Max depth
                         // 2. Node has only one sample
                         if (curr_node->get_depth() < max_depth
-                                && curr_node->get_data_index().size() > 1) {
+                                && curr_node->can_split()) {
                             curr_node->spawn();
                             curr_node->deschedule();
                             if (!one_spawned) one_spawned = true;

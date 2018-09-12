@@ -27,7 +27,7 @@
 #include "../io/IO.hpp"
 #include "../structures/SampleVector.hpp"
 #include "../validate/BruteForcekNN.hpp"
-#include "../common/cxxopts/cxxopts.hpp"
+//#include "../common/cxxopts/cxxopts.hpp"
 
 #ifdef PROFILER
 #include <gperftools/profiler.h>
@@ -66,7 +66,6 @@ class kdnode: public container::BinaryNode {
         }
 
         void spawn() override {
-
             // TODO: Boilerplate
             left = new kdnode;
             right = new kdnode;
@@ -78,24 +77,25 @@ class kdnode: public container::BinaryNode {
             auto next_split = split_dim+1 == ioer->shape().second ?
                     0 : split_dim+1;
             cast2(left)->set_split_dim(next_split);
-            cast2(left)->set_index(next_split);
+            cast2(left)->request(next_split);
             cast2(right)->set_split_dim(next_split);
-            cast2(right)->set_index(next_split);
-
+            cast2(right)->request(next_split);
 
             std::vector<sample_id_t> idxs;
-            data_index.get_indexes(idxs);
+            data_index.get_indexes(idxs, get_split_dim());
 
-            std::vector<offset_t> offsets = { 0, data_index.size() / 2 };
-            assert(idxs.size() == data_index.size());
+            //printf("Printing idxs: ", io::print_arr(idxs));
+
+            std::vector<offset_t> offsets = { 0,
+                data_index[get_split_dim()].size() / 2 };
 
             // NOTE: Always <= go left and > right
-            // TODO: Better way to set split value
             assert(offsets.size() == 2);
 
-            left->set_ph_data_index(&idxs[offsets[0]], offsets[1]-offsets[0]);
+            left->set_ph_data_index(&idxs[offsets[0]], offsets[1]-offsets[0],
+                    next_split);
             right->set_ph_data_index(&idxs[offsets[1]],
-                    idxs.size()-offsets[1]);
+                    idxs.size()-offsets[1], next_split);
         }
 
         void set_split_dim(size_t split_dim) {
@@ -115,7 +115,7 @@ class kdnode: public container::BinaryNode {
             upper_bounds.assign(ioer->shape().second,
                     std::numeric_limits<data_t>::min());
 
-            for (auto iv : data_index) {
+            for (auto iv : data_index[get_split_dim()]) {
                 data_t* sample = ioer->get_row(iv.get_index());
 
                 for (size_t feat_id = 0; feat_id < ioer->shape().second;
@@ -140,10 +140,13 @@ class kdnode: public container::BinaryNode {
                 sort_data_index(false);
             }
 
-            this->set_comparator(data_index[data_index.size() / 2 ].get_val());
+            this->set_comparator(
+                    data_index[get_split_dim()]
+                    [data_index[get_split_dim()].size() / 2 ].get_val());
 #if 0
             printf("Printing data from node at depth: %lu with comparator "
-                    ":%.2f\n", depth, get_comparator());
+                    ": %.2f\n", depth, get_comparator());
+            print();
 #endif
 #ifdef PRUNE
             // What makes pruning possible
@@ -152,9 +155,9 @@ class kdnode: public container::BinaryNode {
         }
 
         void print() override {
-            printf("Comparator: %.2f, Split dim: %lu\n %s\n", get_comparator(),
-            get_split_dim(), data_index.to_string().c_str());
-            printf("Membership: %s\n",  data_index.to_string().c_str());
+            printf("Comparator: %.2f, Depth: %lu, Split dim: %lu\n %s\n",
+                    get_comparator(), depth, get_split_dim(),
+                    data_index.to_string().c_str());
 #if 0
             std::cout << "Upper bounds:\n";
             io::print_arr<data_t>(&upper_bounds[0], upper_bounds.size());
@@ -214,7 +217,8 @@ class kdTreeProgram: public BinaryTreeProgram {
                 //  if it's a leaf
 
                 if (!node->has_child()) {
-                    for (IndexVal<data_t> iv : node->get_data_index()) {
+                    for (IndexVal<data_t> iv :
+                            node->get_data_index()[node->get_split_dim()]) {
                         auto dist = node->distance(&(query->get_qsample()[0]),
                                 iv.get_index());
                         std::cout << "\n\nDist to: " << iv.get_index() <<
@@ -269,15 +273,25 @@ int main(int argc, char* argv[]) {
     tree_t ntree;
     unsigned nthread;
     depth_t max_depth;
-    mat_orient_t mo = mat_orient_t::COL;
+    orient_t mo = orient_t::COL;
     constexpr unsigned FANOUT = 2;
+#if 0
     bool approx = false;
-    unsigned k;
+    unsigned k = 3;
+#endif
+
+    datafn = "test-data/rand_32_16_cw.bin";
+    nsamples = 32;
+    nfeatures = 16;
+    ntree = 1;
+    nthread = 4;
+    max_depth = 5;
 
 #ifdef PROFILER
     ProfilerStart("kdtree.perf");
 #endif
 
+#if 0
     try {
         cxxopts::Options options(argv[0],
                 "kdtree data-file nsamples nfeatures [alg-options]\n");
@@ -327,6 +341,7 @@ int main(int argc, char* argv[]) {
         std::cout << "error parsing options: " << e.what() << std::endl;
         exit(EXIT_FAILURE);
     }
+#endif
 
     Params params(nsamples, nfeatures, datafn,
             io_t::MEM, ntree, nthread, mo, FANOUT, max_depth);
@@ -357,7 +372,7 @@ int main(int argc, char* argv[]) {
         // Which dim to split on
         kdnode::cast2(root)->set_split_dim(split_dim.get());
         // Which col to get from the data & place in memory
-        kdnode::cast2(root)->set_index(split_dim.get());
+        kdnode::cast2(root)->request(split_dim.get());
         tree->set_root(root);
         split_dim.inc();
     }
@@ -365,7 +380,6 @@ int main(int argc, char* argv[]) {
     std::cout << "Roots initialized ... Training trees\n";
     engine->train();
     std::cout << "Trees trained!\n";
-
     std::cout << "Algorithmic time " << params.nthread << " threads: "
         <<  timer.toc() << " sec\n";
 
@@ -383,7 +397,7 @@ int main(int argc, char* argv[]) {
         "/home/disa/Research/monya/src/test-data/rand_32_16_rw.bin";
 
     io::IO::raw_ptr syncioer = new io::SyncIO(rw_fn,
-            dimpair(nsamples, nfeatures), mat_orient_t::ROW);
+            dimpair(nsamples, nfeatures), orient_t::ROW);
 
     std::vector<data_t> data(nsamples*nfeatures);
     static_cast<io::SyncIO*>(syncioer)->read(&data[0]);
@@ -394,7 +408,7 @@ int main(int argc, char* argv[]) {
     for (size_t i = 0; i < nsamples; i++) {
         data_t* tmp = syncioer->get_row(i);
 
-#if 0
+#if 1
         auto qsample = container::DenseVector::create_raw(tmp, nfeatures);
         container::Query* pq = new container::ProximityQuery(qsample, k, ntree);
 
@@ -405,7 +419,6 @@ int main(int argc, char* argv[]) {
         std::cout << "Monya Brute: \n";
         std::vector<NNVector*> nnvs =
             container::ProximityQuery::raw_cast(pq)->getNN();
-
         assert(nnvs.size() == ntree);
         nnvs[0]->print();
 
