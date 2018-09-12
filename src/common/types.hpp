@@ -30,6 +30,7 @@
 #include <cassert>
 #include <algorithm>
 #include <unordered_map>
+#include <parallel/algorithm>
 
 #include "exception.hpp"
 
@@ -91,7 +92,7 @@ namespace monya {
          COL: colwise
          BAND: banded
     */
-    enum mat_orient_t {
+    enum orient_t {
         ROW,
         COL,
         BAND,
@@ -106,14 +107,14 @@ namespace monya {
             io_t iotype;
             tree_t ntree;
             unsigned nthread;
-            mat_orient_t orientation;
+            orient_t orientation;
             unsigned fanout; // The number of children a node a can have
             depth_t max_depth; // Maximum depth the tree can reach
             file_t filetype; // file format
 
         Params(size_t nsamples=0, size_t nfeatures=0, std::string fn="",
                 io_t iotype=io_t::MEM, tree_t ntree=1, unsigned nthread=1,
-                mat_orient_t orientation=mat_orient_t::COL, unsigned fanout=2,
+                orient_t orientation=orient_t::COL, unsigned fanout=2,
                 depth_t max_depth=std::numeric_limits<depth_t>::max(),
                 file_t filetype=file_t::BIN) {
 
@@ -367,12 +368,7 @@ namespace monya {
             }
 
             void print() {
-                for (auto kv : _) {
-                    printf("Element: %lu\n", kv.first);
-                    for (auto elem : kv.second)
-                        elem.print();
-                    printf("\n");
-                }
+                printf("%s\n", to_string().c_str());
             }
 
             std::string to_string() {
@@ -400,6 +396,11 @@ namespace monya {
 
                 for (size_t i = 0; i < nelem; i++)
                    _[pos].push_back(IndexVal<data_t>(idxs[i], 0));
+            }
+
+            // Insert placeholder pos: common case
+            inline void request(const size_t pos) {
+                _[pos] = std::vector<IndexVal<data_t>>();
             }
 
             // Insert values with contiguous indexes
@@ -438,14 +439,24 @@ namespace monya {
                 return sorted[pos];
             }
 
-            void sort(size_t pos) {
-                std::sort(_[pos].begin(), _[pos].end());
+            void sort(size_t pos, bool par=false) {
+                if (par) {
+                    omp_set_num_threads(omp_get_num_threads());
+                    __gnu_parallel::sort(_[pos].begin(), _[pos].end());
+                } else
+                    std::sort(_[pos].begin(), _[pos].end());
                 sorted[pos] = true;
             }
 
-            void sort() {
+            void sort(bool par=false) {
+                if (par)
+                    omp_set_num_threads(omp_get_num_threads());
+
                 for (auto kv : _) {
-                    std::sort(kv.second.begin(), kv.second.end());
+                    if (par)
+                        __gnu_parallel::sort(kv.second.begin(), kv.second.end());
+                    else
+                        std::sort(kv.second.begin(), kv.second.end());
                     sorted[kv.first] = true;
                 }
             }
@@ -457,6 +468,10 @@ namespace monya {
             void clear() {
                 _.clear();
                 sorted.clear();
+            }
+
+            const size_t size() const {
+                return _.size();
             }
     };
 
