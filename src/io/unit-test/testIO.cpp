@@ -34,14 +34,14 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Creating MemoryIO unit ...\n";
     io::IO::raw_ptr memioer = io::MemoryIO::create(&v[0],
-            dimpair(NROW, NCOL), mat_orient_t::ROW);
+            dimpair(NROW, NCOL), orient_t::ROW);
 
     std::string fn = std::string("inmem_n") + std::to_string(NROW) +
         std::string("_m") + std::to_string(NCOL) + std::string(".bin");
     memioer->set_fn(fn);
 
     std::cout << "\nROW wise print:\n";
-    assert(memioer->get_orientation() == mat_orient_t::ROW);
+    assert(memioer->get_orientation() == orient_t::ROW);
     assert(memioer->shape().first == NROW
             && memioer->shape().second == NCOL);
     io::print_mat<data_t>(io::MemoryIO::cast2(memioer)->get_data(),
@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
 
     memioer->transpose();
     std::cout << "\nCOL wise print:\n";
-    assert(memioer->get_orientation() == mat_orient_t::COL);
+    assert(memioer->get_orientation() == orient_t::COL);
     assert(memioer->shape().first == NCOL
             && memioer->shape().second == NROW);
     io::print_mat<data_t>(io::MemoryIO::cast2(memioer)->get_data(),
@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
     std::cout << "\nReading back through SyncIO unit...\n";
     std::vector<data_t> v2(NROW*NCOL);
     io::IO::raw_ptr syncioer = new io::SyncIO(fn, dimpair(NROW, NCOL),
-            mat_orient_t::ROW);
+            orient_t::ROW);
 
     syncioer->read(&v2[0]);
 
@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
             assert(membuf[row] == syncbuf[row]);
         }
 
-        if (memioer->get_orientation() == mat_orient_t::ROW)
+        if (memioer->get_orientation() == orient_t::ROW)
             delete [] membuf;
         delete [] syncbuf; // Always
     }

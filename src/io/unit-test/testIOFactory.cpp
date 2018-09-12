@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
     ioer = IOfactory::create(io_t::MEM);
     ioer->shape(dimpair(NROW, NCOL));
     io::MemoryIO::cast2(ioer)->set_data(&d[0]);
-    ioer->set_orientation(mat_orient_t::COL);
+    ioer->set_orientation(orient_t::COL);
 
     data_t *buf = NULL;
 
