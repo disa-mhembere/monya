@@ -22,9 +22,11 @@
 
 #include "../BinaryTreeProgram.hpp"
 #include "../ComputeEngine.hpp"
+
 #include "../structures/RBNode.hpp"
 #include "../structures/Query.hpp"
 #include "../structures/Stack.hpp"
+#include "../structures/SampleVector.hpp"
 
 #include "NNVector.hpp"
 #include "distance.hpp"

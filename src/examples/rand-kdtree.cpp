@@ -26,7 +26,6 @@
 #include "../utils/time.hpp"
 #include "../io/IO.hpp"
 #include "../validate/BruteForcekNN.hpp"
-//#include "../common/cxxopts/cxxopts.hpp"
 
 #ifdef PROFILER
 #include <gperftools/profiler.h>
@@ -34,22 +33,19 @@
 
 using namespace monya;
 
-class kdnode: public container::BinaryNode {
+class RandkdNode: public container::BinaryNode {
     private:
         size_t split_dim;
-#ifdef PRUNE
-        std::vector<data_t> upper_bounds, lower_bounds;
-#endif
     public:
         // Inherit constructors
         using container::BinaryNode::BinaryNode;
 
-        kdnode() {
+        RandkdNode() {
             parent = left = right = NULL;
         }
 
-        static kdnode* cast2(container::BinaryNode* node) {
-            return static_cast<kdnode*>(node);
+        static RandkdNode* cast2(container::BinaryNode* node) {
+            return static_cast<RandkdNode*>(node);
         }
 
         data_t distance(container::SampleVector* s1,
@@ -66,8 +62,8 @@ class kdnode: public container::BinaryNode {
 
         void spawn() override {
             // TODO: Boilerplate
-            left = new kdnode;
-            right = new kdnode;
+            left = new RandkdNode;
+            right = new RandkdNode;
 
             bestow(left);
             bestow(right);
@@ -105,32 +101,6 @@ class kdnode: public container::BinaryNode {
             return split_dim;
         }
 
-        // TODO: ||ize
-#ifdef PRUNE
-        void compute_bounds() {
-            // Upper and lower bounds at this node
-            lower_bounds.assign(ioer->shape().second,
-                    std::numeric_limits<data_t>::max());
-            upper_bounds.assign(ioer->shape().second,
-                    std::numeric_limits<data_t>::min());
-
-            for (auto iv : data_index[get_split_dim()]) {
-                data_t* sample = ioer->get_row(iv.get_index());
-
-                for (size_t feat_id = 0; feat_id < ioer->shape().second;
-                        feat_id++) {
-                    if (sample[feat_id] < lower_bounds[feat_id])
-                        lower_bounds[feat_id] = sample[feat_id];
-                    if (sample[feat_id] > upper_bounds[feat_id])
-                        upper_bounds[feat_id] = sample[feat_id];
-                }
-
-                if (ioer->get_orientation() != ROW)
-                    delete [] sample; // TODO: Coz wrong access pattern
-            }
-        }
-#endif
-
         // This is run next
         void run() override {
             if (depth < 3) {
@@ -147,32 +117,21 @@ class kdnode: public container::BinaryNode {
                     ": %.2f\n", depth, get_comparator());
             print();
 #endif
-#ifdef PRUNE
-            // What makes pruning possible
-            compute_bounds();
-#endif
         }
 
         void print() override {
             printf("Comparator: %.2f, Depth: %u, Split dim: %lu\n %s\n",
                     get_comparator(), depth, get_split_dim(),
                     data_index.to_string().c_str());
-#if 0
-            std::cout << "Upper bounds:\n";
-            io::print_arr<data_t>(&upper_bounds[0], upper_bounds.size());
-            std::cout << "Lower bounds:\n";
-            io::print_arr<data_t>(&lower_bounds[0], lower_bounds.size());
-#endif
-            std::cout << "\n";
         }
 };
 
 
 // How the program runs
-class kdTreeProgram: public BinaryTreeProgram {
+class RandkdTreeProgram: public BinaryTreeProgram {
     private:
         // All the trees in the forest (including this one!)
-        std::vector<kdTreeProgram*> copse;
+        std::vector<RandkdTreeProgram*> copse;
         std::unordered_set<container::BinaryNode*> completed;
 
     public:
@@ -180,34 +139,34 @@ class kdTreeProgram: public BinaryTreeProgram {
         using BinaryTreeProgram::BinaryTreeProgram;
 
         void find_neighbors(container::Query* q) override {
-            kdnode* node = kdnode::cast2(get_root());
+            RandkdNode* node = RandkdNode::cast2(get_root());
             container::ProximityQuery* query =
                 container::ProximityQuery::raw_cast(q);
             completed.clear();
 
             // Keep track of visited nodes
-            container::Stack<kdnode*> visited;
+            container::Stack<RandkdNode*> visited;
 
             do {
                 visited.push(node);
                 // compare
                 auto split_dim = node->get_split_dim();
                 if ((*query)[split_dim] > node->get_comparator()) {
-                    node = kdnode::cast2(node->right);
+                    node = RandkdNode::cast2(node->right);
                 } else {
-                    node = kdnode::cast2(node->left);
+                    node = RandkdNode::cast2(node->left);
                 }
             } while (node);
 #if 1
             // TEST: Print the path the sample took
             printf("Printing the nodes in the path:\n");
-            for (kdnode* node : visited) {
+            for (RandkdNode* node : visited) {
                 node->print();
             }
 #endif
             // Found query's closest node in tree, now compute dist from samples
             while (!visited.empty()) {
-                kdnode* node = visited.pop(); // Now complete
+                RandkdNode* node = visited.pop(); // Now complete
                 std::cout << "Popping node with comparator: "
                     << node->get_comparator() << "\n";
                 // TODO: Prune step
@@ -231,7 +190,7 @@ class kdTreeProgram: public BinaryTreeProgram {
                         std::cout << "Node c: " << node->get_comparator() <<
                             " pushing Node c: " <<
                             node->left->get_comparator() << "\n";
-                        visited.push(kdnode::cast2(node->left));
+                        visited.push(RandkdNode::cast2(node->left));
                     }
 
                     auto r = completed.find(node->right);
@@ -239,7 +198,7 @@ class kdTreeProgram: public BinaryTreeProgram {
                         std::cout << "Node c: " << node->get_comparator() <<
                             " pushing Node c: " << node->right->get_comparator()
                             << " ";
-                        visited.push(kdnode::cast2(node->right));
+                        visited.push(RandkdNode::cast2(node->right));
                     }
                 }
                 completed.insert(node);
@@ -247,18 +206,40 @@ class kdTreeProgram: public BinaryTreeProgram {
         }
 };
 
-class RandomSplit {
-    private:
-        std::default_random_engine generator;
-        std::uniform_int_distribution<size_t> distribution;
+// FIXME: Use a random # generator that is ||izable
+class RandomFeaturePicker {
     public:
-        RandomSplit(size_t nfeatures) {
-            distribution = std::uniform_int_distribution<size_t>(0, nfeatures);
-            distribution(generator); // Throw away the first one
-        }
+        RandomFeaturePicker(const sample_id_t nfeatures,
+                const sample_id_t npicks, std::vector<sample_id_t>& picks) {
 
-        size_t generate() {
-            return distribution(generator);
+            picks.resize(npicks);
+            unsigned im = 0;
+
+            for (unsigned in = 0; in < nfeatures && im < npicks; ++in) {
+                int rn = nfeatures - in;
+                int rm = npicks - im;
+                if (rand() % rn < rm)
+                    picks[im++] = in;
+            }
+        }
+};
+
+class MaxVarianceFeaturePicker {
+    public:
+        MaxVarianceFeaturePicker(const size_t max_sample_size,
+                IndexMatrix im) {
+
+            sample_id_t max_var_feature_id;
+
+            for (auto kv : im) {
+                data_t mean = 0; // Compute mean of the
+
+                auto sample_size = std::min(max_sample_size, kv.second.size());
+                for (sample_id_t i = 0; i < sample_size; i++) {
+                    mean += kv.second[i].get_val();
+                }
+                mean /= sample_size;
+            }
         }
 };
 
@@ -267,6 +248,9 @@ int main(int argc, char* argv[]) {
     std::string datafn;
     size_t nsamples;
     size_t nfeatures;
+    unsigned max_sample_size = 100; // Same as flann
+    unsigned nchoose_dim = 5; // D
+
 
     // Optional args
     tree_t ntree;
@@ -283,63 +267,11 @@ int main(int argc, char* argv[]) {
     nsamples = 32;
     nfeatures = 16;
     ntree = 1;
-    nthread = 4;
+    nthread = 1;
     max_depth = 5;
 
 #ifdef PROFILER
-    ProfilerStart("kdtree.perf");
-#endif
-
-#if 0
-    try {
-        cxxopts::Options options(argv[0],
-                "kdtree data-file nsamples nfeatures [alg-options]\n");
-        options.positional_help("[optional args]");
-
-        options.add_options()
-            ("f,datafn", "Path to data-file on disk",
-             cxxopts::value<std::string>(datafn), "FILE")
-            ("n,nsamples", "Number of samples in the dataset (rows)",
-             cxxopts::value<std::string>())
-            ("m,nfeatures", "Number of features in the dataset (columns)",
-             cxxopts::value<std::string>())
-            ("t,ntree", "Number of trees in the forest",
-             cxxopts::value<tree_t>(ntree)->default_value("1"))
-            ("T,num_thread", "The number of threads to run",
-             cxxopts::value<unsigned>(nthread)->default_value("1"))
-            ("d,depth", "Max tree depth",
-             cxxopts::value<depth_t>(max_depth)->default_value("10"))
-            ("o,orientation", "data orientataion `row` or `col`)",
-             cxxopts::value<std::string>()->default_value("col"))
-            ("A,approx", "Do approx rather than exact kNN",
-             cxxopts::value<bool>(approx))
-            ("k,num_neighs", "The number of nearest neighbors",
-             cxxopts::value<unsigned>(k)->default_value("3"))
-            ("h,help", "Print help");
-
-        options.parse_positional({"datafn", "nsamples", "nfeatures"});
-        int nargs = argc;
-        options.parse(argc, argv);
-
-        if (options.count("help") || (nargs == 1)) {
-            std::cout << options.help() << std::endl;
-            exit(EXIT_SUCCESS);
-        }
-
-        if (nargs < 4) {
-            std::cout << "[ERROR]: Not enough default arguments\n";
-            std::cout << options.help() << std::endl;
-            exit(EXIT_SUCCESS);
-        }
-
-        nsamples = atol(options["nsamples"].as<std::string>().c_str());
-        nfeatures = atol(options["nfeatures"].as<std::string>().c_str());
-        mo = options["orientation"].as<std::string>() == "col" ? COL : ROW;
-
-    } catch (const cxxopts::OptionException& e) {
-        std::cout << "error parsing options: " << e.what() << std::endl;
-        exit(EXIT_FAILURE);
-    }
+    ProfilerStart("rand-kdtree.perf");
 #endif
 
     Params params(nsamples, nfeatures, datafn,
@@ -347,33 +279,25 @@ int main(int argc, char* argv[]) {
     assert(ntree < params.nfeatures);
     params.print();
 
-    ComputeEngine<kdTreeProgram>::ptr engine =
-        ComputeEngine<kdTreeProgram>::create(params);
+    ComputeEngine<RandkdTreeProgram>::ptr engine =
+        ComputeEngine<RandkdTreeProgram>::create(params);
     std::cout << "Engine created ...\n";
 
     utils::time timer;
     timer.tic();
 
-    // Create the root with no duplicates for split dimension
+#if 1
     // TODO: Create root/node initializer that is passed to node
-    RandomSplit rs(params.nfeatures);
-
-    // Pick the first tree's split dim
-    cunsigned split_dim(rs.generate(), params.nfeatures);
 
     for (size_t tid = 0; tid < engine->get_forest().size(); tid++) {
         auto tree = engine->get_tree(tid);
+        container::BinaryNode* root = new RandkdNode;
 
-        std::cout << "Tree: " << tree->get_id() <<
-            " INIT Choosing split: " << split_dim.get() << std::endl;
-        container::BinaryNode* root = new kdnode;
+        for (sample_id_t rid = 0; rid < std::min(nsamples, max_sample_size);
+                rid++)
+            RandkdNode::cast2(root)->row_request(split_dim.get());
 
-        // Which dim to split on
-        kdnode::cast2(root)->set_split_dim(split_dim.get());
-        // Which col to get from the data & place in memory
-        kdnode::cast2(root)->request(split_dim.get());
         tree->set_root(root);
-        split_dim.inc();
     }
 
     std::cout << "Roots initialized ... Training trees\n";
@@ -381,8 +305,9 @@ int main(int argc, char* argv[]) {
     std::cout << "Trees trained!\n";
     std::cout << "Algorithmic time " << params.nthread << " threads: "
         <<  timer.toc() << " sec\n";
+#endif
 
-#if 0
+#if 1
     std::cout << "Echoing the tree contents:\n";
     for (auto tree : engine->get_forest()) {
         std::cout << "\n TREE: " << tree->get_id() << "\n";

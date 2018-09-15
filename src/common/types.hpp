@@ -42,7 +42,7 @@ namespace monya {
     typedef unsigned child_t; // The number of children an NAry node can hold
     typedef size_t offset_t; // The offset position of a file
     typedef unsigned tree_t; // The number of trees in the forest
-    typedef size_t depth_t; // The depth of trees in the forest
+    typedef unsigned depth_t; // The depth of trees in the forest
     typedef float data_t; // The type of the data
 
     // Constants
@@ -101,8 +101,8 @@ namespace monya {
 
     struct Params {
         public:
-            size_t nsamples; // Max # of samples from which the tree is built
-            size_t nfeatures; // Number of features
+            sample_id_t nsamples; // Max # of samples from which the tree is built
+            sample_id_t nfeatures; // Number of features
             std::string fn;
             io_t iotype;
             tree_t ntree;
@@ -112,9 +112,10 @@ namespace monya {
             depth_t max_depth; // Maximum depth the tree can reach
             file_t filetype; // file format
 
-        Params(size_t nsamples=0, size_t nfeatures=0, std::string fn="",
-                io_t iotype=io_t::MEM, tree_t ntree=1, unsigned nthread=1,
-                orient_t orientation=orient_t::COL, unsigned fanout=2,
+        Params(sample_id_t nsamples=0, sample_id_t nfeatures=0,
+                std::string fn="", io_t iotype=io_t::MEM, tree_t ntree=1,
+                unsigned nthread=1, orient_t orientation=orient_t::COL,
+                unsigned fanout=2,
                 depth_t max_depth=std::numeric_limits<depth_t>::max(),
                 file_t filetype=file_t::BIN) {
 

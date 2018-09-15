@@ -76,7 +76,7 @@ namespace monya { namespace container {
     }
 
     void Scheduler::run_level(const depth_t level) {
-        if (tree_id == 0) printf("Running level: %lu\n", level);
+        if (tree_id == 0) printf("Running level: %u\n", level);
 
         std::vector<NodeView*> level_nodes = nodes[level];
 

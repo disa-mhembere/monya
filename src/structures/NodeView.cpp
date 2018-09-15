@@ -85,6 +85,11 @@ namespace monya {
         data_index.request(index);
     }
 
+    void row_request(const sample_id_t index) {
+        //data_index.row_request(index); // TODO
+    }
+
+
     void NodeView::prep() {
         for (auto indexvec : data_index) {
             // TODO: What if row?

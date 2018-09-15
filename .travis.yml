@@ -5,6 +5,9 @@ dist:
 notifications:
   email: false
 install: sudo ./install.sh
+branches:
+    except:
+        - no-check
 compiler:
 - g++
 script:

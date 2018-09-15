@@ -18,15 +18,16 @@ include ../../Makefile.common
 CXXFLAGS +=-I../../SAFS/libsafs -I../common -I../structures -I..
 LDFLAGS +=-L../../SAFS/libsafs -L../common -L../structures -L..\
 		  -lstructures -lmonya -lsafs
-#LDFLAGS :=-L../../SAFS/libsafs -L../common -L../structures -L..\
-	#$(LDFLAGS) -lstructures -lmonya -lsafs
 
-EXAMPLES=kdtree
+EXAMPLES=kdtree rand-kdtree
 
 all: $(EXAMPLES)
 
 kdtree: kdtree.o
 	$(CXX) -o kdtree kdtree.o $(LDFLAGS)
+
+rand-kdtree: rand-kdtree.o
+	$(CXX) -o rand-kdtree rand-kdtree.o $(LDFLAGS)
 
 clean:
 	rm -f *.d
