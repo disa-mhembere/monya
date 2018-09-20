@@ -19,7 +19,7 @@
 
 #include "Query.hpp"
 #include "BinaryNode.hpp"
-#include "../BinaryTreeProgram.hpp"
+#include "BinaryTreeProgram.hpp"
 #include "SampleVector.hpp"
 #include "../common/NNVector.hpp"
 

@@ -16,7 +16,7 @@
 include ../../Makefile.common
 
 CXXFLAGS +=-I../../SAFS/libsafs -I../common -I../structures -I..
-LDFLAGS :=-L../../SAFS/libsafs -L../common -L../structures -L..\
+LDFLAGS :=-L../../SAFS/libsafs -L../common -L../structures -L../include\
 	-lsafs -lstructures -lmonya $(LDFLAGS)
 
 TESTFILES = brute-test

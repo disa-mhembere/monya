@@ -22,10 +22,10 @@
 
 #include <memory>
 #include <vector>
-#include "common/types.hpp"
-#include "common/exception.hpp"
-#include "structures/Query.hpp"
-#include "utils/utility.hpp"
+#include "../common/types.hpp"
+#include "../common/exception.hpp"
+#include "../structures/Query.hpp"
+#include "../utils/utility.hpp"
 
 namespace monya {
     template <typename TreeProgramType>

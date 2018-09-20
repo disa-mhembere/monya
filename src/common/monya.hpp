@@ -20,10 +20,11 @@
 #ifndef MONYA_MONYA_HPP__
 #define MONYA_MONYA_HPP__
 
-#include "../BinaryTreeProgram.hpp"
-#include "../ComputeEngine.hpp"
+#include "../include/ComputeEngine.hpp"
 
+#include "../structures/BinaryTreeProgram.hpp"
 #include "../structures/RBNode.hpp"
+#include "../structures/BinaryNode.hpp"
 #include "../structures/Query.hpp"
 #include "../structures/Stack.hpp"
 #include "../structures/SampleVector.hpp"
@@ -31,9 +32,4 @@
 #include "NNVector.hpp"
 #include "distance.hpp"
 #include "types.hpp"
-
-#include <algorithm>
-#include <parallel/numeric>
-#include <parallel/algorithm>
-
 #endif

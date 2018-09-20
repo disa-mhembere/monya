@@ -17,8 +17,8 @@ include ../../Makefile.common
 
 CXXFLAGS :=-I../../SAFS/libsafs -I../common \
 		   -I../structures -I../utils -I.. $(CXXFLAGS)
-LDFLAGS :=-L../../SAFS/libsafs -L../common -L../structures -L../utils -L..\
-		  -lstructures -lmonya -lutils -lsafs $(LDFLAGS)
+LDFLAGS :=-L../../SAFS/libsafs -L../common -L../structures -L../utils \
+	-L../include -lstructures -lmonya -lutils -lsafs $(LDFLAGS)
 
 EXAMPLES=kdtree rand-kdtree
 
