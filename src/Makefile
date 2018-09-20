@@ -17,14 +17,14 @@ include ../Makefile.common
 
 all: libstructures utils libmonya commontag examples iotag validate
 
-libstructures:
+libstructures: utils
 	$(MAKE) -C structures
 
-libmonya: libstructures utils commontag io $(OBJS)
+libmonya: libstructures commontag iotag $(OBJS)
 	rm -f libmonya
 	ar -cvq libmonya.a $(OBJS)
 
-utils: io libstructures
+utils: commontag
 	$(MAKE) -C utils
 
 examples: libmonya
@@ -36,7 +36,7 @@ validate: libmonya
 commontag:
 	$(MAKE) -C common
 
-iotag: common
+iotag: commontag
 	$(MAKE) -C io
 
 clean:

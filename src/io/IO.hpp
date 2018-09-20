@@ -20,6 +20,8 @@
 #ifndef MONYA_I0_HPP__
 #define MONYA_I0_HPP__
 
+#include <sys/stat.h>
+
 #include <iostream>
 #include <fstream>
 #include <memory>
@@ -28,7 +30,6 @@
 
 #include "../common/exception.hpp"
 #include "../common/types.hpp"
-#include "../utils/FileUtil.hpp"
 #include "vecs_reader.hpp"
 
 namespace monya { namespace io {
@@ -55,6 +56,21 @@ void print_mat(T* matrix, const unsigned rows, const unsigned cols) {
         std::cout <<  " ]\n";
     }
 #endif
+}
+
+static inline size_t get_file_size(std::string filename) {
+        struct stat stat_buf;
+        int rc = stat(filename.c_str(), &stat_buf);
+        return rc == 0 ? stat_buf.st_size : -1;
+}
+
+static inline std::string get_file_ext(const std::string& s) {
+    size_t i = s.rfind('.', s.length());
+
+    if (i != std::string::npos) {
+        return (s.substr(i + 1, s.length() - i));
+    }
+    return "";
 }
 
 class IO {
@@ -216,7 +232,7 @@ class MemoryIO: public IO {
                 data = new data_t[dim.first*dim.second];
 
             // TODO: Use an enum for filetype
-            if (utils::get_file_ext(fn) == "fvecs") {
+            if (get_file_ext(fn) == "fvecs") {
                 vecs_reader* vr = new fvecs_reader(fn, dim.first,
                         dim.second);
                 vr->read(data);
@@ -361,7 +377,7 @@ class SyncIO: public IO {
                 open();
             }
 
-            size_t size = monya::utils::get_file_size(this->fn);
+            size_t size = get_file_size(this->fn);
             fs.read(reinterpret_cast<char*>(buf), size);
         }
 

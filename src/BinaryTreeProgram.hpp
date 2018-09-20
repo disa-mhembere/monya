@@ -80,13 +80,8 @@ namespace monya {
                 unsigned nworkers = std::max(1,
                         static_cast<int>(params.nthread/params.ntree));
                 omp_set_num_threads(nworkers);
-#ifdef USE_NUMA
                 scheduler = new container::Scheduler(params.fanout,
                         params.max_depth, tree_id, nworkers, numa_id);
-#else
-                scheduler = new container::Scheduler(params.fanout,
-                        params.max_depth, tree_id, nworkers, 0;
-#endif
             }
 
             void set_root(container::BinaryNode*& node) {

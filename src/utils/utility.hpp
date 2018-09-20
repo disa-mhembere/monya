@@ -24,10 +24,6 @@
 #include <algorithm>
 #include "../common/types.hpp"
 
-#ifdef USE_NUMA
-#include <numa.h>
-#endif
-
 namespace monya { namespace utils {
 
 template<class T=data_t>
@@ -37,13 +33,6 @@ typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
         * ulp || std::abs(x-y) < std::numeric_limits<T>::min();
 }
 
-int get_num_nodes() {
-#ifdef USE_NUMA
-    return numa_num_task_nodes();
-#else
-    return 1;
-#endif
-}
-
+int get_num_nodes();
 } } // End namespace monya::utils
 #endif

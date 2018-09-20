@@ -15,8 +15,9 @@
 
 include ../../../Makefile.common
 
-CXXFLAGS +=-I.. -I../../../SAFS/libsafs
-LDFLAGS :=-L.. -L../../../SAFS/libsafs -lsafs -lstructures $(LDFLAGS)
+CXXFLAGS +=-I.. -I../../../SAFS/libsafs -I../../utils
+LDFLAGS :=-L.. -L../../../SAFS/libsafs -lsafs \
+	-lstructures -L../../utils -lutils $(LDFLAGS)
 
 TESTFILES = testBinaryNode testRBNode testRBTree testNAryNode \
 			perftest cppperftest testBinaryTree \

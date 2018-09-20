@@ -15,9 +15,10 @@
 
 include ../../Makefile.common
 
-CXXFLAGS +=-I../../SAFS/libsafs -I../common -I../structures -I..
-LDFLAGS +=-L../../SAFS/libsafs -L../common -L../structures -L..\
-		  -lstructures -lmonya -lsafs
+CXXFLAGS +=-I../../SAFS/libsafs -I../common \
+		   -I../structures -I../utils -I..
+LDFLAGS +=-L../../SAFS/libsafs -L../common -L../structures -L../utils -L..\
+		  -lstructures -lmonya -lutils -lsafs
 
 EXAMPLES=kdtree rand-kdtree
 

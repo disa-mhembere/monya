@@ -31,24 +31,10 @@ class time {
         std::chrono::duration<double> duration;
 
     public:
-        time(): flag(false) {}
-
-        void tic() {
-            start = std::chrono::high_resolution_clock::now();
-            flag = true;
-        }
-
-        double len() {
-            return duration.count();
-        }
-
-        double toc() {
-            if (!flag)
-                std::cerr << "[WARNING]: time(): multiple calls to `toc`\n";
-            flag = false;
-            duration = std::chrono::high_resolution_clock::now() - start;
-            return duration.count();
-        }
+        time();
+        void tic();
+        double len();
+        double toc();
 };
 
 } } // End namespace
