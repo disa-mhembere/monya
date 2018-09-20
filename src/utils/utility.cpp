@@ -19,16 +19,16 @@
 
 #include "utility.hpp"
 
-//#ifdef USE_NUMA
-//#include <numa.h>
-//#endif
+#ifdef USE_NUMA
+#include <numa.h>
+#endif
 
 namespace monya { namespace utils {
 int get_num_nodes() {
-//#ifdef USE_NUMA
-    //return numa_num_task_nodes();
-//#else
+#ifdef USE_NUMA
+    return numa_num_task_nodes();
+#else
     return 1;
-//#endif
+#endif
 }
 } } // End namespace monya::utils

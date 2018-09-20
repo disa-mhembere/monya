@@ -15,11 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CC = gcc
-CXX = g++
-#CC = clang
-#CXX = clang++
-_GLIBCXX_PARALLEL = 1
+CC=gcc
+CXX=g++
+#CC=clang
+#CXX=clang++
+_GLIBCXX_PARALLEL=1
 #MEMCHECK=1
 #PROF=1
 #MEMTRACE=1

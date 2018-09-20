@@ -15,6 +15,9 @@
 
 include ../../Makefile.common
 
+CXXFLAGS := -I../../SAFS/libsafs $(CXXFLAGS)
+LDFLAGS := -L../../SAFS/libsafs -lsafs $(LDFLAGS)
+
 all: libutils
 
 libutils: $(OBJS)
