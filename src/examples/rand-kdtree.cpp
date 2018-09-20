@@ -225,31 +225,72 @@ class RandomFeaturePicker {
 };
 
 class MaxVarianceFeaturePicker {
-    public:
-        MaxVarianceFeaturePicker(const size_t max_sample_size,
-                IndexMatrix im) {
+    private:
+        sample_id_t nchoose_features;
 
-            sample_id_t max_var_feature_id;
+        /**
+          * @param means: the feature means
+          * @param vars: the feature variances
+          */
+        void pick_cuts(std::vector<data_t>& means, std::vector<data_t>& vars) {
+            // TODO
+        }
+
+    public:
+        MaxVarianceFeaturePicker(const sample_id_t nchoose_features) {
+            this->nchoose_features = nchoose_features;
+        }
+
+        void pick(const sample_id_t max_sample_size,
+                IndexMatrix& im, sample_id_t& cut_feature, data_t& cut_value) {
+
+            sample_id_t sid = 0;
+
+            // Compute feature means
+            std::vector<data_t> feature_means;
 
             for (auto kv : im) {
-                data_t mean = 0; // Compute mean of the
+                if (!feature_means.size()) // Compute mean of the featrures
+                    feature_means.assign(kv.second.size(), 0); // Init @ 0
+                for (size_t i = 0; i < kv.second.size(); i++) {
 
-                auto sample_size = std::min(max_sample_size, kv.second.size());
-                for (sample_id_t i = 0; i < sample_size; i++) {
-                    mean += kv.second[i].get_val();
+                    // FIXME: I need a vector not IndexVector
+                    //feature_means[i] += kv.second[i];
                 }
-                mean /= sample_size;
+                if (++sid == max_sample_size) // Same as flann param
+                    break;
             }
+
+            // Finalize the means
+            for (size_t i = 0; i < sid; i++)
+                feature_means[i] /= sid;
+
+            // Compute the feature variance
+            sid = 0;
+            std::vector<data_t> feature_variance;
+            feature_variance.assign(feature_means.size(), 0);
+
+            for (auto kv : im) {
+                for (size_t i = 0; i < kv.second.size(); i++) {
+                    // FIXME: I need a vector not an IndexVectork
+                    //auto dist = kv.second[i] - feature_means[i];
+                    //feature_variance[i] += dist * dist;
+                }
+                // Same as flann param
+                if (++sid == max_sample_size)  break;
+            }
+
+            // Pick cut feature and value
+            pick_cuts(feature_means, feature_variance);
         }
 };
 
 int main(int argc, char* argv[]) {
     // Positional args
     std::string datafn;
-    size_t nsamples;
-    size_t nfeatures;
-    unsigned max_sample_size = 100; // Same as flann
-    unsigned nchoose_dim = 5; // D
+    sample_id_t nsamples;
+    sample_id_t nfeatures;
+    sample_id_t max_sample_size = 100; // Same as flann
 
 
     // Optional args
@@ -289,14 +330,15 @@ int main(int argc, char* argv[]) {
 #if 1
     // TODO: Create root/node initializer that is passed to node
 
-    for (size_t tid = 0; tid < engine->get_forest().size(); tid++) {
+    for (unsigned tid = 0; tid < engine->get_forest().size(); tid++) {
         auto tree = engine->get_tree(tid);
         container::BinaryNode* root = new RandkdNode;
 
         for (sample_id_t rid = 0; rid < std::min(nsamples, max_sample_size);
-                rid++)
-            RandkdNode::cast2(root)->row_request(split_dim.get());
-
+                rid++) {
+            // TODO: Create multi-row request & range
+            RandkdNode::cast2(root)->row_request(rid);
+        }
         tree->set_root(root);
     }
 

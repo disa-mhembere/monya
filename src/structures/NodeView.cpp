@@ -85,7 +85,7 @@ namespace monya {
         data_index.request(index);
     }
 
-    void row_request(const sample_id_t index) {
+    void NodeView::row_request(const sample_id_t index) {
         //data_index.row_request(index); // TODO
     }
 
