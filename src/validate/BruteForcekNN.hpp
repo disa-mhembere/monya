@@ -21,7 +21,6 @@
 #include <cassert>
 #include <cmath>
 
-#include "../common/monya.hpp"
 #include "../common/distance.hpp"
 
 namespace monya { namespace validate {

@@ -19,8 +19,6 @@ project (monya)
 
 include_directories("${PROJECT_SOURCE_DIR}")
 
-add_executable(brute-test
-    brute-test.cpp
-    )
-
-target_link_libraries(brute-test stdc++ safs structures)
+add_executable(testIO testIO.cpp)
+add_executable(testIOFactory testIOFactory.cpp)
+add_executable(test_vecs_reader test_vecs_reader.cpp)

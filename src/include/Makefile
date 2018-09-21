@@ -1,13 +1,11 @@
 # Copyright 2017 Neurodata (https://neurodata.io)
 # Written by Disa Mhembere (disa@cs.jhu.edu)
 #
-# This file is part of Monya.
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,12 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-project (monya)
+include ../../Makefile.common
 
-include_directories("${PROJECT_SOURCE_DIR}")
+CXXFLAGS := -I../structures $(CXXFLAGS)
+LDFLAGS := -L../structures -lstructures $(LDFLAGS)
 
-add_executable(brute-test
-    brute-test.cpp
-    )
+all: libmonya
 
-target_link_libraries(brute-test stdc++ safs structures)
+libmonya: $(OBJS)
+	rm -f libmonya.a
+	ar -cvq libmonya.a $(OBJS)
+
+clean:
+	rm -f *.d
+	rm -f *.o
+	rm -f *~
+	rm -f *.a
+	$(MAKE) --ignore-errors -C unit-test clean
+
+-include $(DEPS)

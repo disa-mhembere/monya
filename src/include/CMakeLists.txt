@@ -15,12 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-project (monya)
+add_library(monya INTERFACE)
 
-include_directories("${PROJECT_SOURCE_DIR}")
-
-add_executable(brute-test
-    brute-test.cpp
+target_include_directories(monya INTERFACE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
     )
-
-target_link_libraries(brute-test stdc++ safs structures)

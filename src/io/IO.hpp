@@ -421,7 +421,7 @@ class SyncIO: public IO {
                 return data;
             } else if (this->orientation == orient_t::ROW) {
                 // FIXME: Memory leak if not freed
-                printf("WARNING: Inefficent method `get_col` for rowwise\n");
+                printf("WARNING: Inefficient method `get_col` for rowwise\n");
                 data_t* tmp = new data_t[dim.first];
                 for (size_t row = 0; row < dim.first; row++) {
                     fs.seekp((row*dim.second+offset)*dtype_size);
@@ -446,7 +446,7 @@ class SyncIO: public IO {
             } else if (this->orientation == orient_t::COL) {
 #if 1
                 // FIXME: Memory leak if not freed
-                printf("WARNING: Inefficent method `get_row` for colwise\n");
+                printf("WARNING: Inefficient method `get_row` for colwise\n");
                 data_t* tmp = new data_t[dim.second];
                 for (size_t col = 0; col < dim.second; col++) {
 

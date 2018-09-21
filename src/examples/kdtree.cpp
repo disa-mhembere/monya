@@ -279,7 +279,7 @@ int main(int argc, char* argv[]) {
     unsigned k = 3;
 #endif
 
-    datafn = "test-data/rand_32_16_cw.bin";
+    datafn = "/home/disa/Research/monya/src/test-data/rand_32_16_cw.bin";
     nsamples = 32;
     nfeatures = 16;
     ntree = 1;

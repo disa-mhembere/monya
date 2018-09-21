@@ -19,8 +19,14 @@ project (monya)
 
 include_directories("${PROJECT_SOURCE_DIR}")
 
-add_executable(brute-test
-    brute-test.cpp
-    )
+add_executable(metric-test metric-test.cpp)
+add_executable(testIndexMatrix testIndexMatrix.cpp)
+add_executable(testIndexVector testIndexMatrix.cpp)
+add_executable(testNNVector testNNVector.cpp)
+add_executable(testTypes testTypes.cpp)
 
-target_link_libraries(brute-test stdc++ safs structures)
+target_link_libraries(metric-test)
+target_link_libraries(testIndexMatrix)
+target_link_libraries(testIndexVector)
+target_link_libraries(testNNVector)
+target_link_libraries(testTypes)
